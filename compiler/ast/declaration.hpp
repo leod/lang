@@ -20,12 +20,32 @@ protected:
 	}
 };
 
+class Module : Declaration {
+public:
+	typedef std::list<boost::shared_ptr<Declaration*> > declaration_list_t;
+
+	Module(const Location& location, const identifier_t& name)
+		: name_(name) {
+	}
+
+	const identifier_t& name() const { return name_; }
+	const declaration_list_t& declarations() const { return declarations_; }
+
+	void addDeclaration(Declaration* declaration) {
+		declarations.push_back(declaration);
+	}
+
+private:
+	identifier_t name_;	
+	declaration_list_t declarations_;
+}
+
 class FunctionDeclaration : public Declaration {
 public:
 	struct Parameter {
 		const bool hasName;
 		const identifier_t name;
-		const boost::shared_ptr<Type> type; // need shared_ptr for std::list...
+		const boost::shared_ptr<Type> type; // need shared_ptr for std::list
 
 		Parameter(bool hasName,
 		          const identifier_t& name,
