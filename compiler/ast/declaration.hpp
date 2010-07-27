@@ -15,7 +15,7 @@ namespace ast {
 
 class Declaration : public Node {
 protected:
-	Declaration(const Location& location)
+	explicit Declaration(const Location& location)
 		: Node(location) {
 	}
 };

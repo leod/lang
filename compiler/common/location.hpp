@@ -6,11 +6,12 @@
 namespace llang {
 
 struct Location {
-	const std::string file;
+	const std::string filename;
 	const int line;
+	const int column;
 
-	Location(const std::string& file, int line)
-		: file(file), line(line) {
+	Location(const std::string& filename, int line, int column)
+		: filename(filename), line(line), column(column) {
 
 	}
 };
