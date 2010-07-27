@@ -22,23 +22,24 @@ protected:
 
 class Module : Declaration {
 public:
-	typedef std::list<boost::shared_ptr<Declaration*> > declaration_list_t;
+	typedef std::list<boost::shared_ptr<Declaration> > declaration_list_t;
 
 	Module(const Location& location, const identifier_t& name)
-		: name_(name) {
+		: Declaration(location),
+		  name_(name) {
 	}
 
 	const identifier_t& name() const { return name_; }
 	const declaration_list_t& declarations() const { return declarations_; }
 
 	void addDeclaration(Declaration* declaration) {
-		declarations.push_back(declaration);
+		declarations_.push_back(boost::shared_ptr<Declaration>(declaration));
 	}
 
 private:
 	identifier_t name_;	
 	declaration_list_t declarations_;
-}
+};
 
 class FunctionDeclaration : public Declaration {
 public:
