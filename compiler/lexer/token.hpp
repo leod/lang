@@ -1,6 +1,8 @@
 #ifndef LLANG_LEXER_TOKEN_HPP_INCLUDED
 #define LLANG_LEXER_TOKEN_HPP_INCLUDED
 
+#include <iostream>
+
 #include "common/number.hpp"
 #include "common/identifier.hpp"
 #include "common/location.hpp"
@@ -23,7 +25,9 @@ struct Token {
 		KEYWORD_FN,
 		KEYWORD_VAR,
 		KEYWORD_IF,
-		KEYWORD_ELSE
+		KEYWORD_ELSE,
+
+		ENUM_MAX
 	} type;
 
 	const int_t number; // set if type == NUMBER
@@ -43,6 +47,8 @@ struct Token {
 		  identifier(identifier) {
 	}
 };
+
+std::ostream& operator<<(std::ostream& os, const Token& token);
 
 } // namespace lexer
 } // namespace llang

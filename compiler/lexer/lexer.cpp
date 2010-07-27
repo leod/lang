@@ -9,7 +9,9 @@ Token Lexer::lexToken() {
 	if (endOfFile)
 		throw std::runtime_error("end of file reached");
 
-	Location location(filename, line, column);
+	while (eatWhitespace() || eatComments());
+
+	Location location(filename, line, static_cast<size_t>(c - lineStart) + 1);
 	
 	switch (*c) {
 		case '(':
@@ -25,6 +27,27 @@ Token Lexer::lexToken() {
 			endOfFile = true;
 			return Token(location, Token::END_OF_FILE);
 	}
+}
+
+bool Lexer::eatWhitespace() {
+	const char* start = c;
+
+	while (*c == ' ' || *c == '\t' || *c == '\n') {
+		if (*c == '\n') { // TODO: CRLF
+			++line;
+			lineStart = c + 1;
+		}
+		++c;
+	}
+}
+
+bool Lexer::eatComments() {
+	if (*c == '/' && *(c + 1) == '/') {
+		while(*++c != '\n');	
+		return true;
+	}
+	
+	return false;
 }
 
 } // namespace llang

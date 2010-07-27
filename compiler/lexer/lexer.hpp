@@ -12,7 +12,7 @@ class Lexer {
 public:
 	Lexer(const std::string& filename, const std::string& source)
 		: filename(filename), source(source), c(source.c_str()),
-		  endOfFile(false), line(1), column(1) {
+		  lineStart(c), endOfFile(false), line(1) {
 	}
 
 	Token lexToken();
@@ -22,10 +22,14 @@ private:
 	const std::string source;
 
 	const char* c; // pointer into source
+	const char* lineStart;
 
 	bool endOfFile; // end of file reached?
 
-	int line, column; // current line and column in source
+	int line; // current line in source
+
+	bool eatWhitespace();
+	bool eatComments();
 };
 
 } // namespace lexer
