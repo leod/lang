@@ -4,7 +4,7 @@
 #include <deque>
 #include <cassert>
 
-#include "lexer/token.hpp"
+#include "lexer/lexer.hpp"
 
 namespace llang {
 namespace lexer {

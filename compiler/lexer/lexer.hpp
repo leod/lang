@@ -19,6 +19,12 @@ public:
 	Token lexToken();
 
 private:
+	Token lexIdentifier(const Location& location);
+	Token lexNumber(const Location& location);
+
+	bool eatWhitespace();
+	bool eatComments();
+
 	const std::string filename;
 	const std::string source;
 
@@ -27,13 +33,7 @@ private:
 
 	bool endOfFile; // end of file reached?
 
-	int line; // current line in source
-
-	Token lexIdentifier(const Location& location);
-	Token lexNumber(const Location& location);
-
-	bool eatWhitespace();
-	bool eatComments();
+	size_t line; // current line in source
 };
 
 } // namespace lexer
