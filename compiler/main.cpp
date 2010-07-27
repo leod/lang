@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include "lexer/lexer.hpp"
+#include "lexer/token_stream.hpp"
 
 using namespace llang;
 
@@ -18,11 +19,12 @@ int main() {
 	}
 
 	lexer::Lexer lexer(filename, code);
+	lexer::TokenStream ts(lexer);
 
 	bool endOfFile = false;
 	do
 	{
-		lexer::Token token = lexer.lexToken();
+		lexer::Token token = ts.next();
 		std::cout << token << std::endl;
 
 		endOfFile = (token.type == lexer::Token::END_OF_FILE);
