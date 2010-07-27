@@ -16,12 +16,12 @@ public:
 	virtual const Type* type() const = 0;
 
 protected:
-	Expression(const Location& location)
+	explicit Expression(const Location& location)
 		: Node(location) {
 	}
 };
 
-template<typename Number> class LiteralNumberExpression  : public Expression {
+template<typename Number> class LiteralNumberExpression : public Expression {
 public:
 	LiteralNumberExpression(const Location& location, const Number& number)
 		: number_(number) {
@@ -52,7 +52,7 @@ public:
 	IfElseExpression(const Location& location,
 	                 Expression* condition,
 	                 Expression* ifExpression,
-		             Expression* elseExpression)
+	                 Expression* elseExpression)
 		: Expression(location),
 		  condition_(condition),
 		  ifExpression_(ifExpression),

@@ -8,7 +8,7 @@ namespace ast {
 
 class Node {
 public:
-	Node(const Location& location)
+	explicit Node(const Location& location)
 		: location_(location) {
 	}
 
