@@ -62,8 +62,8 @@ class VariableDeclaration : public Declaration {
 public:
 	VariableDeclaration(const Location& location,
 	                    const Type* type,
-						const identifier_t& name,
-						const Expression* initializer)
+	                    const identifier_t& name,
+	                    const Expression* initializer)
 		: Declaration(location),
 		  type_(type),
 		  name_(name),
