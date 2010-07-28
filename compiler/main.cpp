@@ -28,7 +28,7 @@ int main() {
 	lexer::TokenStream ts(lexer);
 
 	parser::Parser parser(diag, filename, ts);
-	ast::Module* module = parser.parseModule();
+	boost::scoped_ptr<ast::Module> module(parser.parseModule());
 
 	ast::PrintVisitor printer;
 	printer.accept(*module);
