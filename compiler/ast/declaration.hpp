@@ -58,7 +58,7 @@ public:
 	                    Type* returnType,
 	                    const identifier_t& name,
 	                    parameter_list_t& parameters,
-						Expression* body)
+	                    Expression* body)
 		: Declaration(Node::FUNCTION_DECLARATION, location),
 		  returnType(returnType),
 		  name(name),

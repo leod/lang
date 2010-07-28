@@ -25,8 +25,8 @@ EXTENDED_NODE_TABLE(GENERATE_FORWARD_REFERENCE)
 	virtual Result visit(name&) { assert(false); }
 
 #define GENERATE_CASE(name, nameCaps) \
-		case Node::nameCaps:          \
-			return visit(static_cast<name&>(node)); 
+	case Node::nameCaps:          \
+		return visit(static_cast<name&>(node)); 
 
 template <typename Param, typename Result> class Visitor {
 protected:
