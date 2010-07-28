@@ -326,7 +326,7 @@ void Parser::assume(lexer::Token::Type type) {
 	const Token& token = ts.get();
 	if (token.type != type) {
 		error("expected %s, not %s",
-			Token::typeToString(type), Token::typeToString(token.type));
+		      Token::typeToString(type), Token::typeToString(token.type));
 	}
 }
 
@@ -365,5 +365,5 @@ void Parser::expectedError(const char* expected) {
 	assert(false);
 }
 
-}
-}
+} // namespace parser
+} // namespace llang
