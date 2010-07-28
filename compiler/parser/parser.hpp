@@ -28,12 +28,21 @@ private:
 	ast::Declaration* parseFunctionDeclaration();
 	ast::Declaration* parseVariableDeclaration();
 
-	ast::Expression* parseIfExpression();
+	ast::Expression* parseBlockExpression();
+	ast::Expression* parseLiteralExpression();
+	ast::Expression* parseIfElseExpression();
 
 	identifier_t parseIdentifier();
 
-	void assumeCurrent(lexer::Token::Type type);
-	const lexer::Token& nextExpect(lexer::Token::Type type);
+	// Checks if current token is a 'type'
+	void assume(lexer::Token::Type type);
+
+	// Checks if current token is a 'type' and moves to next token
+	void assumeNext(lexer::Token::Type type);
+
+	// Moves to next token and checks if it is a 'type.
+	// Returns the token before moving.
+	const lexer::Token& expectNext(lexer::Token::Type type);
 
 	void error(const char* format, ...);
 	void expectedError(const char* expected);

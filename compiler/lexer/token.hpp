@@ -20,6 +20,9 @@ struct Token {
 		EQUALS,
 		IDENTIFIER,
 		SEMICOLON,
+		COMMA,
+		LBRACE,
+		RBRACE,
 		END_OF_FILE,
 
 		KEYWORD_FN,

@@ -17,6 +17,8 @@ keyword_map_t makeKeywordMap()
 	map["var"] = Token::KEYWORD_VAR;
 	map["if"] = Token::KEYWORD_IF;
 	map["else"] = Token::KEYWORD_ELSE;
+	map["i32"] = Token::KEYWORD_I32;
+	map["void"] = Token::KEYWORD_VOID;
 
 	return map;
 }
@@ -55,6 +57,15 @@ Token Lexer::lexToken() {
 		case ';':
 			++c;
 			return Token(location, Token::SEMICOLON);
+		case ',':
+			++c;
+			return Token(location, Token::COMMA);
+		case '{':
+			++c;
+			return Token(location, Token::LBRACE);
+		case '}':
+			++c;
+			return Token(location, Token::RBRACE);
 		case '\0':
 			endOfFile = true;
 			return Token(location, Token::END_OF_FILE);
