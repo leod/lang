@@ -52,7 +52,15 @@ Type* Parser::parseType() {
 }
 
 Expression* Parser::parseExpression() {
-	return parseAssignExpression();
+	switch (ts.get().type) {
+	default:
+		return parseAssignExpression();
+
+	case Token::KEYWORD_FN:
+	case Token::KEYWORD_VAR:
+		const Location location = ts.get().location;
+		return new DeclarationExpression(location, parseDeclaration());
+	}
 }
 
 Declaration* Parser::parseFunctionDeclaration() {
@@ -170,7 +178,12 @@ Expression* Parser::parseEqualsExpression() {
 
 	Expression* expression = parseAddExpression();
 	
-	// TODO
+	while (ts.get().type == Token::EQUALS) {
+		ts.next();
+
+		expression = new BinaryExpression(location, BinaryExpression::EQUALS,
+		                                  expression, parseAddExpression());
+	}
 
 	return expression;
 }

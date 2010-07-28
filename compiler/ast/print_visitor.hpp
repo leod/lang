@@ -16,10 +16,6 @@ public:
 	}
 
 protected:
-	virtual void visit(Node&) {
-		assert(false);
-	}
-
 	virtual void visit(Module& m) {
 		print("module %s", m.name.c_str());
 
@@ -53,6 +49,15 @@ protected:
 
 		print("body:");
 		acceptWithDepth(*fn.body);
+	}
+
+	virtual void visit(VariableDeclaration& var) {
+		print("var %s", var.name.c_str());
+
+		IncDepth guard(depth);
+
+		print("type:"); acceptWithDepth(*var.type);
+		print("initializer:"); acceptWithDepth(*var.initializer);
 	}
 
 	virtual void visit(LiteralNumberExpression& num) {
@@ -120,6 +125,10 @@ protected:
 		     ++it) {
 			print("argument"); acceptWithDepth(**it);
 		}
+	}
+
+	virtual void visit(DeclarationExpression& d) {
+		accept(*d.declaration);	
 	}
 
 	virtual void visit(VoidType&) {

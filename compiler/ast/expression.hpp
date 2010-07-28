@@ -11,6 +11,7 @@ namespace llang {
 namespace ast {
 
 class Type;
+class Declaration;
 
 class Expression : public Node {
 public:
@@ -82,9 +83,9 @@ public:
 		  elseExpression(elseExpression) {
 	}
 
-	Expression* condition;
-	Expression* ifExpression;
-	Expression* elseExpression;
+	boost::scoped_ptr<Expression> condition;
+	boost::scoped_ptr<Expression> ifExpression;
+	boost::scoped_ptr<Expression> elseExpression;
 };
 
 class VoidExpression : public Expression {
@@ -114,8 +115,18 @@ public:
 		  callee(callee), arguments(arguments) {
 	}
 	
-	Expression* callee;
+	boost::scoped_ptr<Expression> callee;
 	argument_list_t arguments;
+};
+
+class DeclarationExpression : public Expression {
+public:
+	DeclarationExpression(const Location& location, Declaration* declaration)
+		: Expression(Node::DECLARATION_EXPRESSION, location),
+		  declaration(declaration) {
+	}
+
+	boost::scoped_ptr<Declaration> declaration;	
 };
 
 } // namespace ast
