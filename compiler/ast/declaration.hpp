@@ -3,7 +3,8 @@
 
 #include <list>
 
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include "common/identifier.hpp"
 #include "ast/node.hpp"
@@ -68,7 +69,7 @@ public:
 	Type* returnType;
 	const identifier_t name;
 	parameter_list_t parameters;	
-	Expression* body;	
+	boost::scoped_ptr<Expression> body;	
 };
 
 class VariableDeclaration : public Declaration {
@@ -83,9 +84,9 @@ public:
 		  initializer(initializer) {
 	}
 
-	Type* type;
+	boost::scoped_ptr<Type> type;
 	const identifier_t name;
-	Expression* initializer;
+	boost::scoped_ptr<Expression> initializer;
 };
 
 } // namespace ast

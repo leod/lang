@@ -9,5 +9,5 @@ fn void x(i32 a, void x) = {
 
 	{x;}({ if (9 + 3) 1 else 2 * poop(); });
 
-	if (10 + ident + { 1; 2; 3; } * 3) {} else {};
+	var i32 x = if (10 + ident + { 1; 2; 3; } * 3) {} else {};
 }
