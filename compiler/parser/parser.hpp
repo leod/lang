@@ -36,6 +36,7 @@ private:
 	ast::Expression* parseAddExpression();
 	ast::Expression* parseMulExpression();
 	ast::Expression* parsePrimaryExpression();
+	ast::Expression* parsePostExpression(ast::Expression* expression);
 
 	identifier_t parseIdentifier();
 

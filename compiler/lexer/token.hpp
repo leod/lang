@@ -25,6 +25,8 @@ struct Token {
 		RBRACE,
 		PLUS,
 		STAR,
+		MINUS,
+		SLASH,
 		END_OF_FILE,
 
 		KEYWORD_FN,

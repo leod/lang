@@ -72,6 +72,12 @@ Token Lexer::lexToken() {
 		case '*':
 			++c;
 			return Token(location, Token::STAR);
+		case '-':
+			++c;
+			return Token(location, Token::MINUS);
+		case '/':
+			++c;
+			return Token(location, Token::SLASH);
 		case '\0':
 			endOfFile = true;
 			return Token(location, Token::END_OF_FILE);

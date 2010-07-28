@@ -16,6 +16,7 @@
 	X(BlockExpression, BLOCK_EXPRESSION) \
 	X(IfElseExpression, IF_ELSE_EXPRESSION) \
 	X(VoidExpression, VOID_EXPRESSION) \
-	X(IdentifierExpression, IDENTIFIER_EXPRESSION)
+	X(IdentifierExpression, IDENTIFIER_EXPRESSION) \
+	X(CallExpression, CALL_EXPRESSION)
 
 #endif
