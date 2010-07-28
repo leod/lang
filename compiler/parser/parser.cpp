@@ -151,9 +151,11 @@ Expression* Parser::parseLiteralExpression() {
 	const Location location = ts.get().location;
 
 	switch (ts.get().type) {
-	case Token::NUMBER:
+	case Token::NUMBER: {
+		const int_t& number = ts.get().number;
 		ts.next();
-		return new LiteralNumberExpression(location, ts.get().number);
+		return new LiteralNumberExpression(location, number);
+	}
 
 	case Token::KEYWORD_VOID:
 		ts.next(); 
