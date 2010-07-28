@@ -11,14 +11,14 @@ class Node {
 public:
 	// Create an enum of Node types
 #define GENERATE_ENUM_ENTRY(name, nameInCaps) nameInCaps,
-	enum Type {
+	enum Tag {
 		LLANG_AST_NODE_TABLE(GENERATE_ENUM_ENTRY)
 		TYPE_MAX
 	};
 #undef GENERATE_ENUM_ENTRY
 
-	Node(const Type type, const Location& location)
-		: type_(type), location_(location) {
+	Node(const Tag tag, const Location& location)
+		: tag_(tag), location_(location) {
 	}
 
 	virtual ~Node() {}
@@ -27,11 +27,11 @@ public:
 		return dynamic_cast<T*>(this);
 	}
 
-	Type type() const { return type_; }
+	Tag tag() const { return tag_; }
 	const Location& location() const { return location_; }
 
 private:
-	const Type type_;
+	const Tag tag_;
 	const Location location_;
 };
 

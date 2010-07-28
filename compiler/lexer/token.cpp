@@ -14,7 +14,9 @@ const char* typeToStringArray[] =
 	  "fn",
 	  "var",
 	  "if",
-	  "else"
+	  "i32",
+	  "else",
+	  "void"
 	};
 
 const char* Token::typeToString(Token::Type type) {

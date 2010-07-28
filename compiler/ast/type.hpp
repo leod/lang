@@ -8,8 +8,8 @@ namespace ast {
 
 class Type : public Node {
 protected:
-	Type(const Node::Type type, const Location& location)
-		: Node(type, location) {
+	Type(const Node::Tag tag, const Location& location)
+		: Node(tag, location) {
 	}
 };
 
@@ -20,10 +20,10 @@ public:
 	}
 };
 
-class IntType : public Type {
+class I32Type : public Type {
 public:
-	IntType(const Location& location)
-		: Type(Node::INT_TYPE, location) {
+	I32Type(const Location& location)
+		: Type(Node::I32_TYPE, location) {
 	}
 };
 

@@ -34,7 +34,19 @@ Declaration* Parser::parseDeclaration() {
 }
 
 Type* Parser::parseType() {
-	assert(false);
+	const Location location = ts.get().location;
+
+	switch (ts.get().type) {
+	case Token::KEYWORD_I32:
+		return new I32Type(location);
+
+	case Token::KEYWORD_VOID:
+		return new VoidType(location);
+
+	default:
+		expectedError("type");
+		assert(false);
+	}
 }
 
 Expression* Parser::parseExpression() {
@@ -46,7 +58,24 @@ Declaration* Parser::parseFunctionDeclaration() {
 }
 
 Declaration* Parser::parseVariableDeclaration() {
-	assert(false);
+	const Location location = ts.get().location;
+
+	assumeCurrent(Token::KEYWORD_VAR);
+	ts.next();
+	
+	// TODO: parse inferred declarations
+	const Type* type = parseType();
+
+	const identifier_t identifier = parseIdentifier();
+
+	if (ts.get().type == Token::SEMICOLON) {
+		assert(false); // TODO: implement vars without initializer
+	} else {
+		nextExpect(Token::EQUALS);
+		const Expression* initializer = parseExpression();
+
+		return new VariableDeclaration(location, type, identifier, initializer);
+	}
 }
 
 Expression* Parser::parseIfExpression() {
@@ -66,6 +95,14 @@ const Token& Parser::nextExpect(lexer::Token::Type type) {
 	assumeCurrent(type);
 
 	return token;
+}
+
+identifier_t Parser::parseIdentifier() {
+	assumeCurrent(Token::IDENTIFIER);
+	const identifier_t identifier = ts.get().identifier;
+	ts.next();
+
+	return identifier;
 }
 
 void Parser::error(const char* format, ...) {
