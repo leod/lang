@@ -37,8 +37,7 @@ protected:
 
 		IncDepth guard(depth);
 
-		print("return type:");
-		acceptWithDepth(*fn.returnType);
+		print("return type:"); acceptWithDepth(*fn.returnType);
 
 		for (FunctionDeclaration::parameter_list_t::iterator it =
 		         fn.parameters.begin();
@@ -47,8 +46,8 @@ protected:
 			print("param %s", it->name.c_str());
 			{
 				IncDepth guard(depth);
-				print("type:");
-				acceptWithDepth(*it->type);
+
+				print("type:"); acceptWithDepth(*it->type);
 			}
 		}
 
@@ -107,6 +106,20 @@ protected:
 
 	virtual void visit(IdentifierExpression& i) {
 		print("identifier: %s", i.name.c_str());
+	}
+
+	virtual void visit(CallExpression& c) {
+		print("call expression");
+
+		IncDepth guard(depth);
+
+		print("callee"); acceptWithDepth(*c.callee);
+
+		for (CallExpression::argument_list_t::iterator it = c.arguments.begin();
+		     it != c.arguments.end();
+		     ++it) {
+			print("argument"); acceptWithDepth(**it);
+		}
 	}
 
 	virtual void visit(VoidType&) {

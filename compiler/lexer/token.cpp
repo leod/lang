@@ -15,6 +15,8 @@ const char* typeToStringArray[] =
 	  "rbrace",
 	  "plus",
 	  "star",
+	  "minus",
+	  "slash",
 	  "end_of_file",
 	  "fn",
 	  "var",

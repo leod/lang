@@ -180,10 +180,23 @@ Expression* Parser::parseAddExpression() {
 
 	Expression* expression = parseMulExpression();
 	
-	while (ts.get().type == Token::PLUS) {
+	while (ts.get().type == Token::PLUS || ts.get().type == Token::MINUS) {
+		BinaryExpression::Operation operation;
+
+		switch (ts.get().type) {
+		case Token::PLUS:
+			operation = BinaryExpression::ADD;
+			break;
+		case Token::MINUS:
+			operation = BinaryExpression::SUB;
+			break;
+		default:
+			assert(false);
+		}
+
 		ts.next();
 
-		expression = new BinaryExpression(location, BinaryExpression::ADD,
+		expression = new BinaryExpression(location, operation,
 		                                  expression, parseMulExpression());
 		//location = ts.get().location;
 	}
@@ -196,10 +209,23 @@ Expression* Parser::parseMulExpression() {
 
 	Expression* expression = parsePrimaryExpression();
 	
-	while (ts.get().type == Token::STAR) {
+	while (ts.get().type == Token::STAR || ts.get().type == Token::SLASH) {
+		BinaryExpression::Operation operation;
+
+		switch (ts.get().type) {
+		case Token::STAR:
+			operation = BinaryExpression::MUL;
+			break;
+		case Token::SLASH:
+			operation = BinaryExpression::DIV;
+			break;
+		default:
+			assert(false);
+		}
+
 		ts.next();
 
-		expression = new BinaryExpression(location, BinaryExpression::MUL,
+		expression = new BinaryExpression(location, operation,
 		                                  expression, parsePrimaryExpression());
 		//location = ts.get().location;
 	}
@@ -248,9 +274,39 @@ Expression* Parser::parsePrimaryExpression() {
 		assert(false);
 	}
 
-	// TODO: post expressions
+	expression = parsePostExpression(expression);
 
 	return expression;
+}
+
+Expression* Parser::parsePostExpression(Expression* expression) {
+	const Location location = ts.get().location;
+
+	switch (ts.get().type) {
+	case Token::LPAREN: {
+		ts.next();
+
+		CallExpression::argument_list_t arguments;
+		
+		while (ts.get().type != Token::RPAREN) {
+			arguments.push_back(ExpressionPtr(parseExpression()));	
+
+			if (ts.get().type == Token::COMMA) {
+				ts.next();
+
+				if (ts.get().type == Token::RPAREN)
+					error("bogus comma at end of parameter list");
+			}
+		}
+
+		assumeNext(Token::RPAREN);
+
+		return new CallExpression(location, expression, arguments);
+	}
+
+	default:
+		return expression;
+	}
 }
 
 void Parser::assume(lexer::Token::Type type) {

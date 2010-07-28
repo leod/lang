@@ -104,6 +104,20 @@ public:
 	const identifier_t name;
 };
 
+class CallExpression : public Expression {
+public:
+	typedef std::list<ExpressionPtr> argument_list_t;
+
+	CallExpression(const Location& location, Expression* callee,
+	               argument_list_t arguments)
+		: Expression(Node::CALL_EXPRESSION, location),
+		  callee(callee), arguments(arguments) {
+	}
+	
+	Expression* callee;
+	argument_list_t arguments;
+};
+
 } // namespace ast
 } // namespace llang
 
