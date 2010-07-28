@@ -15,6 +15,7 @@
 	X(LiteralNumberExpression, LITERAL_NUMBER_EXPRESSION) \
 	X(BlockExpression, BLOCK_EXPRESSION) \
 	X(IfElseExpression, IF_ELSE_EXPRESSION) \
-	X(VoidExpression, VOID_EXPRESSION)
+	X(VoidExpression, VOID_EXPRESSION) \
+	X(IdentifierExpression, IDENTIFIER_EXPRESSION)
 
 #endif

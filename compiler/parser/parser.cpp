@@ -52,16 +52,7 @@ Type* Parser::parseType() {
 }
 
 Expression* Parser::parseExpression() {
-	switch (ts.get().type) {
-	case Token::LBRACE:
-		return parseBlockExpression();
-	
-	case Token::KEYWORD_IF:
-		return parseIfElseExpression();
-
-	default:
-		return parseLiteralExpression();
-	}
+	return parseAssignExpression();
 }
 
 Declaration* Parser::parseFunctionDeclaration() {
@@ -120,7 +111,7 @@ Declaration* Parser::parseVariableDeclaration() {
 	identifier_t identifier = parseIdentifier();
 
 	if (ts.get().type == Token::SEMICOLON) {
-		assert(false); // TODO: implement vars without initializer
+		assert(false); // TODO: implement vars without initializers
 	} else {
 		assumeNext(Token::EQUALS);
 
@@ -147,26 +138,6 @@ Expression* Parser::parseBlockExpression() {
 	return new BlockExpression(location, expressions);
 }
 
-Expression* Parser::parseLiteralExpression() {
-	const Location location = ts.get().location;
-
-	switch (ts.get().type) {
-	case Token::NUMBER: {
-		const int_t& number = ts.get().number;
-		ts.next();
-		return new LiteralNumberExpression(location, number);
-	}
-
-	case Token::KEYWORD_VOID:
-		ts.next(); 
-		return new VoidExpression(location);
-			
-	default:
-		expectedError("literal");	
-		assert(false);
-	}
-}
-
 Expression* Parser::parseIfElseExpression() {
 	const Location location = ts.get().location;
 
@@ -182,6 +153,104 @@ Expression* Parser::parseIfElseExpression() {
 	Expression* elseBody = parseExpression();
 
 	return new IfElseExpression(location, condition, ifBody, elseBody);
+}
+
+Expression* Parser::parseAssignExpression() {
+	Location location = ts.get().location;
+
+	Expression* expression = parseEqualsExpression();
+	
+	// TODO
+
+	return expression;
+}
+
+Expression* Parser::parseEqualsExpression() {
+	Location location = ts.get().location;
+
+	Expression* expression = parseAddExpression();
+	
+	// TODO
+
+	return expression;
+}
+
+Expression* Parser::parseAddExpression() {
+	Location location = ts.get().location;
+
+	Expression* expression = parseMulExpression();
+	
+	while (ts.get().type == Token::PLUS) {
+		ts.next();
+
+		expression = new BinaryExpression(location, BinaryExpression::ADD,
+		                                  expression, parseMulExpression());
+		//location = ts.get().location;
+	}
+
+	return expression;
+}
+
+Expression* Parser::parseMulExpression() {
+	Location location = ts.get().location;
+
+	Expression* expression = parsePrimaryExpression();
+	
+	while (ts.get().type == Token::STAR) {
+		ts.next();
+
+		expression = new BinaryExpression(location, BinaryExpression::MUL,
+		                                  expression, parsePrimaryExpression());
+		//location = ts.get().location;
+	}
+
+	return expression;
+}
+
+Expression* Parser::parsePrimaryExpression() {
+	const Location location = ts.get().location;
+
+	Expression* expression = 0;
+	
+	switch (ts.get().type) {
+	case Token::IDENTIFIER:
+		expression = new IdentifierExpression(location, parseIdentifier());
+		break;
+
+	case Token::NUMBER: {
+		const int_t& number = ts.get().number;
+		ts.next();
+		expression = new LiteralNumberExpression(location, number);
+		break;
+	}
+
+	case Token::KEYWORD_VOID:
+		ts.next(); 
+		expression = new VoidExpression(location);
+		break;
+
+	case Token::LPAREN:
+		ts.next();
+		expression = parseExpression();
+		assumeNext(Token::RPAREN);
+		break;
+
+	case Token::LBRACE:
+		expression = parseBlockExpression();
+		break;
+
+	case Token::KEYWORD_IF:
+		expression = parseIfElseExpression();
+		break;
+
+	default:
+		expectedError("primary expression");
+		assert(false);
+	}
+
+	// TODO: post expressions
+
+	return expression;
 }
 
 void Parser::assume(lexer::Token::Type type) {
