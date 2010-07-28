@@ -41,7 +41,7 @@ public:
 class FunctionDeclaration : public Declaration {
 public:
 	struct Parameter {
-		const boost::shared_ptr<Type> type; // need shared_ptr for std::list
+		boost::shared_ptr<Type> type; // need shared_ptr for std::list
 		const bool hasName;
 		const identifier_t name;
 
@@ -66,7 +66,7 @@ public:
 		  body(body) {
 	}
 
-	Type* returnType;
+	boost::scoped_ptr<Type> returnType;
 	const identifier_t name;
 	parameter_list_t parameters;	
 	boost::scoped_ptr<Expression> body;	

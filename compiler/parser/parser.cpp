@@ -257,7 +257,7 @@ Expression* Parser::parsePrimaryExpression() {
 		break;
 
 	case Token::NUMBER: {
-		const int_t& number = ts.get().number;
+		const int_t number = ts.get().number;
 		ts.next();
 		expression = new LiteralNumberExpression(location, number);
 		break;
