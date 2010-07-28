@@ -49,16 +49,38 @@ Declaration* Parser::parseVariableDeclaration() {
 	assert(false);
 }
 
+Expression* Parser::parseIfExpression() {
+	assert(false);
+}
+
+void Parser::assumeCurrent(lexer::Token::Type type) {
+	const Token& token = ts.get();
+	if (token.type != type) {
+		error("expected %s, not %s",
+			Token::typeToString(type), Token::typeToString(token.type));
+	}
+}
+
+const Token& Parser::nextExpect(lexer::Token::Type type) {
+	const Token& token = ts.next();
+	assumeCurrent(type);
+
+	return token;
+}
+
 void Parser::error(const char* format, ...) {
 	va_list argp;
 	va_start(argp, format);
 	diag.verror(ts.get().location, format, argp);
 	va_end(argp);
+
+	assert(false);
 }
 
 void Parser::expectedError(const char* expected) {
 	error("expected %s, not %s",
 		expected, Token::typeToString(ts.get().type));
+	assert(false);
 }
 
 }
