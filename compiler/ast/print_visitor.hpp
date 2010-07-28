@@ -27,7 +27,7 @@ protected:
 
 		for (Module::declaration_list_t::iterator it = m.declarations.begin();
 		     it != m.declarations.end();
-			 ++it) {
+		     ++it) {
 			accept(**it);
 		}
 	}
@@ -37,10 +37,58 @@ protected:
 
 		IncDepth guard(depth);
 
+		print("return type:");
+		acceptWithDepth(*fn.returnType);
+
+		for (FunctionDeclaration::parameter_list_t::iterator it =
+		         fn.parameters.begin();
+		     it != fn.parameters.end();
+		     ++it) {
+			print("param %s", it->name.c_str());
+			{
+				IncDepth guard(depth);
+				print("type:");
+				acceptWithDepth(*it->type);
+			}
+		}
+
+		print("body:");
+		acceptWithDepth(*fn.body);
+	}
+
+	virtual void visit(LiteralNumberExpression& num) {
+		print("literal: %d", num.number);
+	}
+
+	virtual void visit(IfElseExpression& ifElse) {
+		print("if/else");
+
+		IncDepth guard(depth);
+
+		print("condition:"); acceptWithDepth(*ifElse.condition);
+		print("if expr:"); acceptWithDepth(*ifElse.ifExpression);
+		print("else expr:"); acceptWithDepth(*ifElse.elseExpression);
+	}
+
+	virtual void visit(BlockExpression& block) {
+		print("block");
+
+		IncDepth guard(depth);
+
+		for (BlockExpression::expression_list_t::iterator it =
+		         block.expressions.begin();
+		     it != block.expressions.end();
+	         ++it) {
+			accept(**it);	
+		}
 	}
 
 	virtual void visit(VoidType&) {
-		
+		print("void");	
+	}
+
+	virtual void visit(I32Type&) {
+		print("i32");
 	}
 
 private:
@@ -67,6 +115,11 @@ private:
 		vfprintf(stdout, format, argp);
 		printf("\n");
 		va_end(argp);
+	}
+
+	void acceptWithDepth(Node& node) {
+		IncDepth guard(depth);
+		accept(node);
 	}
 };
 
