@@ -44,16 +44,14 @@ private:
 class FunctionDeclaration : public Declaration {
 public:
 	struct Parameter {
+		const boost::shared_ptr<Type> type; // need shared_ptr for std::list
 		const bool hasName;
 		const identifier_t name;
-		const boost::shared_ptr<Type> type; // need shared_ptr for std::list
 
-		Parameter(bool hasName,
-		          const identifier_t& name,
-		          Type* type)
-			: hasName(hasName),
-			  name(name),
-			  type(type) {
+		Parameter(Type* type, 
+		          bool hasName,
+		          const identifier_t& name)
+			: type(type), hasName(hasName), name(name) {
 		}
 	};
 
@@ -62,21 +60,25 @@ public:
 	FunctionDeclaration(const Location& location,
 	                    const Type* returnType,
 	                    const identifier_t& name,
-	                    const parameter_list_t& parameters)
+	                    const parameter_list_t& parameters,
+						const Expression* body)
 		: Declaration(Node::FUNCTION_DECLARATION, location),
 		  returnType_(returnType),
 		  name_(name),
-		  parameters_(parameters) {
+		  parameters_(parameters),
+		  body_(body) {
 	}
 
 	const Type* returnType() const { return returnType_; }
 	const identifier_t name() const { return name_; }
 	const parameter_list_t parameters() const { return parameters_; }
+	const Expression* body() const { return body_; }
 
 private:
 	const Type* returnType_;
 	const identifier_t name_;
 	const parameter_list_t parameters_;	
+	const Expression* body_;	
 };
 
 class VariableDeclaration : public Declaration {

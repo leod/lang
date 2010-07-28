@@ -2,7 +2,7 @@
 #define LLANG_AST_EXPRESSION_HPP_INCLUDED
 
 #include <list>
-#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "ast/node.hpp"
 
@@ -13,13 +13,15 @@ class Type;
 
 class Expression : public Node {
 public:
-	virtual const Type* type() const = 0;
+	//virtual const Type* type() const = 0;
 
 protected:
 	Expression(const Node::Tag tag, const Location& location)
 		: Node(tag, location) {
 	}
 };
+
+typedef boost::shared_ptr<Expression> ExpressionPtr;
 
 class LiteralNumberExpression : public Expression {
 public:
@@ -38,16 +40,18 @@ private:
 
 class BlockExpression : public Expression {
 public:
-	typedef std::list<boost::scoped_ptr<Expression> > expression_list_t;
+	typedef std::list<ExpressionPtr> expression_list_t;
 
-	BlockExpression(const Location& location)
-		: Expression(Node::BLOCK_EXPRESSION, location) {
+	BlockExpression(const Location& location,
+	                const expression_list_t& expressions)
+		: Expression(Node::BLOCK_EXPRESSION, location),
+		  expressions_(expressions) {
 	}
 
 	const expression_list_t& expressions() const { return expressions_; }
 
 private:
-	expression_list_t expressions_;
+	const expression_list_t expressions_;
 };
 
 class IfElseExpression : public Expression {
