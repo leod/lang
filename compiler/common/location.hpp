@@ -18,7 +18,7 @@ struct Location {
 
 inline std::ostream& operator<<(std::ostream& os, const Location& location) {
 	os << location.filename << ":" << location.line
-	   << "(" << location.column << ")";
+	   << ":" << location.column;
 	return os;
 }
 

@@ -28,6 +28,11 @@ private:
 	ast::Declaration* parseFunctionDeclaration();
 	ast::Declaration* parseVariableDeclaration();
 
+	ast::Expression* parseIfExpression();
+
+	void assumeCurrent(lexer::Token::Type type);
+	const lexer::Token& nextExpect(lexer::Token::Type type);
+
 	void error(const char* format, ...);
 	void expectedError(const char* expected);
 
