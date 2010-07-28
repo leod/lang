@@ -29,5 +29,7 @@ int main() {
 
 	parser::Parser parser(diag, filename, ts);
 	ast::Module* module = parser.parseModule();
-	assert(module);
+
+	ast::PrintVisitor printer;
+	printer.accept(*module);
 }

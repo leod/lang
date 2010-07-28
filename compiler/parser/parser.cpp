@@ -52,7 +52,16 @@ Type* Parser::parseType() {
 }
 
 Expression* Parser::parseExpression() {
-	return parseLiteralExpression();
+	switch (ts.get().type) {
+	case Token::LBRACE:
+		return parseBlockExpression();
+	
+	case Token::KEYWORD_IF:
+		return parseIfElseExpression();
+
+	default:
+		return parseLiteralExpression();
+	}
 }
 
 Declaration* Parser::parseFunctionDeclaration() {
@@ -67,20 +76,29 @@ Declaration* Parser::parseFunctionDeclaration() {
 
 	FunctionDeclaration::parameter_list_t parameters;
 
-	do {
-		Type* type = parseType();
+	if (ts.get().type != Token::RPAREN) {
+		bool doLoop = true;
 
-		bool hasName = false;	
-		identifier_t name;
+		do {
+			Type* type = parseType();
 
-		if (ts.get().type == Token::IDENTIFIER) {
-			hasName = true;
-			name = parseIdentifier();
-		}
+			bool hasName = false;	
+			identifier_t name;
 
-		parameters.push_back(FunctionDeclaration::Parameter(
-			type, hasName, name));	
-	} while(ts.get().type == Token::COMMA);
+			if (ts.get().type == Token::IDENTIFIER) {
+				hasName = true;
+				name = parseIdentifier();
+			}
+
+			parameters.push_back(FunctionDeclaration::Parameter(
+				type, hasName, name));	
+
+			if (ts.get().type != Token::COMMA)
+				doLoop = false;
+			else
+				ts.next();
+		} while(doLoop);
+	}
 
 	assumeNext(Token::RPAREN);
 	assumeNext(Token::EQUALS);
@@ -106,7 +124,7 @@ Declaration* Parser::parseVariableDeclaration() {
 	} else {
 		assumeNext(Token::EQUALS);
 
-		const Expression* initializer = parseExpression();
+		Expression* initializer = parseExpression();
 
 		return new VariableDeclaration(location, type, identifier, initializer);
 	}
@@ -121,6 +139,7 @@ Expression* Parser::parseBlockExpression() {
 
 	while (ts.get().type != Token::RBRACE) {
 		expressions.push_back(ExpressionPtr(parseExpression()));
+		assumeNext(Token::SEMICOLON);
 	}
 
 	assumeNext(Token::RBRACE);

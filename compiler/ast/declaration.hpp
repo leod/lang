@@ -20,25 +20,21 @@ protected:
 	}
 };
 
-class Module : Declaration {
+class Module : public Declaration {
 public:
 	typedef std::list<boost::shared_ptr<Declaration> > declaration_list_t;
 
 	Module(const Location& location, const identifier_t& name)
 		: Declaration(Node::MODULE, location),
-		  name_(name) {
+		  name(name) {
 	}
-
-	const identifier_t& name() const { return name_; }
-	const declaration_list_t& declarations() const { return declarations_; }
 
 	void addDeclaration(Declaration* declaration) {
-		declarations_.push_back(boost::shared_ptr<Declaration>(declaration));
+		declarations.push_back(boost::shared_ptr<Declaration>(declaration));
 	}
 
-private:
-	identifier_t name_;	
-	declaration_list_t declarations_;
+	const identifier_t name;	
+	declaration_list_t declarations;
 };
 
 class FunctionDeclaration : public Declaration {
@@ -58,49 +54,38 @@ public:
 	typedef std::list<Parameter> parameter_list_t;
 
 	FunctionDeclaration(const Location& location,
-	                    const Type* returnType,
+	                    Type* returnType,
 	                    const identifier_t& name,
-	                    const parameter_list_t& parameters,
-						const Expression* body)
+	                    parameter_list_t& parameters,
+						Expression* body)
 		: Declaration(Node::FUNCTION_DECLARATION, location),
-		  returnType_(returnType),
-		  name_(name),
-		  parameters_(parameters),
-		  body_(body) {
+		  returnType(returnType),
+		  name(name),
+		  parameters(parameters),
+		  body(body) {
 	}
 
-	const Type* returnType() const { return returnType_; }
-	const identifier_t name() const { return name_; }
-	const parameter_list_t parameters() const { return parameters_; }
-	const Expression* body() const { return body_; }
-
-private:
-	const Type* returnType_;
-	const identifier_t name_;
-	const parameter_list_t parameters_;	
-	const Expression* body_;	
+	Type* returnType;
+	const identifier_t name;
+	parameter_list_t parameters;	
+	Expression* body;	
 };
 
 class VariableDeclaration : public Declaration {
 public:
 	VariableDeclaration(const Location& location,
-	                    const Type* type,
+	                    Type* type,
 	                    const identifier_t& name,
-	                    const Expression* initializer)
+	                    Expression* initializer)
 		: Declaration(Node::VARIABLE_DECLARATION, location),
-		  type_(type),
-		  name_(name),
-		  initializer_(initializer) {
+		  type(type),
+		  name(name),
+		  initializer(initializer) {
 	}
 
-	const Type* type() const { return type_; }
-	const identifier_t name() const { return name_; }
-	const Expression* initializer() const { return initializer_; }
-
-private:
-	const Type* type_;
-	const identifier_t name_;
-	const Expression* initializer_;
+	Type* type;
+	const identifier_t name;
+	Expression* initializer;
 };
 
 } // namespace ast
