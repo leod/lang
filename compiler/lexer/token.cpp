@@ -3,7 +3,7 @@
 namespace llang {
 namespace lexer {
 
-const char* typeToString[] =
+const char* typeToStringArray[] =
 	{ "number",
 	  "lparen",
 	  "rparen",
@@ -17,8 +17,12 @@ const char* typeToString[] =
 	  "else"
 	};
 
+const char* Token::typeToString(Token::Type type) {
+	return typeToStringArray[type];
+}
+
 std::ostream& operator<<(std::ostream& os, const Token& token) {
-	os << token.location << ":" << typeToString[token.type];
+	os << token.location << ":" << Token::typeToString(token.type);
 
 	if (token.type == Token::NUMBER)
 		os << ":" << token.number;

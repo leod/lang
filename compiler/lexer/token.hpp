@@ -46,6 +46,8 @@ struct Token {
 		: location(location), type(IDENTIFIER), number(-666),
 		  identifier(identifier) {
 	}
+
+	static const char* typeToString(Type type);
 };
 
 std::ostream& operator<<(std::ostream& os, const Token& token);

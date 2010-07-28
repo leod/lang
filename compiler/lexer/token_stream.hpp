@@ -13,6 +13,7 @@ class TokenStream {
 public:
 	TokenStream(Lexer& lexer)
 		: lexer(lexer) {
+		addOneToken();
 	}
 
 	const Token& get() const {
