@@ -16,15 +16,18 @@ public:
 	virtual const Type* type() const = 0;
 
 protected:
-	explicit Expression(const Location& location)
-		: Node(location) {
+	Expression(const Node::Type type, const Location& location)
+		: Node(type, location) {
 	}
 };
 
-template<typename Number> class LiteralNumberExpression : public Expression {
+class LiteralNumberExpression : public Expression {
 public:
+	typedef int_t Number;
+
 	LiteralNumberExpression(const Location& location, const Number& number)
-		: number_(number) {
+		: Expression(Node::LITERAL_NUMBER_EXPRESSION, location),
+		  number_(number) {
 	}
 
 	const Number& number() const { return number_; }
@@ -33,15 +36,15 @@ private:
 	const Number number_;
 };
 
-template<typename T> class BlockExpression : public Expression {
+class BlockExpression : public Expression {
 public:
 	typedef std::list<boost::scoped_ptr<Expression> > expression_list_t;
 
 	BlockExpression(const Location& location)
-		: Expression(location) {
+		: Expression(Node::BLOCK_EXPRESSION, location) {
 	}
 
-	const expression_list_t& expressions() const { return expressions; }
+	const expression_list_t& expressions() const { return expressions_; }
 
 private:
 	expression_list_t expressions_;
@@ -53,7 +56,7 @@ public:
 	                 Expression* condition,
 	                 Expression* ifExpression,
 	                 Expression* elseExpression)
-		: Expression(location),
+		: Expression(Node::IF_ELSE_EXPRESSION, location),
 		  condition_(condition),
 		  ifExpression_(ifExpression),
 		  elseExpression_(elseExpression) {
@@ -72,7 +75,7 @@ private:
 class VoidExpression : public Expression {
 public:
 	VoidExpression(const Location& location)
-		: Expression(location) {
+		: Expression(Node::VOID_EXPRESSION, location) {
 	}
 };
 

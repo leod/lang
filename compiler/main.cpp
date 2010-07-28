@@ -2,8 +2,12 @@
 #include <sstream>
 #include <fstream>
 
+#include "common/diagnostics.hpp"
 #include "lexer/lexer.hpp"
 #include "lexer/token_stream.hpp"
+#include "ast/print_visitor.hpp"
+#include "ast/declaration.hpp"
+#include "parser/parser.hpp"
 
 using namespace llang;
 
@@ -18,15 +22,12 @@ int main() {
 		code = oss.str();
 	}
 
-	lexer::Lexer lexer(filename, code);
+	Diagnostics diag;
+
+	lexer::Lexer lexer(diag, filename, code);
 	lexer::TokenStream ts(lexer);
 
-	bool endOfFile = false;
-	do
-	{
-		lexer::Token token = ts.next();
-		std::cout << token << std::endl;
-
-		endOfFile = (token.type == lexer::Token::END_OF_FILE);
-	} while(!endOfFile);
+	parser::Parser parser(diag, filename, ts);
+	ast::Module* module = parser.parseModule();
+	assert(module);
 }

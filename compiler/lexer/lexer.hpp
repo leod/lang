@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 
+#include "common/diagnostics.hpp"
 #include "lexer/token.hpp"
 
 namespace llang {
@@ -11,8 +12,10 @@ namespace lexer {
 
 class Lexer {
 public:
-	Lexer(const std::string& filename, const std::string& source)
-		: filename(filename), source(source), c(source.c_str()),
+	Lexer(Diagnostics& diag,
+	      const std::string& filename,
+          const std::string& source)
+		: diag(diag), filename(filename), source(source), c(source.c_str()),
 		  lineStart(c), endOfFile(false), line(1) {
 	}
 
@@ -24,6 +27,8 @@ private:
 
 	bool eatWhitespace();
 	bool eatComments();
+
+	Diagnostics& diag;
 
 	const std::string filename;
 	const std::string source;

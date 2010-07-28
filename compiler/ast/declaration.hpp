@@ -15,8 +15,8 @@ namespace ast {
 
 class Declaration : public Node {
 protected:
-	explicit Declaration(const Location& location)
-		: Node(location) {
+	Declaration(const Node::Type type, const Location& location)
+		: Node(type, location) {
 	}
 };
 
@@ -25,7 +25,7 @@ public:
 	typedef std::list<boost::shared_ptr<Declaration> > declaration_list_t;
 
 	Module(const Location& location, const identifier_t& name)
-		: Declaration(location),
+		: Declaration(Node::MODULE, location),
 		  name_(name) {
 	}
 
@@ -63,7 +63,7 @@ public:
 	                    const Type* returnType,
 	                    const identifier_t& name,
 	                    const parameter_list_t& parameters)
-		: Declaration(location),
+		: Declaration(Node::FUNCTION_DECLARATION, location),
 		  returnType_(returnType),
 		  name_(name),
 		  parameters_(parameters) {
@@ -85,7 +85,7 @@ public:
 	                    const Type* type,
 	                    const identifier_t& name,
 	                    const Expression* initializer)
-		: Declaration(location),
+		: Declaration(Node::VARIABLE_DECLARATION, location),
 		  type_(type),
 		  name_(name),
 		  initializer_(initializer) {

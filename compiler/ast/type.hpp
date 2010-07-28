@@ -8,22 +8,22 @@ namespace ast {
 
 class Type : public Node {
 protected:
-	Type(const Location& location)
-		: Node(location) {
+	Type(const Node::Type type, const Location& location)
+		: Node(type, location) {
 	}
 };
 
 class VoidType : public Type {
 public:
 	VoidType(const Location& location)
-		: Type(location) {
+		: Type(Node::VOID_TYPE, location) {
 	}
 };
 
 class IntType : public Type {
 public:
 	IntType(const Location& location)
-		: Type(location) {
+		: Type(Node::INT_TYPE, location) {
 	}
 };
 

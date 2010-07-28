@@ -9,8 +9,16 @@ namespace ast {
 
 class Node {
 public:
-	explicit Node(const Location& location)
-		: location_(location) {
+	// Create an enum of Node types
+#define GENERATE_ENUM_ENTRY(name, nameInCaps) nameInCaps,
+	enum Type {
+		LLANG_AST_NODE_TABLE(GENERATE_ENUM_ENTRY)
+		TYPE_MAX
+	};
+#undef GENERATE_ENUM_ENTRY
+
+	Node(const Type type, const Location& location)
+		: type_(type), location_(location) {
 	}
 
 	virtual ~Node() {}
@@ -19,32 +27,13 @@ public:
 		return dynamic_cast<T*>(this);
 	}
 
+	Type type() const { return type_; }
 	const Location& location() const { return location_; }
 
-	// Create an enum of Node types
-#define TABLE_CALLBACK(name, nameInCaps) nameInCaps,
-	enum Type {
-		LLANG_AST_NODE_TABLE(TABLE_CALLBACK)
-	};
-#undef TABLE_CALLBACK
-
 private:
+	const Type type_;
 	const Location location_;
 };
-
-// Looks up the Node::Type corresponding to a type
-template<typename T> struct GetNodeType {
-
-};
-
-#define TABLE_CALLBACK(name, nameInCaps) \
-	template <>                          \
-	struct GetNodeType <name*> {         \
-		Node::Type type =                \
-			Node::nameInCaps;            \
-	};                                   
-LLANG_AST_NODE_TABLE(TABLE_CALLBACK)
-#undef TABLE_CALLBACK
 
 } // namespace ast
 } // namespace llang
