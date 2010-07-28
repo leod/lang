@@ -1,10 +1,6 @@
 // ab c d de f 
-() = 
 
-
-= )( // arst ==
-
-
-fyy = 56;
-
-
+fn void x(i32 a, void x) = {
+	5;
+	if (10) {} else {};
+}

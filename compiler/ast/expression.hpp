@@ -3,6 +3,7 @@
 
 #include <list>
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include "ast/node.hpp"
 
@@ -23,19 +24,30 @@ protected:
 
 typedef boost::shared_ptr<Expression> ExpressionPtr;
 
+class BinaryExpression : public Expression {
+public:
+	BinaryExpression(const Location& location, lexer::Token::Type operation,
+	                 Expression* left, Expression* right)
+		: Expression(Node::BINARY_EXPRESSION, location),
+		  operation(operation), left(left), right(right) {
+	}
+
+	// TODO: I need to think about whether I want to
+	//       do it like this for every node
+	const lexer::Token::Type operation;
+	boost::scoped_ptr<Expression> left, right;
+};
+
 class LiteralNumberExpression : public Expression {
 public:
 	typedef int_t Number;
 
 	LiteralNumberExpression(const Location& location, const Number& number)
 		: Expression(Node::LITERAL_NUMBER_EXPRESSION, location),
-		  number_(number) {
+		  number(number) {
 	}
 
-	const Number& number() const { return number_; }
-
-private:
-	const Number number_;
+	const Number number;
 };
 
 class BlockExpression : public Expression {
@@ -45,13 +57,10 @@ public:
 	BlockExpression(const Location& location,
 	                const expression_list_t& expressions)
 		: Expression(Node::BLOCK_EXPRESSION, location),
-		  expressions_(expressions) {
+		  expressions(expressions) {
 	}
 
-	const expression_list_t& expressions() const { return expressions_; }
-
-private:
-	const expression_list_t expressions_;
+	expression_list_t expressions;
 };
 
 class IfElseExpression : public Expression {
@@ -61,19 +70,14 @@ public:
 	                 Expression* ifExpression,
 	                 Expression* elseExpression)
 		: Expression(Node::IF_ELSE_EXPRESSION, location),
-		  condition_(condition),
-		  ifExpression_(ifExpression),
-		  elseExpression_(elseExpression) {
+		  condition(condition),
+		  ifExpression(ifExpression),
+		  elseExpression(elseExpression) {
 	}
 
-	const Expression* condition() const { return condition_; }
-	const Expression* ifExpression() const { return ifExpression_; }
-	const Expression* elseExpression() const { return elseExpression_; }
-
-private:
-	Expression* condition_;
-	Expression* ifExpression_;
-	Expression* elseExpression_;
+	Expression* condition;
+	Expression* ifExpression;
+	Expression* elseExpression;
 };
 
 class VoidExpression : public Expression {
