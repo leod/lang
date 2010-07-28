@@ -16,8 +16,8 @@ public:
 	virtual const Type* type() const = 0;
 
 protected:
-	Expression(const Node::Type type, const Location& location)
-		: Node(type, location) {
+	Expression(const Node::Tag tag, const Location& location)
+		: Node(tag, location) {
 	}
 };
 

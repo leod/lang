@@ -15,8 +15,8 @@ namespace ast {
 
 class Declaration : public Node {
 protected:
-	Declaration(const Node::Type type, const Location& location)
-		: Node(type, location) {
+	Declaration(const Node::Tag tag, const Location& location)
+		: Node(tag, location) {
 	}
 };
 

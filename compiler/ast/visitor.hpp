@@ -35,7 +35,7 @@ protected:
 
 public:
 	Result accept(Node& node, Param param) {
-		switch(node.type()) {
+		switch(node.tag()) {
 
 		// Generate cases
 		LLANG_AST_NODE_TABLE(GENERATE_CASE)
@@ -52,7 +52,7 @@ protected:
 
 public:
 	Result accept(Node& node) {
-		switch(node.type()) {
+		switch(node.tag()) {
 
 		LLANG_AST_NODE_TABLE(GENERATE_CASE)
 

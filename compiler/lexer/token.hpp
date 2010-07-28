@@ -26,6 +26,8 @@ struct Token {
 		KEYWORD_VAR,
 		KEYWORD_IF,
 		KEYWORD_ELSE,
+		KEYWORD_I32,
+		KEYWORD_VOID,
 
 		ENUM_MAX
 	} type;

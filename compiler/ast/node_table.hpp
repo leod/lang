@@ -9,7 +9,7 @@
 	X(VariableDeclaration, VARIABLE_DECLARATION) \
 	\
 	X(VoidType, VOID_TYPE) \
-	X(IntType, INT_TYPE) \
+	X(I32Type, I32_TYPE) \
     \
 	X(LiteralNumberExpression, LITERAL_NUMBER_EXPRESSION) \
 	X(BlockExpression, BLOCK_EXPRESSION) \

@@ -30,6 +30,8 @@ private:
 
 	ast::Expression* parseIfExpression();
 
+	identifier_t parseIdentifier();
+
 	void assumeCurrent(lexer::Token::Type type);
 	const lexer::Token& nextExpect(lexer::Token::Type type);
 
