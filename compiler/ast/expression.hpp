@@ -26,15 +26,22 @@ typedef boost::shared_ptr<Expression> ExpressionPtr;
 
 class BinaryExpression : public Expression {
 public:
-	BinaryExpression(const Location& location, lexer::Token::Type operation,
+	enum Operation {
+		ADD,
+		SUB,
+		MUL,
+		DIV,
+		ASSIGN,
+		EQUALS
+	};
+
+	BinaryExpression(const Location& location, Operation operation,
 	                 Expression* left, Expression* right)
 		: Expression(Node::BINARY_EXPRESSION, location),
 		  operation(operation), left(left), right(right) {
 	}
 
-	// TODO: I need to think about whether I want to
-	//       do it like this for every node
-	const lexer::Token::Type operation;
+	const Operation operation;
 	boost::scoped_ptr<Expression> left, right;
 };
 
@@ -85,6 +92,16 @@ public:
 	VoidExpression(const Location& location)
 		: Expression(Node::VOID_EXPRESSION, location) {
 	}
+};
+
+class IdentifierExpression : public Expression {
+public:
+	IdentifierExpression(const Location& location, const identifier_t& name)
+		: Expression(Node::IDENTIFIER_EXPRESSION, location),
+		  name(name) {
+	}
+
+	const identifier_t name;
 };
 
 } // namespace ast

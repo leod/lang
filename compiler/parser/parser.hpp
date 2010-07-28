@@ -29,8 +29,13 @@ private:
 	ast::Declaration* parseVariableDeclaration();
 
 	ast::Expression* parseBlockExpression();
-	ast::Expression* parseLiteralExpression();
 	ast::Expression* parseIfElseExpression();
+
+	ast::Expression* parseAssignExpression();
+	ast::Expression* parseEqualsExpression();
+	ast::Expression* parseAddExpression();
+	ast::Expression* parseMulExpression();
+	ast::Expression* parsePrimaryExpression();
 
 	identifier_t parseIdentifier();
 

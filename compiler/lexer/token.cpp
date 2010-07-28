@@ -13,6 +13,8 @@ const char* typeToStringArray[] =
 	  "comma",
 	  "lbrace",
 	  "rbrace",
+	  "plus",
+	  "star",
 	  "end_of_file",
 	  "fn",
 	  "var",

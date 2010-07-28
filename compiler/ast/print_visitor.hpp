@@ -83,6 +83,32 @@ protected:
 		}
 	}
 
+	virtual void visit(BinaryExpression& b) {
+		std::string type;
+		switch (b.operation) {
+		case BinaryExpression::ADD:
+			type = "+";
+			break;
+		case BinaryExpression::MUL:
+			type = "*";
+			break;
+
+		default:
+			assert(false);
+		}
+
+		print("binary expression: %s", type.c_str());
+		{
+			IncDepth guard(depth);
+			print("left: "); acceptWithDepth(*b.left);
+			print("right: "); acceptWithDepth(*b.right);
+		}
+	}
+
+	virtual void visit(IdentifierExpression& i) {
+		print("identifier: %s", i.name.c_str());
+	}
+
 	virtual void visit(VoidType&) {
 		print("void");	
 	}

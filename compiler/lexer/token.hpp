@@ -23,6 +23,8 @@ struct Token {
 		COMMA,
 		LBRACE,
 		RBRACE,
+		PLUS,
+		STAR,
 		END_OF_FILE,
 
 		KEYWORD_FN,

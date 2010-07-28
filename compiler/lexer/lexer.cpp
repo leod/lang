@@ -66,6 +66,12 @@ Token Lexer::lexToken() {
 		case '}':
 			++c;
 			return Token(location, Token::RBRACE);
+		case '+':
+			++c;
+			return Token(location, Token::PLUS);
+		case '*':
+			++c;
+			return Token(location, Token::STAR);
 		case '\0':
 			endOfFile = true;
 			return Token(location, Token::END_OF_FILE);

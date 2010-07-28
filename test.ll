@@ -2,5 +2,8 @@
 
 fn void x(i32 a, void x) = {
 	5;
-	if (10) {} else {};
+
+	ident * (2 + 3);
+
+	if (10 + ident + { 1; 2; 3; } * 3) {} else {};
 }
