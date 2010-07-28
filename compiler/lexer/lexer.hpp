@@ -13,8 +13,8 @@ namespace lexer {
 class Lexer {
 public:
 	Lexer(Diagnostics& diag,
-        const std::string& filename,
-        const std::string& source)
+          const std::string& filename,
+          const std::string& source)
 		: diag(diag), filename(filename), source(source), c(source.c_str()),
 		  lineStart(c), endOfFile(false), line(1) {
 	}
