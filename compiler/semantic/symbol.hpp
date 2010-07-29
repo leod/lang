@@ -17,7 +17,7 @@ public:
 	Scope* declarationScope;
 
 protected:
-	Symbol(Node::Tag tag, const ast::Node astNode,
+	Symbol(Node::Tag tag, const ast::Node& astNode,
            const identifier_t& name, Scope* declarationScope)
 		: Node(tag, astNode), name(name),
 		  declarationScope(declarationScope) {
@@ -31,31 +31,30 @@ public:
 	Scope* const scope;
 
 protected:
-	ScopedSymbol(Node::Tag tag, const ast::Node astNode,
+	ScopedSymbol(Node::Tag tag, const ast::Node& astNode,
 	             const identifier_t& name, Scope* declarationScope)
 		: Symbol(tag, astNode, name, declarationScope),
 		  scope(new Scope(declarationScope)) {
 	}
 };
 
-class Module : public Symbol {
+class Module : public ScopedSymbol {
 public:
 	Module(const ast::Module& astNode)
-		: Symbol(Node::MODULE, astNode, astNode.name, 0) {
+		: ScopedSymbol(Node::MODULE, astNode, astNode.name, 0) {
 	}
 };
 
+class ParameterSymbol;
 class FunctionSymbol : public Symbol {
 public:
 	struct Parameter {
 		boost::shared_ptr<Type> type;
-		const bool hasName;
-		const identifier_t name;
+		ParameterSymbol* symbol;
 
 		Parameter(Type* type, 
-		          bool hasName,
-		          const identifier_t& name)
-			: type(type), hasName(hasName), name(name) {
+		          ParameterSymbol* symbol)
+			: type(type), symbol(symbol) {
 		}
 	};
 
@@ -92,6 +91,21 @@ public:
 
 	boost::scoped_ptr<Type> type;
 	boost::scoped_ptr<Expression> initializer;
+};
+
+class ParameterSymbol : public Symbol {
+public:
+	ParameterSymbol(const ast::Node& astNode,
+	                const identifier_t& name, // TMP until I add ast::Param
+	                Scope* declarationScope,
+	                Type* type)
+		: Symbol(Node::PARAMETER_SYMBOL, astNode, name,
+		         declarationScope),
+		  type(type) {
+	}
+
+	boost::scoped_ptr<Type> type;
+	//boost::scoped_ptr<Expression> defaultValue;
 };
 
 } // namespace semantic
