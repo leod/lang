@@ -1,6 +1,7 @@
 #ifndef LLANG_AST_TYPE_HPP_INCLUDED
 #define LLANG_AST_TYPE_HPP_INCLUDED
 
+#include "lexer/token.hpp"
 #include "ast/node.hpp"
 
 namespace llang {
@@ -13,18 +14,13 @@ protected:
 	}
 };
 
-class VoidType : public Type {
+class IntegralType : public Type {
 public:
-	VoidType(const Location& location)
-		: Type(Node::VOID_TYPE, location) {
+	IntegralType(const Location& location, const lexer::Token::Type type)
+		: Type(Node::INTEGRAL_TYPE, location), type(type) {
 	}
-};
 
-class I32Type : public Type {
-public:
-	I32Type(const Location& location)
-		: Type(Node::I32_TYPE, location) {
-	}
+	const lexer::Token::Type type;
 };
 
 } // namespace ast

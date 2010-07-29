@@ -8,6 +8,7 @@
 #include "ast/print_visitor.hpp"
 #include "ast/declaration.hpp"
 #include "parser/parser.hpp"
+#include "semantic/ast_visitor.hpp"
 
 using namespace llang;
 
