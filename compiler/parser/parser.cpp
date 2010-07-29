@@ -9,13 +9,13 @@ using namespace ast;
 using namespace lexer;
 
 Module* Parser::parseModule() {
-	Module* module = new Module(Location(moduleName, 1, 1), moduleName);
+	Module::declaration_list_t declarations;
 
 	while (ts.get().type != Token::END_OF_FILE) {
-		module->addDeclaration(parseDeclaration());
+		declarations.push_back(DeclarationPtr(parseDeclaration()));
 	}
 
-	return module;
+	return new Module(Location(moduleName, 1, 1), moduleName, declarations);
 }
 
 Declaration* Parser::parseDeclaration() {

@@ -7,63 +7,15 @@
 namespace llang {
 namespace ast {
 
-// Extend node table by abstract classes
-#define EXTENDED_NODE_TABLE(X) \
-	LLANG_AST_NODE_TABLE(X) \
-	X(Node, ) \
-	X(Type, ) \
-	X(Declaration, ) \
-	X(Expression, )
+#define LLANG_VISITOR_TABLE_PARAM LLANG_AST_NODE_TABLE
+#define LLANG_VISITOR_TYPE_PARAM  Node
+#define LLANG_VISITOR_TAG_PARAM   tag
 
-// Generate forward references
-#define GENERATE_FORWARD_REFERENCE(name, nameInCaps) \
-	class name;
-EXTENDED_NODE_TABLE(GENERATE_FORWARD_REFERENCE)
-#undef GENERATE_FORWARD_REFERENCE
+#include "common/make_visitor.hpp"
 
-#define GENERATE_VIRTUAL_METHOD(name, nameCaps) \
-	virtual Result visit(name&) { assert(false); }
-
-#define GENERATE_CASE(name, nameCaps) \
-	case Node::nameCaps:          \
-		return visit(static_cast<name&>(node)); 
-
-template <typename Param, typename Result> class Visitor {
-protected:
-	// Generate virtual methods
-	EXTENDED_NODE_TABLE(GENERATE_VIRTUAL_METHOD)
-
-public:
-	Result accept(Node& node, Param param) {
-		switch(node.tag()) {
-
-		// Generate cases
-		LLANG_AST_NODE_TABLE(GENERATE_CASE)
-
-		default:
-			assert(false);
-		}
-	}
-};
-
-template <typename Result> class Visitor <void, Result> {
-protected:
-	EXTENDED_NODE_TABLE(GENERATE_VIRTUAL_METHOD)
-
-public:
-	Result accept(Node& node) {
-		switch(node.tag()) {
-
-		LLANG_AST_NODE_TABLE(GENERATE_CASE)
-
-		default:
-			assert(false);
-		}
-	}
-};
-
-#undef GENERATE_VIRTUAL_METHOD	
-#undef GENERATE_CASE
+#undef LLANG_VISITOR_TABLE_PARAM
+#undef LLANG_VISITOR_TYPE_PARAM
+#undef LLANG_VISITOR_TAG_PARAM
 
 } // namespace ast
 } // namespace llang

@@ -21,17 +21,16 @@ protected:
 	}
 };
 
+typedef boost::shared_ptr<Declaration> DeclarationPtr;
+
 class Module : public Declaration {
 public:
-	typedef std::list<boost::shared_ptr<Declaration> > declaration_list_t;
+	typedef std::list<DeclarationPtr> declaration_list_t;
 
-	Module(const Location& location, const identifier_t& name)
+	Module(const Location& location, const identifier_t& name,
+	       declaration_list_t declarations)
 		: Declaration(Node::MODULE, location),
-		  name(name) {
-	}
-
-	void addDeclaration(Declaration* declaration) {
-		declarations.push_back(boost::shared_ptr<Declaration>(declaration));
+		  name(name), declarations(declarations) {
 	}
 
 	const identifier_t name;	
