@@ -1,12 +1,10 @@
-#ifndef LLANG_AST_NODE_TABLE_HPP_INCLUDED
-#define LLANG_AST_NODE_TABLE_HPP_INCLUDED
+#ifndef LLANG_SEMANTIC_NODE_TABLE_HPP_INCLUDED
+#define LLANG_SEMANTIC_NODE_TABLE_HPP_INCLUDED
 
-// see http://www.drdobbs.com/blog/archives/2010/06/the_x_macro.html
-
-#define LLANG_AST_NODE_TABLE(X) \
+#define LLANG_SEMANTIC_NODE_TABLE(X) \
 	X(Module, MODULE) \
-	X(FunctionDeclaration, FUNCTION_DECLARATION) \
-	X(VariableDeclaration, VARIABLE_DECLARATION) \
+	X(FunctionSymbol, FUNCTION_SYMBOL) \
+	X(VariableSymbol, VARIABLE_SYMBOL) \
 	\
 	X(IntegralType, INTEGRAL_TYPE) \
 	\

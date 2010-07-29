@@ -39,11 +39,11 @@ Type* Parser::parseType() {
 	switch (ts.get().type) {
 	case Token::KEYWORD_I32:
 		ts.next();
-		return new I32Type(location);
+		return new IntegralType(location, Token::KEYWORD_I32);
 
 	case Token::KEYWORD_VOID:
 		ts.next();
-		return new VoidType(location);
+		return new IntegralType(location, Token::KEYWORD_I32);
 
 	default:
 		expectedError("type");

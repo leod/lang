@@ -131,12 +131,17 @@ protected:
 		accept(*d.declaration);	
 	}
 
-	virtual void visit(VoidType&) {
-		print("void");	
-	}
-
-	virtual void visit(I32Type&) {
-		print("i32");
+	virtual void visit(IntegralType& type) {
+		switch (type.type) {
+		case lexer::Token::KEYWORD_I32:
+			print("i32");
+			break;
+		case lexer::Token::KEYWORD_VOID:
+			print("void");
+			break;
+		default:
+			assert(false);	
+		}
 	}
 
 private:
