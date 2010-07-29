@@ -5,6 +5,7 @@
 	X(Module, MODULE) \
 	X(FunctionSymbol, FUNCTION_SYMBOL) \
 	X(VariableSymbol, VARIABLE_SYMBOL) \
+	X(ParameterSymbol, PARAMETER_SYMBOL) \
 	\
 	X(IntegralType, INTEGRAL_TYPE) \
 	\
