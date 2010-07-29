@@ -18,21 +18,13 @@ public:
 #undef GENERATE_ENUM_ENTRY
 
 	Node(const Tag tag, const Location& location)
-		: tag_(tag), location_(location) {
+		: tag(tag), location(location) {
 	}
 
 	virtual ~Node() {}
 	
-	template<typename T> T* is() {
-		return dynamic_cast<T*>(this);
-	}
-
-	Tag tag() const { return tag_; }
-	const Location& location() const { return location_; }
-
-private:
-	const Tag tag_;
-	const Location location_;
+	const Tag tag;
+	const Location location;
 };
 
 } // namespace ast
