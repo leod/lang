@@ -3,6 +3,8 @@
 #include <fstream>
 
 #include "common/diagnostics.hpp"
+#include "common/config.hpp"
+#include "common/context.hpp"
 #include "lexer/lexer.hpp"
 #include "lexer/token_stream.hpp"
 #include "ast/print_visitor.hpp"
@@ -23,12 +25,14 @@ int main() {
 		code = oss.str();
 	}
 
-	Diagnostics diag;
+	Config config;
+	Diagnostics diag(config);
+	Context context(config, diag);
 
-	lexer::Lexer lexer(diag, filename, code);
+	lexer::Lexer lexer(context, filename, code);
 	lexer::TokenStream ts(lexer);
 
-	parser::Parser parser(diag, filename, ts);
+	parser::Parser parser(context, filename, ts);
 	boost::scoped_ptr<ast::Module> module(parser.parseModule());
 
 	ast::PrintVisitor printer;

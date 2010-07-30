@@ -8,6 +8,7 @@
 	X(ParameterSymbol, PARAMETER_SYMBOL) \
 	\
 	X(IntegralType, INTEGRAL_TYPE) \
+	X(FunctionType, FUNCTION_TYPE) \
 	\
 	X(BinaryExpression, BINARY_EXPRESSION) \
 	X(LiteralNumberExpression, LITERAL_NUMBER_EXPRESSION) \

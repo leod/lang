@@ -14,9 +14,6 @@ class Type;
 class Declaration;
 
 class Expression : public Node {
-public:
-	//virtual const Type* type() const = 0;
-
 protected:
 	Expression(const Node::Tag tag, const Location& location)
 		: Node(tag, location) {

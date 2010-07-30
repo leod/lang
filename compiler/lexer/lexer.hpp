@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-#include "common/diagnostics.hpp"
+#include "common/context.hpp"
 #include "lexer/token.hpp"
 
 namespace llang {
@@ -12,11 +12,11 @@ namespace lexer {
 
 class Lexer {
 public:
-	Lexer(Diagnostics& diag,
+	Lexer(Context& context,
 	      const std::string& filename,
 	      const std::string& source)
-		: diag(diag), filename(filename), source(source), c(source.c_str()),
-		  lineStart(c), endOfFile(false), line(1) {
+		: diag(context.diag), filename(filename), source(source),
+		  c(source.c_str()), lineStart(c), endOfFile(false), line(1) {
 	}
 
 	Token lexToken();
