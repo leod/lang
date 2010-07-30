@@ -1,6 +1,7 @@
 #include <cassert>
 #include <boost/make_shared.hpp>
 
+#include "ast/print_visitor.hpp"
 #include "semantic/ast_visitor.hpp"
 
 namespace llang {
@@ -66,6 +67,15 @@ protected:
 	                      ScopeState state) {
 		TypePtr type(accept(*variable.type, state));
 		Expression* initializer = accept(*variable.initializer, state);
+
+		if (!initializer->type->equals(type)) {
+			std::string expectedType = type->name();
+			std::string gotType = initializer->type->name();
+
+			context.diag.error(variable.location,
+				"wrong type in initializer of %s: expected '%s', got '%s'",
+				variable.name.c_str(), expectedType.c_str(), gotType.c_str());
+		}
 		
 		VariableSymbol* symbol = new VariableSymbol(variable, state.scope, type,
 		                                            initializer);
@@ -169,7 +179,7 @@ protected:
 		CallExpression::argument_list_t arguments;
 
 		{
-			int i = 0;
+			size_t i = 0;
 			auto it1 = call.arguments.begin();
 			auto it2 = type->parameterTypes.begin();
 
@@ -223,6 +233,15 @@ protected:
 		                              lexer::Token::KEYWORD_VOID));
 		return new VoidExpression(voidExpression, type);
 	}
+
+	virtual Expression* visit(ast::DeclarationExpression& declaration,
+                              ScopeState state) {
+		state.scope->addSymbol(accept(*declaration.declaration, state));
+
+		TypePtr type(new IntegralType(declaration,
+		                              lexer::Token::KEYWORD_VOID));
+		return new VoidExpression(declaration, type);
+	}	
 };
 
 AstVisitors* makeAstVisitors(Context& context) {

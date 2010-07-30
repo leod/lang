@@ -2,6 +2,8 @@
 #define LLANG_SEMANTIC_TYPE_HPP_INCLUDED
 
 #include <list>
+#include <sstream>
+#include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -97,7 +99,25 @@ public:
 	}
 
 	virtual std::string name() const {
-		return "<function>"; // TODO
+		std::stringstream ss;
+
+		ss << "fn "
+		   << returnType->name()
+		   << " (";
+
+		size_t i = 0;
+		for (auto it = parameterTypes.begin();
+		     it != parameterTypes.end();
+		     ++it, ++i) {
+			ss << (*it)->name();
+
+			if (i < parameterTypes.size())
+				ss << ", ";
+		}
+
+		ss << ")";
+
+		return ss.str();
 	}
 
 	TypePtr returnType;

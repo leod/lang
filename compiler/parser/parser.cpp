@@ -43,7 +43,7 @@ Type* Parser::parseType() {
 
 	case Token::KEYWORD_VOID:
 		ts.next();
-		return new IntegralType(location, Token::KEYWORD_I32);
+		return new IntegralType(location, Token::KEYWORD_VOID);
 
 	default:
 		expectedError("type");

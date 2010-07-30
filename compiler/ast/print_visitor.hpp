@@ -178,6 +178,11 @@ private:
 	}
 };
 
+template <typename T> void print(T& node) {
+	PrintVisitor visitor;
+	visitor.accept(node);
+}
+
 } // namespace ast
 } // namespace llang
 
