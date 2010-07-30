@@ -158,6 +158,12 @@ protected:
 			type = function->type;
 		else if (VariableSymbol* variable = symbol->isA<VariableSymbol>())
 			type = variable->type;
+		else if (ParameterSymbol* parameter = symbol->isA<ParameterSymbol>())
+			type = parameter->type;
+		else
+			context.diag.error(expression.location,
+			                   "cannot use %s in expression",
+			                   expression.name.c_str());
 
 		return new SymbolExpression(expression, type, symbol);
 	}
@@ -167,8 +173,11 @@ protected:
 		Expression* callee = accept(*call.callee, state);
 
 		FunctionType* type = callee->type->isA<FunctionType>();
-		if (!type) 
-			context.diag.error(call.location, "can call only functions");
+		if (!type) { 
+			std::string typeName = callee->type->name();
+			context.diag.error(call.location,
+				"can call only functions, not '%s'", typeName.c_str());
+		}
 
 		if (type->parameterTypes.size() != call.arguments.size())
 			context.diag.error(call.location,
