@@ -4,6 +4,7 @@
 #include <list>
 #include <boost/scoped_ptr.hpp>
 
+#include "common/context.hpp"
 #include "ast/node.hpp"
 #include "ast/visitor.hpp"
 #include "semantic/node.hpp"
@@ -16,6 +17,8 @@ namespace semantic {
 
 struct ScopeState {
 	Scope* scope;
+
+	ScopeState() : scope(0) {}
 };
 
 class AstVisitors {
@@ -33,7 +36,7 @@ public:
 	}
 };
 
-AstVisitors* makeAstVisitors();
+AstVisitors* makeAstVisitors(Context&);
 
 } // namespace ast
 } // namespace llang

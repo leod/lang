@@ -35,6 +35,11 @@ int main() {
 	parser::Parser parser(context, filename, ts);
 	boost::scoped_ptr<ast::Module> module(parser.parseModule());
 
-	ast::PrintVisitor printer;
-	printer.accept(*module);
+	//ast::PrintVisitor printer;
+	//printer.accept(*module);
+
+	boost::scoped_ptr<semantic::AstVisitors> visitors(
+		semantic::makeAstVisitors(context));
+	semantic::ScopeState state;
+	visitors->declarationVisitor->accept(*module, state);
 }
