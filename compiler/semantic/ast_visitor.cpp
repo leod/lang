@@ -1,4 +1,5 @@
 #include <cassert>
+#include <boost/make_shared.hpp>
 
 #include "common/context.hpp"
 #include "semantic/ast_visitor.hpp"
@@ -192,9 +193,9 @@ protected:
 	}
 
 	virtual Expression* visit(ast::VoidExpression voidExpression, ScopeState) {
-		return new VoidExpression(voidExpression,
-			TypePtr(new IntegralType(voidExpression,
-			                         lexer::Token::KEYWORD_VOID)));
+		TypePtr type(new IntegralType(voidExpression,
+		                              lexer::Token::KEYWORD_VOID));
+		return new VoidExpression(voidExpression, type);
 	}
 };
 
