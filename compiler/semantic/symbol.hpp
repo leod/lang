@@ -1,6 +1,8 @@
 #ifndef LLANG_SEMANTIC_SYMBOL_HPP_INCLUDED
 #define LLANG_SEMANTIC_SYMBOL_HPP_INCLUDED
 
+#include <boost/scoped_ptr.hpp>
+
 #include "ast/declaration.hpp"
 #include "semantic/node.hpp"
 #include "semantic/scope.hpp"
@@ -28,7 +30,7 @@ typedef boost::shared_ptr<Symbol> SymbolPtr;
 
 class ScopedSymbol : public Symbol {
 public:
-	Scope* const scope;
+	boost::scoped_ptr<Scope> scope;
 
 protected:
 	ScopedSymbol(Node::Tag tag, const ast::Node& astNode,
@@ -46,7 +48,7 @@ public:
 };
 
 class ParameterSymbol;
-class FunctionSymbol : public Symbol {
+class FunctionSymbol : public ScopedSymbol {
 public:
 	struct Parameter {
 		TypePtr type;
@@ -61,13 +63,13 @@ public:
 	typedef std::list<Parameter> parameter_list_t;
 
 	FunctionSymbol(const ast::FunctionDeclaration& astNode,
-	               Scope* declarationScope,
+	               Scope* scope,
 	               TypePtr returnType,
 	               parameter_list_t& parameters,
 	               Expression* body,
 	               TypePtr type)
-		: Symbol(Node::FUNCTION_SYMBOL, astNode,
-		         astNode.name, declarationScope),
+		: ScopedSymbol(Node::FUNCTION_SYMBOL, astNode,
+		               astNode.name, scope),
 		  returnType(returnType),
 		  parameters(parameters),
 		  body(body),

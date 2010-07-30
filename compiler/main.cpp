@@ -41,5 +41,7 @@ int main() {
 	boost::scoped_ptr<semantic::AstVisitors> visitors(
 		semantic::makeAstVisitors(context));
 	semantic::ScopeState state;
-	visitors->declarationVisitor->accept(*module, state);
+
+	boost::scoped_ptr<semantic::Symbol> semModule(
+		visitors->declarationVisitor->accept(*module, state));
 }

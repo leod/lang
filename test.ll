@@ -1,8 +1,8 @@
 // ab c d de f 
 
 fn i32 x(i32 a, void z) = {
-	fn void foo() = x(1, 2);
+	fn void foo() = void;
 
-	var void x = foo();
+	var void l = foo();
 
 }

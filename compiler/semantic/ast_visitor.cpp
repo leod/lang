@@ -79,7 +79,6 @@ protected:
 		
 		VariableSymbol* symbol = new VariableSymbol(variable, state.scope, type,
 		                                            initializer);
-		state.scope->addSymbol(symbol);
 
 		return symbol;
 	}
