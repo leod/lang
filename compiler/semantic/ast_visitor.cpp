@@ -1,14 +1,13 @@
 #include <cassert>
 #include <boost/make_shared.hpp>
 
-#include "ast/print_visitor.hpp"
 #include "semantic/ast_visitor.hpp"
 
 namespace llang {
 namespace semantic {
 
-template <typename Param, typename Result> class VisitorBase
-	: public ast::Visitor<Param, Result> {
+template <typename Result> class VisitorBase
+	: public ast::Visitor<ScopeState, Result> {
 protected:
 	AstVisitors* visitors;
 	Context& context;
@@ -16,23 +15,23 @@ protected:
 	VisitorBase(Context& context) : context(context) {}
 	friend AstVisitors* makeAstVisitors(Context&);
 
-	Type* accept(ast::Type& n, const Param& p) {
+	Type* accept(ast::Type& n, const ScopeState& p) {
 		return visitors->typeVisitor->accept(n, p);
 	}
 
-	Symbol* accept(ast::Declaration& n, const Param& p) {
+	Symbol* accept(ast::Declaration& n, const ScopeState& p) {
 		return visitors->declarationVisitor->accept(n, p);
 	}
 
-	Expression* accept(ast::Expression& n, const Param& p) {
+	Expression* accept(ast::Expression& n, const ScopeState& p) {
 		return visitors->expressionVisitor->accept(n, p);
 	}
 };
 
-class TypeVisitor : public VisitorBase<ScopeState, Type*> {
+class TypeVisitor : public VisitorBase<Type*> {
 private:
 	TypeVisitor(Context& context)
-		: VisitorBase<ScopeState, Type*>(context) {}
+		: VisitorBase<Type*>(context) {}
 	friend AstVisitors* makeAstVisitors(Context&);
 
 protected:
@@ -41,10 +40,10 @@ protected:
 	}
 };
 
-class DeclarationVisitor : public VisitorBase<ScopeState, Symbol*> {
+class DeclarationVisitor : public VisitorBase<Symbol*> {
 private:
 	DeclarationVisitor(Context& context)
-		: VisitorBase<ScopeState, Symbol*>(context) {}
+		: VisitorBase<Symbol*>(context) {}
 	friend AstVisitors* makeAstVisitors(Context&);
 
 protected:
@@ -113,10 +112,10 @@ protected:
 	}
 };
 
-class ExpressionVisitor : public VisitorBase<ScopeState, Expression*> {
+class ExpressionVisitor : public VisitorBase<Expression*> {
 private:
 	ExpressionVisitor(Context& context)
-		: VisitorBase<ScopeState, Expression*>(context) {}
+		: VisitorBase<Expression*>(context) {}
 	friend AstVisitors* makeAstVisitors(Context&);
 
 protected:
@@ -200,9 +199,7 @@ protected:
 		for (auto it = block.expressions.begin();
 		     it != block.expressions.end();
 		     ++it) {
-			ast::PrintVisitor print; print.accept(**it);
-			ast::Expression& exp = **it;
-			ExpressionPtr expression(accept(exp, state));
+			ExpressionPtr expression(accept(**it, state));
 			expressions.push_back(expression);
 		}
 
@@ -212,14 +209,14 @@ protected:
 		return new BlockExpression(block, type, expressions);
 	}
 
-	//virtual Expression* visit(ast::LiteralNumberExpression& literal,
-							  //ScopeState) {
-		//// TODO: This type is not right. Literal numbers have an unspecified
-		////       int type and are implicitly casteable to i32.
-		//TypePtr type(new IntegralType(literal, lexer::Token::KEYWORD_I32));
+	virtual Expression* visit(ast::LiteralNumberExpression& literal,
+							  ScopeState) {
+		// TODO: This type is not right. Literal numbers have an unspecified
+		//       int type and are implicitly casteable to i32.
+		TypePtr type(new IntegralType(literal, lexer::Token::KEYWORD_I32));
 
-		//return new LiteralNumberExpression(literal, type);
-	//}
+		return new LiteralNumberExpression(literal, type);
+	}
 
 	virtual Expression* visit(ast::VoidExpression& voidExpression, ScopeState) {
 		TypePtr type(new IntegralType(voidExpression,
@@ -238,7 +235,7 @@ AstVisitors* makeAstVisitors(Context& context) {
 	
 	typeVisitor->visitors = visitors;
 	declarationVisitor->visitors = visitors;
-	typeVisitor->visitors = visitors;
+	expressionVisitor->visitors = visitors;
 
 	return visitors;
 }
