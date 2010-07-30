@@ -1,5 +1,5 @@
-/* This is a template include used for creating visitors over a fixed set of
-   classes.
+/* This is a template include used for creating base classes for visitors over a
+   fixed set of classes.
 
    It expects the following macros to be set:
        LLANG_VISITOR_TABLE_PARAM(apply): Takes a macro and applies it to every
@@ -10,6 +10,7 @@
 */
 
 #include <cassert>
+#include <cstdio>
 
 // Generate forward references
 #define GENERATE_FORWARD_REFERENCE(name, nameInCaps) \
@@ -22,7 +23,7 @@ LLANG_VISITOR_TABLE_PARAM(GENERATE_FORWARD_REFERENCE)
 
 #define GENERATE_CASE(name, nameCaps) \
 	case LLANG_VISITOR_TYPE_PARAM::nameCaps: \
-		return visit(static_cast<name&>(node), param); 
+		return visit(dynamic_cast<name&>(node), param);
 
 template <typename Param, typename Result> class Visitor {
 protected:
@@ -30,6 +31,8 @@ protected:
 	LLANG_VISITOR_TABLE_PARAM(GENERATE_VIRTUAL_METHOD)
 
 public:
+	virtual ~Visitor() {}
+
 	Result accept(LLANG_VISITOR_TYPE_PARAM& node, Param param) {
 		switch(node.LLANG_VISITOR_TAG_PARAM) {
 
@@ -57,6 +60,8 @@ protected:
 	LLANG_VISITOR_TABLE_PARAM(GENERATE_VIRTUAL_METHOD)
 
 public:
+	virtual ~Visitor() {}
+
 	Result accept(LLANG_VISITOR_TYPE_PARAM& node) {
 		switch(node.LLANG_VISITOR_TAG_PARAM) {
 
