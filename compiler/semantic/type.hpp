@@ -25,6 +25,8 @@ public:
 		return equals(other.get());
 	}
 
+	virtual std::string name() const = 0;
+
 protected:
 	Type(const Node::Tag tag, const ast::Node& astNode)
 		: Node(tag, astNode) {
@@ -49,6 +51,17 @@ public:
 		if (!type) return false;
 
 		return type->type == this->type;
+	}
+
+	virtual std::string name() const {
+		switch (type) {
+		case lexer::Token::KEYWORD_I32:
+			return "i32";
+		case lexer::Token::KEYWORD_VOID:
+			return "void";
+		default:
+			assert(false);
+		}
 	}
 
 	const lexer::Token::Type type;
@@ -81,6 +94,10 @@ public:
 		}
 
 		return true;
+	}
+
+	virtual std::string name() const {
+		return "<function>"; // TODO
 	}
 
 	TypePtr returnType;
