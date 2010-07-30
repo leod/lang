@@ -5,12 +5,10 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "common/context.hpp"
-#include "ast/node.hpp"
 #include "ast/visitor.hpp"
-#include "semantic/node.hpp"
-#include "semantic/expression.hpp"
-#include "semantic/type.hpp"
-#include "semantic/symbol.hpp"
+#include "semantic/expression_ptr.hpp"
+#include "semantic/type_ptr.hpp"
+#include "semantic/symbol_ptr.hpp"
 #include "semantic/scope_state.hpp"
 
 namespace llang {
@@ -18,13 +16,13 @@ namespace semantic {
 
 class AstVisitors {
 public:
-	boost::scoped_ptr<ast::Visitor<ScopeState, Type*> > typeVisitor;
-	boost::scoped_ptr<ast::Visitor<ScopeState, Symbol*> > declarationVisitor;
-	boost::scoped_ptr<ast::Visitor<ScopeState, Expression*> > expressionVisitor;
+	boost::scoped_ptr<ast::Visitor<ScopeState, TypePtr> > typeVisitor;
+	boost::scoped_ptr<ast::Visitor<ScopeState, SymbolPtr> > declarationVisitor;
+	boost::scoped_ptr<ast::Visitor<ScopeState, ExpressionPtr> > expressionVisitor;
 
-	AstVisitors(ast::Visitor<ScopeState, Type*>* typeVisitor,
-	            ast::Visitor<ScopeState, Symbol*>* declarationVisitor,
-	            ast::Visitor<ScopeState, Expression*>* expressionVisitor)
+	AstVisitors(ast::Visitor<ScopeState, TypePtr>* typeVisitor,
+	            ast::Visitor<ScopeState, SymbolPtr>* declarationVisitor,
+	            ast::Visitor<ScopeState, ExpressionPtr>* expressionVisitor)
 		: typeVisitor(typeVisitor),
 		  declarationVisitor(declarationVisitor),
 		  expressionVisitor(expressionVisitor) {

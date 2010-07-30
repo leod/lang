@@ -4,5 +4,5 @@ fn i32 x(i32 a, void z) = {
 	fn void foo() = void;
 
 	var void l = foo();
-
+	var i32 l = 2;
 }

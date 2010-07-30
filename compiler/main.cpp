@@ -11,6 +11,7 @@
 #include "ast/declaration.hpp"
 #include "parser/parser.hpp"
 #include "semantic/ast_visitor.hpp"
+#include "semantic/symbol.hpp"
 
 using namespace llang;
 
@@ -42,6 +43,6 @@ int main() {
 		semantic::makeAstVisitors(context));
 	semantic::ScopeState state;
 
-	boost::scoped_ptr<semantic::Symbol> semModule(
+	semantic::SymbolPtr semModule(
 		visitors->declarationVisitor->accept(*module, state));
 }

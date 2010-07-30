@@ -7,6 +7,7 @@
 #include "semantic/node.hpp"
 #include "semantic/scope.hpp"
 #include "semantic/type_ptr.hpp"
+#include "semantic/symbol_ptr.hpp"
 
 namespace llang {
 namespace semantic {
@@ -48,14 +49,15 @@ public:
 };
 
 class ParameterSymbol;
+typedef boost::shared_ptr<ParameterSymbol> ParameterSymbolPtr;
+
 class FunctionSymbol : public ScopedSymbol {
 public:
 	struct Parameter {
 		TypePtr type;
-		ParameterSymbol* symbol;
+		ParameterSymbolPtr symbol;
 
-		Parameter(TypePtr type, 
-		          ParameterSymbol* symbol)
+		Parameter(TypePtr type, ParameterSymbolPtr symbol)
 			: type(type), symbol(symbol) {
 		}
 	};
@@ -66,7 +68,7 @@ public:
 	               Scope* scope,
 	               TypePtr returnType,
 	               parameter_list_t& parameters,
-	               Expression* body,
+	               ExpressionPtr body,
 	               TypePtr type)
 		: ScopedSymbol(Node::FUNCTION_SYMBOL, astNode,
 		               astNode.name, scope),
@@ -78,7 +80,7 @@ public:
 
 	TypePtr returnType;
 	parameter_list_t parameters;	
-	boost::scoped_ptr<Expression> body;	
+	ExpressionPtr body;	
 	
 	TypePtr type;
 };
@@ -88,7 +90,7 @@ public:
 	VariableSymbol(const ast::VariableDeclaration& astNode,
 	               Scope* declarationScope,
 	               TypePtr type,
-	               Expression* initializer)
+	               ExpressionPtr initializer)
 		: Symbol(Node::VARIABLE_SYMBOL, astNode,
 		         astNode.name, declarationScope),
 		  type(type),
@@ -96,7 +98,7 @@ public:
 	}
 
 	TypePtr type;
-	boost::scoped_ptr<Expression> initializer;
+	ExpressionPtr initializer;
 };
 
 class ParameterSymbol : public Symbol {
@@ -111,7 +113,6 @@ public:
 	}
 
 	TypePtr type;
-	//boost::scoped_ptr<Expression> defaultValue;
 };
 
 } // namespace semantic
