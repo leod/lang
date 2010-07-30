@@ -1,7 +1,6 @@
 #include <cassert>
 #include <boost/make_shared.hpp>
 
-#include "common/context.hpp"
 #include "semantic/ast_visitor.hpp"
 
 namespace llang {
@@ -49,9 +48,10 @@ private:
 
 protected:
 	virtual Symbol* visit(ast::Module& module, ScopeState state) {
-		Module* symbol = new Module(module);
+		Scope* scope = new Scope(0);
+		state.scope = scope;
 
-		state.scope = symbol->scope;
+		Module* symbol = new Module(module, scope);
 
 		for (auto it = module.declarations.begin();
 		     it != module.declarations.end();

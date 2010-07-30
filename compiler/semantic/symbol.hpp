@@ -40,8 +40,8 @@ protected:
 
 class Module : public ScopedSymbol {
 public:
-	Module(const ast::Module& astNode)
-		: ScopedSymbol(Node::MODULE, astNode, astNode.name, 0) {
+	Module(const ast::Module& astNode, Scope* scope)
+		: ScopedSymbol(Node::MODULE, astNode, astNode.name, scope) {
 	}
 };
 
