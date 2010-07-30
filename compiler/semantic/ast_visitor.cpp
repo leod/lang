@@ -131,6 +131,8 @@ protected:
 
 	virtual Expression* visit(ast::IdentifierExpression& expression,
 	                          ScopeState state) {
+		// TODO: will probably need a second pass to handle forward refs
+
 		Symbol* symbol = state.scope->lookup(expression.name);
 
 		if (!symbol)
@@ -147,6 +149,52 @@ protected:
 			type = variable->type;
 
 		return new SymbolExpression(expression, type, symbol);
+	}
+
+	virtual Expression* visit(ast::CallExpression& call,
+	                          ScopeState state) {
+		Expression* callee = accept(*call.callee, state);
+
+		FunctionType* type = callee->type->isA<FunctionType>();
+		if (!type) 
+			context.diag.error(call.location, "can call only functions");
+
+		CallExpression::argument_list_t arguments;
+		for (auto it = call.arguments.begin();
+		     it != call.arguments.end();
+		     ++it) {
+			arguments.push_back(ExpressionPtr(accept(**it, state)));		
+		}
+
+		return new CallExpression(call, type->returnType, callee, arguments);
+	}
+
+	virtual Expression* visit(ast::BlockExpression& block,
+	                          ScopeState state) {
+		BlockExpression::expression_list_t expressions;
+		for (auto it = block.expressions.begin();
+		     it != block.expressions.end();
+		     ++it) {
+			expressions.push_back(ExpressionPtr(accept(**it, state)));
+		}
+
+		return new BlockExpression(block, expressions.back()->type,
+		                           expressions);
+	}
+
+	virtual Expression* visit(ast::LiteralNumberExpression literal,
+	                          ScopeState) {
+		// TODO: This type is not right. Literal numbers have an unspecified
+		//       int type and are implicitly casteable to i32.
+		TypePtr type(new IntegralType(literal, lexer::Token::KEYWORD_I32));
+
+		return new LiteralNumberExpression(literal, type);
+	}
+
+	virtual Expression* visit(ast::VoidExpression voidExpression, ScopeState) {
+		return new VoidExpression(voidExpression,
+			TypePtr(new IntegralType(voidExpression,
+			                         lexer::Token::KEYWORD_VOID)));
 	}
 };
 

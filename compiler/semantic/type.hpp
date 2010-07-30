@@ -38,6 +38,12 @@ public:
 		  type(astNode.type) {
 	}
 
+	IntegralType(const ast::Node& astNode, lexer::Token::Type type)
+		: Type(Node::INTEGRAL_TYPE, astNode),
+		  type(type) {
+	}
+	             
+
 	virtual bool equals(const Type* other) const {
 		const IntegralType* type = other->isA<IntegralType>();
 		if (!type) return false;
