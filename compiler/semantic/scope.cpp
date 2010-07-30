@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include "semantic/type.hpp"
 #include "semantic/expression.hpp"
 #include "semantic/symbol.hpp"
@@ -7,9 +9,12 @@ namespace llang {
 namespace semantic {
 
 void Scope::addSymbol(Symbol* symbol) {
-	// TODO: check conflict
+	assert(symbol);
 
-	symbols[symbol->name] = symbol;
+	if (symbols.find(symbol->name) != symbols.end())
+		throw std::runtime_error("symbol already declared: " + symbol->name);
+
+	symbols[symbol->name] = SymbolPtr(symbol);
 }
 
 Symbol* Scope::lookup(const identifier_t& name) {
@@ -22,7 +27,7 @@ Symbol* Scope::lookup(const identifier_t& name) {
 			return 0;
 	}
 
-	return it->second;
+	return it->second.get();
 }
 
 } // namespace semantic

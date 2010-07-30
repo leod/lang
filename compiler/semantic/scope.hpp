@@ -5,11 +5,10 @@
 #include <map>
 
 #include "common/identifier.hpp"
+#include "semantic/symbol_ptr.hpp"
 
 namespace llang {
 namespace semantic {
-
-class Symbol;
 
 class Scope {
 public:
@@ -22,7 +21,7 @@ public:
 	const Scope* parent() const { return parent_; }
 
 private:
-	typedef std::map<identifier_t, Symbol*> symbol_map_t;
+	typedef std::map<identifier_t, SymbolPtr> symbol_map_t;
 
 	Scope* parent_;
 
