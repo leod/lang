@@ -55,7 +55,7 @@ protected:
 
 		for (auto it = module.declarations.begin();
 		     it != module.declarations.end();
-			 ++it) {
+		     ++it) {
 			symbol->scope->addSymbol(accept(**it, state));
 		}
 
@@ -84,7 +84,7 @@ protected:
 
 		for (auto it = function.parameters.begin();
 		     it != function.parameters.end();
-			 ++it) {
+		     ++it) {
 			TypePtr type(accept(*it->type, state));
 
 			ParameterSymbol* symbol = 0;
@@ -119,7 +119,7 @@ private:
 	friend AstVisitors* makeAstVisitors(Context&);
 
 protected:
-	virtual Expression*	visit(ast::BinaryExpression& expression,
+	virtual Expression* visit(ast::BinaryExpression& expression,
 	                          ScopeState state) {
 		Expression* left = accept(*expression.left, state);
 		Expression* right = accept(*expression.right, state);
