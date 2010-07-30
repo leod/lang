@@ -1,6 +1,8 @@
 #ifndef LLANG_AST_PRINT_VISITOR_HPP_INCLUDED
 #define LLANG_AST_PRINT_VISITOR_HPP_INCLUDED
 
+#include <cstdarg>
+
 #include "ast/type.hpp"
 #include "ast/declaration.hpp"
 #include "ast/expression.hpp"

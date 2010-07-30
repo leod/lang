@@ -1,6 +1,7 @@
 #include <cassert>
 #include <boost/make_shared.hpp>
 
+#include "ast/print_visitor.hpp"
 #include "semantic/ast_visitor.hpp"
 
 namespace llang {
@@ -199,7 +200,10 @@ protected:
 		for (auto it = block.expressions.begin();
 		     it != block.expressions.end();
 		     ++it) {
-			expressions.push_back(ExpressionPtr(accept(**it, state)));
+			ast::PrintVisitor print; print.accept(**it);
+			ast::Expression& exp = **it;
+			ExpressionPtr expression(accept(exp, state));
+			expressions.push_back(expression);
 		}
 
 		TypePtr type = expressions.size() ? expressions.back()->type
@@ -208,16 +212,16 @@ protected:
 		return new BlockExpression(block, type, expressions);
 	}
 
-	virtual Expression* visit(ast::LiteralNumberExpression literal,
-	                          ScopeState) {
-		// TODO: This type is not right. Literal numbers have an unspecified
-		//       int type and are implicitly casteable to i32.
-		TypePtr type(new IntegralType(literal, lexer::Token::KEYWORD_I32));
+	//virtual Expression* visit(ast::LiteralNumberExpression& literal,
+							  //ScopeState) {
+		//// TODO: This type is not right. Literal numbers have an unspecified
+		////       int type and are implicitly casteable to i32.
+		//TypePtr type(new IntegralType(literal, lexer::Token::KEYWORD_I32));
 
-		return new LiteralNumberExpression(literal, type);
-	}
+		//return new LiteralNumberExpression(literal, type);
+	//}
 
-	virtual Expression* visit(ast::VoidExpression voidExpression, ScopeState) {
+	virtual Expression* visit(ast::VoidExpression& voidExpression, ScopeState) {
 		TypePtr type(new IntegralType(voidExpression,
 		                              lexer::Token::KEYWORD_VOID));
 		return new VoidExpression(voidExpression, type);
