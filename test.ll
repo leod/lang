@@ -1,13 +1,8 @@
 // ab c d de f 
 
-fn void x(i32 a, void x) = {
-	5;
+fn i32 x(i32 a, void x) = {
+	fn void foo() = 4;
 
-	ident * (2 + 3);
-
-	ident();
-
-	{x;}({ if (9 + 3) 1 else 2 * poop(); });
-
-	var i32 x = if (10 + ident + { 1; 2; 3; } * 3) {} else {};
+	var i32 a = foo();
+	var void x = foo();
 }
