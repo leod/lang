@@ -160,11 +160,34 @@ protected:
 		if (!type) 
 			context.diag.error(call.location, "can call only functions");
 
+		if (type->parameterTypes.size() != call.arguments.size())
+			context.diag.error(call.location,
+				"wrong number of parameters: expected %d, got %d",
+				type->parameterTypes.size(),
+				call.arguments.size());
+
 		CallExpression::argument_list_t arguments;
-		for (auto it = call.arguments.begin();
-		     it != call.arguments.end();
-		     ++it) {
-			arguments.push_back(ExpressionPtr(accept(**it, state)));		
+
+		{
+			int i = 0;
+			auto it1 = call.arguments.begin();
+			auto it2 = type->parameterTypes.begin();
+
+			for (; it1 != call.arguments.end(); ++it1, ++it2, ++i) {
+				ExpressionPtr argument(accept(**it1, state));
+
+				if (!argument->type->equals(*it2)) {
+					std::string expectedType = (*it2)->name();
+					std::string gotType = argument->type->name();
+
+					context.diag.error(call.location,
+						"wrong type in %d. argument of function call:"
+						"expected '%s', got '%s'",
+						i, expectedType.c_str(), gotType.c_str());
+				}
+
+				arguments.push_back(argument);		
+			}
 		}
 
 		return new CallExpression(call, type->returnType, callee, arguments);
@@ -179,8 +202,10 @@ protected:
 			expressions.push_back(ExpressionPtr(accept(**it, state)));
 		}
 
-		return new BlockExpression(block, expressions.back()->type,
-		                           expressions);
+		TypePtr type = expressions.size() ? expressions.back()->type
+			: TypePtr(new IntegralType(block, lexer::Token::KEYWORD_VOID));
+
+		return new BlockExpression(block, type, expressions);
 	}
 
 	virtual Expression* visit(ast::LiteralNumberExpression literal,
