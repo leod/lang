@@ -63,7 +63,7 @@ protected:
 
 	virtual Symbol* visit(ast::VariableDeclaration& variable,
 	                      ScopeState state) {
-		Type* type = accept(*variable.type, state);
+		TypePtr type(accept(*variable.type, state));
 		Expression* initializer = accept(*variable.initializer, state);
 		
 		VariableSymbol* symbol = new VariableSymbol(variable, state.scope, type,
@@ -84,7 +84,7 @@ protected:
 		for (auto it = function.parameters.begin();
 		     it != function.parameters.end();
 			 ++it) {
-			Type* type = accept(*it->type, state);
+			TypePtr type(accept(*it->type, state));
 
 			ParameterSymbol* symbol = 0;
 			if (it->hasName) {
@@ -95,15 +95,14 @@ protected:
 				state.scope->addSymbol(symbol);
 			}
 
-			parameterTypes.push_back(TypePtr(type));
+			parameterTypes.push_back(type);
 			parameters.push_back(FunctionSymbol::Parameter(type, symbol));
 		}
 
-		Type* returnType = accept(*function.returnType, state);
+		TypePtr returnType(accept(*function.returnType, state));
 		Expression* body = accept(*function.body, state);
 
-		FunctionType* type = new FunctionType(function, returnType,
-		                                      parameterTypes);
+		TypePtr type(new FunctionType(function, returnType, parameterTypes));
 
 		FunctionSymbol* symbol = new FunctionSymbol(function, scope, returnType,
 		                                            parameters, body, type);
@@ -127,12 +126,27 @@ protected:
 		// TODO: later we'll want to do implicit casts here, probably
 		if (!left->type->equals(right->type.get())) assert(false);
 
-		return new BinaryExpression(expression, left->type.get(), left, right);
+		return new BinaryExpression(expression, left->type, left, right);
 	}
 
 	virtual Expression* visit(ast::IdentifierExpression& expression,
 	                          ScopeState state) {
-		
+		Symbol* symbol = state.scope->lookup(expression.name);
+
+		if (!symbol)
+			context.diag.error(expression.location,
+			                   "cannot find symbol '%s'",
+			                   expression.name.c_str());
+
+		// TODO: this isn't very good... maybe add a 'Type*' in the
+		//       symbol base class?
+		TypePtr type;
+		if (FunctionSymbol* function = symbol->isA<FunctionSymbol>())
+			type = function->type;
+		else if (VariableSymbol* variable = symbol->isA<VariableSymbol>())
+			type = variable->type;
+
+		return new SymbolExpression(expression, type, symbol);
 	}
 };
 

@@ -8,6 +8,7 @@
 #include "lexer/token.hpp"
 #include "ast/type.hpp"
 #include "semantic/node.hpp"
+#include "semantic/type_ptr.hpp"
 
 namespace llang {
 namespace semantic {
@@ -29,8 +30,6 @@ protected:
 		: Node(tag, astNode) {
 	}
 };
-
-typedef boost::shared_ptr<Type> TypePtr;
 
 class IntegralType : public Type {
 public:
@@ -54,7 +53,7 @@ public:
 	typedef std::list<TypePtr> parameter_type_list_t;
 
 	FunctionType(const ast::Node& astNode,
-				 Type* returnType, 
+				 TypePtr returnType, 
 	             parameter_type_list_t& parameterTypes)
 		: Type(Node::FUNCTION_TYPE, astNode),
 		  returnType(returnType),
@@ -78,7 +77,7 @@ public:
 		return true;
 	}
 
-	boost::scoped_ptr<Type> returnType;
+	TypePtr returnType;
 	parameter_type_list_t parameterTypes;	
 };
 

@@ -9,20 +9,20 @@
 #include "common/identifier.hpp"
 #include "ast/node.hpp"
 #include "semantic/node.hpp"
+#include "semantic/type_ptr.hpp"
 
 namespace llang {
 namespace semantic {
 
-class Type;
 class Symbol;
 
 class Expression : public Node {
 public:
-	boost::scoped_ptr<Type> type;
+	TypePtr type;
 
 protected:
 	Expression(const Node::Tag tag, const ast::Node& astNode,
-	           Type* type)
+	           TypePtr type)
 		: Node(tag, astNode), type(type) {
 	}
 };
@@ -31,7 +31,7 @@ typedef boost::shared_ptr<Expression> ExpressionPtr;
 
 class BinaryExpression : public Expression {
 public:
-	BinaryExpression(const ast::Node& astNode, Type* type,
+	BinaryExpression(const ast::Node& astNode, TypePtr type,
 	                 Expression* left, Expression* right)
 		: Expression(Node::BINARY_EXPRESSION, astNode, type),
 		  left(left), right(right) {
@@ -42,7 +42,7 @@ public:
 
 class LiteralNumberExpression : public Expression {
 public:
-	LiteralNumberExpression(const ast::Node& astNode, Type* type)
+	LiteralNumberExpression(const ast::Node& astNode, TypePtr type)
 		: Expression(Node::LITERAL_NUMBER_EXPRESSION, astNode, type) {
 	}
 };
@@ -51,7 +51,7 @@ class BlockExpression : public Expression {
 public:
 	typedef std::list<ExpressionPtr> expression_list_t;
 
-	BlockExpression(const ast::Node& astNode, Type* type,
+	BlockExpression(const ast::Node& astNode, TypePtr type,
 	                const expression_list_t& expressions)
 		: Expression(Node::BLOCK_EXPRESSION, astNode, type),
 		  expressions(expressions) {
@@ -63,7 +63,7 @@ public:
 class IfElseExpression : public Expression {
 public:
 	IfElseExpression(const ast::Node& astNode,
-	                 Type* type,
+	                 TypePtr type,
 	                 Expression* condition,
 	                 Expression* ifExpression,
 	                 Expression* elseExpression)
@@ -80,14 +80,14 @@ public:
 
 class VoidExpression : public Expression {
 public:
-	VoidExpression(const ast::Node& astNode, Type* type)
+	VoidExpression(const ast::Node& astNode, TypePtr type)
 		: Expression(Node::VOID_EXPRESSION, astNode, type) {
 	}
 };
 
 class SymbolExpression : public Expression {
 public:
-	SymbolExpression(const ast::Node& astNode, Type* type, 
+	SymbolExpression(const ast::Node& astNode, TypePtr type, 
 	                 Symbol* symbol)
 		: Expression(Node::IDENTIFIER_EXPRESSION, astNode, type),
 		  symbol(symbol) {
@@ -101,7 +101,7 @@ class CallExpression : public Expression {
 public:
 	typedef std::list<ExpressionPtr> argument_list_t;
 
-	CallExpression(const ast::Node& astNode, Type* type, Expression* callee,
+	CallExpression(const ast::Node& astNode, TypePtr type, Expression* callee,
 	               argument_list_t arguments)
 		: Expression(Node::CALL_EXPRESSION, astNode, type),
 		  callee(callee), arguments(arguments) {

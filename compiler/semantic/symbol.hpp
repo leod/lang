@@ -4,11 +4,11 @@
 #include "ast/declaration.hpp"
 #include "semantic/node.hpp"
 #include "semantic/scope.hpp"
+#include "semantic/type_ptr.hpp"
 
 namespace llang {
 namespace semantic {
 
-class Type;
 class Expression;
 
 class Symbol : public Node {
@@ -49,10 +49,10 @@ class ParameterSymbol;
 class FunctionSymbol : public Symbol {
 public:
 	struct Parameter {
-		boost::shared_ptr<Type> type;
+		TypePtr type;
 		ParameterSymbol* symbol;
 
-		Parameter(Type* type, 
+		Parameter(TypePtr type, 
 		          ParameterSymbol* symbol)
 			: type(type), symbol(symbol) {
 		}
@@ -62,10 +62,10 @@ public:
 
 	FunctionSymbol(const ast::FunctionDeclaration& astNode,
 	               Scope* declarationScope,
-	               Type* returnType,
+	               TypePtr returnType,
 	               parameter_list_t& parameters,
 	               Expression* body,
-	               FunctionType* type)
+	               TypePtr type)
 		: Symbol(Node::FUNCTION_SYMBOL, astNode,
 		         astNode.name, declarationScope),
 		  returnType(returnType),
@@ -74,18 +74,18 @@ public:
 		  type(type) {
 	}
 
-	boost::scoped_ptr<Type> returnType;
+	TypePtr returnType;
 	parameter_list_t parameters;	
 	boost::scoped_ptr<Expression> body;	
 	
-	boost::scoped_ptr<FunctionType> type;
+	TypePtr type;
 };
 
 class VariableSymbol : public Symbol {
 public:
 	VariableSymbol(const ast::VariableDeclaration& astNode,
 	               Scope* declarationScope,
-	               Type* type,
+	               TypePtr type,
 	               Expression* initializer)
 		: Symbol(Node::VARIABLE_SYMBOL, astNode,
 		         astNode.name, declarationScope),
@@ -93,7 +93,7 @@ public:
 		  initializer(initializer) {
 	}
 
-	boost::scoped_ptr<Type> type;
+	TypePtr type;
 	boost::scoped_ptr<Expression> initializer;
 };
 
@@ -102,13 +102,13 @@ public:
 	ParameterSymbol(const ast::Node& astNode,
 	                const identifier_t& name, // TMP until I add ast::Param
 	                Scope* declarationScope,
-	                Type* type)
+	                TypePtr type)
 		: Symbol(Node::PARAMETER_SYMBOL, astNode, name,
 		         declarationScope),
 		  type(type) {
 	}
 
-	boost::scoped_ptr<Type> type;
+	TypePtr type;
 	//boost::scoped_ptr<Expression> defaultValue;
 };
 
