@@ -1,8 +1,8 @@
 #ifndef LLANG_SEMANTIC_SCOPE_HPP_INCLUDED
 #define LLANG_SEMANTIC_SCOPE_HPP_INCLUDED
 
-#include <boost/shared_ptr.hpp>
 #include <map>
+#include <utility>
 
 #include "common/identifier.hpp"
 #include "semantic/symbol_ptr.hpp"
@@ -14,8 +14,8 @@ class Scope {
 public:
 	Scope(Scope* parent = 0) : parent_(parent) {}
 
-	void addSymbol(Symbol* symbol);
-	Symbol* lookup(const identifier_t& name);
+	void addSymbol(SymbolPtr symbol);
+	SymbolPtr lookup(const identifier_t& name);
 
 	Scope* parent() { return parent_; }
 	const Scope* parent() const { return parent_; }

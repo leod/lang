@@ -8,26 +8,26 @@
 namespace llang {
 namespace semantic {
 
-void Scope::addSymbol(Symbol* symbol) {
+void Scope::addSymbol(SymbolPtr symbol) {
 	assert(symbol);
 
 	if (symbols.find(symbol->name) != symbols.end())
 		throw std::runtime_error("symbol already declared: " + symbol->name);
 
-	symbols[symbol->name] = SymbolPtr(symbol);
+	symbols.insert(symbol_map_t::value_type(symbol->name, symbol));
 }
 
-Symbol* Scope::lookup(const identifier_t& name) {
+SymbolPtr Scope::lookup(const identifier_t& name) {
 	symbol_map_t::iterator it = symbols.find(name);
 	
 	if (it == symbols.end()) {
 		if (parent_)
 			return parent_->lookup(name);
 		else
-			return 0;
+			return SymbolPtr();
 	}
 
-	return it->second.get();
+	return it->second;
 }
 
 } // namespace semantic

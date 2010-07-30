@@ -3,6 +3,9 @@
 
 #include "ast/print_visitor.hpp"
 #include "semantic/ast_visitor.hpp"
+#include "semantic/symbol.hpp"
+#include "semantic/expression.hpp"
+#include "semantic/type.hpp"
 
 namespace llang {
 namespace semantic {
@@ -16,43 +19,43 @@ protected:
 	VisitorBase(Context& context) : context(context) {}
 	friend AstVisitors* makeAstVisitors(Context&);
 
-	Type* accept(ast::Type& n, const ScopeState& p) {
+	TypePtr accept(ast::Type& n, const ScopeState& p) {
 		return visitors->typeVisitor->accept(n, p);
 	}
 
-	Symbol* accept(ast::Declaration& n, const ScopeState& p) {
+	SymbolPtr accept(ast::Declaration& n, const ScopeState& p) {
 		return visitors->declarationVisitor->accept(n, p);
 	}
 
-	Expression* accept(ast::Expression& n, const ScopeState& p) {
+	ExpressionPtr accept(ast::Expression& n, const ScopeState& p) {
 		return visitors->expressionVisitor->accept(n, p);
 	}
 };
 
-class TypeVisitor : public VisitorBase<Type*> {
+class TypeVisitor : public VisitorBase<TypePtr> {
 private:
 	TypeVisitor(Context& context)
-		: VisitorBase<Type*>(context) {}
+		: VisitorBase<TypePtr>(context) {}
 	friend AstVisitors* makeAstVisitors(Context&);
 
 protected:
-	virtual Type* visit(ast::IntegralType& type, ScopeState) {
-		return new IntegralType(type);				
+	virtual TypePtr visit(ast::IntegralType& type, ScopeState) {
+		return TypePtr(new IntegralType(type));
 	}
 };
 
-class DeclarationVisitor : public VisitorBase<Symbol*> {
+class DeclarationVisitor : public VisitorBase<SymbolPtr> {
 private:
 	DeclarationVisitor(Context& context)
-		: VisitorBase<Symbol*>(context) {}
+		: VisitorBase<SymbolPtr>(context) {}
 	friend AstVisitors* makeAstVisitors(Context&);
 
 protected:
-	virtual Symbol* visit(ast::Module& module, ScopeState state) {
+	virtual SymbolPtr visit(ast::Module& module, ScopeState state) {
 		Scope* scope = new Scope(0);
 		state.scope = scope;
 
-		Module* symbol = new Module(module, scope);
+		boost::shared_ptr<Module> symbol(new Module(module, scope));
 
 		for (auto it = module.declarations.begin();
 		     it != module.declarations.end();
@@ -63,10 +66,10 @@ protected:
 		return symbol;
 	}
 
-	virtual Symbol* visit(ast::VariableDeclaration& variable,
-	                      ScopeState state) {
-		TypePtr type(accept(*variable.type, state));
-		Expression* initializer = accept(*variable.initializer, state);
+	virtual SymbolPtr visit(ast::VariableDeclaration& variable,
+	                        ScopeState state) {
+		TypePtr type = accept(*variable.type, state);
+		ExpressionPtr initializer = accept(*variable.initializer, state);
 
 		if (!initializer->type->equals(type)) {
 			std::string expectedType = type->name();
@@ -77,14 +80,14 @@ protected:
 				variable.name.c_str(), expectedType.c_str(), gotType.c_str());
 		}
 		
-		VariableSymbol* symbol = new VariableSymbol(variable, state.scope, type,
-		                                            initializer);
+		SymbolPtr symbol(new VariableSymbol(variable, state.scope, type,
+		                                    initializer));
 
 		return symbol;
 	}
 
-	virtual Symbol* visit(ast::FunctionDeclaration& function,
-	                      ScopeState state) {
+	virtual SymbolPtr visit(ast::FunctionDeclaration& function,
+	                        ScopeState state) {
 		Scope* scope = new Scope(state.scope);
 		state.scope = scope;
 
@@ -96,12 +99,12 @@ protected:
 		     ++it) {
 			TypePtr type(accept(*it->type, state));
 
-			ParameterSymbol* symbol = 0;
+			ParameterSymbolPtr symbol;
 			if (it->hasName) {
-				symbol = new ParameterSymbol(function, // TMP
-				                             it->name, // TMP
-				                             scope,
-				                             type); 
+				symbol.reset(new ParameterSymbol(function, // TMP
+				                                 it->name, // TMP
+				                                 scope,
+				                                 type)); 
 				state.scope->addSymbol(symbol);
 			}
 
@@ -110,68 +113,73 @@ protected:
 		}
 
 		TypePtr returnType(accept(*function.returnType, state));
-		Expression* body = accept(*function.body, state);
+		ExpressionPtr body = accept(*function.body, state);
 
 		TypePtr type(new FunctionType(function, returnType, parameterTypes));
 
-		FunctionSymbol* symbol = new FunctionSymbol(function, scope, returnType,
-		                                            parameters, body, type);
+		SymbolPtr symbol(new FunctionSymbol(function, scope, returnType,
+		                                    parameters, body, type));
 
 		return symbol;
 	}
 };
 
-class ExpressionVisitor : public VisitorBase<Expression*> {
+class ExpressionVisitor : public VisitorBase<ExpressionPtr> {
 private:
 	ExpressionVisitor(Context& context)
-		: VisitorBase<Expression*>(context) {}
+		: VisitorBase<ExpressionPtr>(context) {}
 	friend AstVisitors* makeAstVisitors(Context&);
 
 protected:
-	virtual Expression* visit(ast::BinaryExpression& expression,
-	                          ScopeState state) {
-		Expression* left = accept(*expression.left, state);
-		Expression* right = accept(*expression.right, state);
+	virtual ExpressionPtr visit(ast::BinaryExpression& expression,
+	                            ScopeState state) {
+		ExpressionPtr left = accept(*expression.left, state);
+		ExpressionPtr right = accept(*expression.right, state);
 
 		// TODO: later we'll want to do implicit casts here, probably
 		if (!left->type->equals(right->type.get())) assert(false);
 
-		return new BinaryExpression(expression, left->type, left, right);
+		return ExpressionPtr(new BinaryExpression(expression, left->type,
+		                                          left, right));
 	}
 
-	virtual Expression* visit(ast::IdentifierExpression& expression,
-	                          ScopeState state) {
+	virtual ExpressionPtr visit(ast::IdentifierExpression& expression,
+	                            ScopeState state) {
 		// TODO: will probably need a second pass to handle forward refs
 
-		Symbol* symbol = state.scope->lookup(expression.name);
+		SymbolPtr symbol = state.scope->lookup(expression.name);
 
 		if (!symbol)
 			context.diag.error(expression.location,
 			                   "cannot find symbol '%s'",
 			                   expression.name.c_str());
 
-		// TODO: this isn't very good... maybe add a 'Type*' in the
+		// TODO: this isn't very good... maybe add a TypePtr in the
 		//       symbol base class?
 		TypePtr type;
-		if (FunctionSymbol* function = symbol->isA<FunctionSymbol>())
+		if (boost::shared_ptr<FunctionSymbol> function =
+			isA<FunctionSymbol>(symbol))
 			type = function->type;
-		else if (VariableSymbol* variable = symbol->isA<VariableSymbol>())
+		else if (boost::shared_ptr<VariableSymbol> variable =
+			isA<VariableSymbol>(symbol))
 			type = variable->type;
-		else if (ParameterSymbol* parameter = symbol->isA<ParameterSymbol>())
+		else if (boost::shared_ptr<ParameterSymbol> parameter =
+			isA<ParameterSymbol>(symbol))
 			type = parameter->type;
 		else
 			context.diag.error(expression.location,
 			                   "cannot use %s in expression",
 			                   expression.name.c_str());
 
-		return new SymbolExpression(expression, type, symbol);
+		return ExpressionPtr(new SymbolExpression(expression, type, symbol));
 	}
 
-	virtual Expression* visit(ast::CallExpression& call,
-	                          ScopeState state) {
-		Expression* callee = accept(*call.callee, state);
+	virtual ExpressionPtr visit(ast::CallExpression& call,
+	                            ScopeState state) {
+		ExpressionPtr callee = accept(*call.callee, state);
 
-		FunctionType* type = callee->type->isA<FunctionType>();
+		boost::shared_ptr<FunctionType> type = isA<FunctionType>(callee->type);
+
 		if (!type) { 
 			std::string typeName = callee->type->name();
 			context.diag.error(call.location,
@@ -208,47 +216,47 @@ protected:
 			}
 		}
 
-		return new CallExpression(call, type->returnType, callee, arguments);
+		return ExpressionPtr(
+			new CallExpression(call, type->returnType, callee, arguments));
 	}
 
-	virtual Expression* visit(ast::BlockExpression& block,
-	                          ScopeState state) {
+	virtual ExpressionPtr visit(ast::BlockExpression& block,
+	                            ScopeState state) {
 		BlockExpression::expression_list_t expressions;
 		for (auto it = block.expressions.begin();
 		     it != block.expressions.end();
 		     ++it) {
-			ExpressionPtr expression(accept(**it, state));
-			expressions.push_back(expression);
+			expressions.push_back(accept(**it, state));
 		}
 
 		TypePtr type = expressions.size() ? expressions.back()->type
 			: TypePtr(new IntegralType(block, lexer::Token::KEYWORD_VOID));
 
-		return new BlockExpression(block, type, expressions);
+		return ExpressionPtr(new BlockExpression(block, type, expressions));
 	}
 
-	virtual Expression* visit(ast::LiteralNumberExpression& literal,
-							  ScopeState) {
+	virtual ExpressionPtr visit(ast::LiteralNumberExpression& literal,
+	                            ScopeState) {
 		// TODO: This type is not right. Literal numbers have an unspecified
 		//       int type and are implicitly casteable to i32.
 		TypePtr type(new IntegralType(literal, lexer::Token::KEYWORD_I32));
 
-		return new LiteralNumberExpression(literal, type);
+		return ExpressionPtr(new LiteralNumberExpression(literal, type));
 	}
 
-	virtual Expression* visit(ast::VoidExpression& voidExpression, ScopeState) {
+	virtual ExpressionPtr visit(ast::VoidExpression& voidExpression, ScopeState) {
 		TypePtr type(new IntegralType(voidExpression,
 		                              lexer::Token::KEYWORD_VOID));
-		return new VoidExpression(voidExpression, type);
+		return ExpressionPtr(new VoidExpression(voidExpression, type));
 	}
 
-	virtual Expression* visit(ast::DeclarationExpression& declaration,
+	virtual ExpressionPtr visit(ast::DeclarationExpression& declaration,
                               ScopeState state) {
 		state.scope->addSymbol(accept(*declaration.declaration, state));
 
 		TypePtr type(new IntegralType(declaration,
 		                              lexer::Token::KEYWORD_VOID));
-		return new VoidExpression(declaration, type);
+		return ExpressionPtr(new VoidExpression(declaration, type));
 	}	
 };
 
