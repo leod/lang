@@ -11,15 +11,10 @@
 #include "semantic/expression.hpp"
 #include "semantic/type.hpp"
 #include "semantic/symbol.hpp"
+#include "semantic/scope_state.hpp"
 
 namespace llang {
 namespace semantic {
-
-struct ScopeState {
-	Scope* scope;
-
-	ScopeState() : scope(0) {}
-};
 
 class AstVisitors {
 public:
