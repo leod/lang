@@ -59,7 +59,7 @@ public:
 	typedef std::list<TypePtr> parameter_type_list_t;
 
 	FunctionType(const ast::Node& astNode,
-				 TypePtr returnType, 
+	             TypePtr returnType, 
 	             parameter_type_list_t& parameterTypes)
 		: Type(Node::FUNCTION_TYPE, astNode),
 		  returnType(returnType),
@@ -76,7 +76,7 @@ public:
 		for (auto it1 = parameterTypes.begin(),
 		          it2 = type->parameterTypes.begin();
 		     it1 != parameterTypes.end();
-			 ++it1, ++it2) {
+		     ++it1, ++it2) {
 			if (!(*it1)->equals(*it2)) return false;
 		}
 

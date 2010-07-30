@@ -18,7 +18,7 @@ public:
 
 protected:
 	Symbol(Node::Tag tag, const ast::Node& astNode,
-           const identifier_t& name, Scope* declarationScope)
+	       const identifier_t& name, Scope* declarationScope)
 		: Node(tag, astNode), name(name),
 		  declarationScope(declarationScope) {
 	}
