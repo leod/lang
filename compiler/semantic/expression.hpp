@@ -2,6 +2,7 @@
 #define LLANG_SEMANTIC_EXPRESSION_HPP_INCLUDED
 
 #include <list>
+#include <cassert>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -13,6 +14,7 @@ namespace llang {
 namespace semantic {
 
 class Type;
+class Symbol;
 
 class Expression : public Node {
 public:
@@ -83,15 +85,16 @@ public:
 	}
 };
 
-class IdentifierExpression : public Expression {
+class SymbolExpression : public Expression {
 public:
-	IdentifierExpression(const ast::Node& astNode, Type* type, 
-	                     const identifier_t& name)
+	SymbolExpression(const ast::Node& astNode, Type* type, 
+	                 Symbol* symbol)
 		: Expression(Node::IDENTIFIER_EXPRESSION, astNode, type),
-		  name(name) {
+		  symbol(symbol) {
+		assert(symbol);
 	}
 
-	const identifier_t name;
+	Symbol* symbol;
 };
 
 class CallExpression : public Expression {

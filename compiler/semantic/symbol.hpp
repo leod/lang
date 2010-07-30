@@ -14,7 +14,7 @@ class Expression;
 class Symbol : public Node {
 public:
 	const identifier_t name;
-	Scope* declarationScope;
+	Scope* const declarationScope;
 
 protected:
 	Symbol(Node::Tag tag, const ast::Node& astNode,
@@ -32,9 +32,9 @@ public:
 
 protected:
 	ScopedSymbol(Node::Tag tag, const ast::Node& astNode,
-	             const identifier_t& name, Scope* declarationScope)
-		: Symbol(tag, astNode, name, declarationScope),
-		  scope(new Scope(declarationScope)) {
+	             const identifier_t& name, Scope* scope)
+		: Symbol(tag, astNode, name, scope->parent()),
+		  scope(scope) {
 	}
 };
 
@@ -61,26 +61,30 @@ public:
 	typedef std::list<Parameter> parameter_list_t;
 
 	FunctionSymbol(const ast::FunctionDeclaration& astNode,
-				   Scope* declarationScope,
+	               Scope* declarationScope,
 	               Type* returnType,
 	               parameter_list_t& parameters,
-	               Expression* body)
+	               Expression* body,
+	               FunctionType* type)
 		: Symbol(Node::FUNCTION_SYMBOL, astNode,
 		         astNode.name, declarationScope),
 		  returnType(returnType),
 		  parameters(parameters),
-		  body(body) {
+		  body(body),
+		  type(type) {
 	}
 
 	boost::scoped_ptr<Type> returnType;
 	parameter_list_t parameters;	
 	boost::scoped_ptr<Expression> body;	
+	
+	boost::scoped_ptr<FunctionType> type;
 };
 
 class VariableSymbol : public Symbol {
 public:
 	VariableSymbol(const ast::VariableDeclaration& astNode,
-				   Scope* declarationScope,
+	               Scope* declarationScope,
 	               Type* type,
 	               Expression* initializer)
 		: Symbol(Node::VARIABLE_SYMBOL, astNode,

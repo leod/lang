@@ -13,14 +13,18 @@ class Symbol;
 
 class Scope {
 public:
-	Scope(Scope* parent = 0) : parent(parent) {}
+	Scope(Scope* parent = 0) : parent_(parent) {}
 
 	void addSymbol(Symbol* symbol);
+	Symbol* lookup(const identifier_t& name);
+
+	Scope* parent() { return parent_; }
+	const Scope* parent() const { return parent_; }
 
 private:
 	typedef std::map<identifier_t, Symbol*> symbol_map_t;
 
-	Scope* parent;
+	Scope* parent_;
 
 	symbol_map_t symbols;
 };

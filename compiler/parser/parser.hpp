@@ -1,7 +1,7 @@
 #ifndef LLANG_PARSER_PARSER_HPP_INCLUDED
 #define LLANG_PARSER_PARSER_HPP_INCLUDED
 
-#include "common/diagnostics.hpp"
+#include "common/context.hpp"
 #include "lexer/token_stream.hpp"
 #include "ast/declaration.hpp"
 #include "ast/type.hpp"
@@ -12,10 +12,10 @@ namespace parser {
 
 class Parser {
 public:
-	Parser(Diagnostics& diag,
+	Parser(Context& context,
 	       const std::string& moduleName,
 	       lexer::TokenStream& ts)
-		: diag(diag), moduleName(moduleName), ts(ts) {
+		: diag(context.diag), moduleName(moduleName), ts(ts) {
 	}
 
 	ast::Module* parseModule();

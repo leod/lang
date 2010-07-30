@@ -20,6 +20,18 @@ public:
 		: tag(tag), astNode(astNode) {
 	}
 
+	virtual ~Node() {}
+
+	template <typename T> T* isA() {
+		// TODO: use Tag to check type
+		return dynamic_cast<T*>(this);
+	}
+
+	template <typename T> const T* isA() const {
+		// TODO: use Tag to check type
+		return dynamic_cast<const T*>(this);
+	}
+
 	const Tag tag;
 	const ast::Node& astNode;
 };
