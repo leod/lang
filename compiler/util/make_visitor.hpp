@@ -7,6 +7,10 @@
                                          work with.
        LLANG_VISITOR_TYPE_PARAM: The base type of all classes.
        LLANG_VISITOR_TAG_PARAM: A member of the base type returning a tag.
+       LLANG_VISITOR_TYPE_WRAP_PARAM: The type wrapper in which nodes are
+                                      passed around
+       LLANG_VISITOR_CAST_PARAM: A way to upcast nodes
+	   LLANG_VISITOR_MEMBER_PARAM
 */
 
 #include <cassert>
@@ -18,11 +22,12 @@ LLANG_VISITOR_TABLE_PARAM(GENERATE_FORWARD_REFERENCE)
 #undef GENERATE_FORWARD_REFERENCE
 
 #define GENERATE_VIRTUAL_METHOD(name, nameCaps) \
-	virtual Result visit(name&, Param) { assert(false); }
+	virtual Result visit(LLANG_VISITOR_TYPE_WRAP_PARAM(name), Param) \
+	{ assert(false); }
 
 #define GENERATE_CASE(name, nameCaps) \
 	case LLANG_VISITOR_TYPE_PARAM::nameCaps: \
-		return visit(static_cast<name&>(node), param);
+		return visit(LLANG_VISITOR_CAST_PARAM(name)(node), param);
 
 template <typename Param, typename Result> class Visitor {
 protected:
@@ -32,8 +37,9 @@ protected:
 public:
 	virtual ~Visitor() {}
 
-	Result accept(LLANG_VISITOR_TYPE_PARAM& node, Param param) {
-		switch(node.LLANG_VISITOR_TAG_PARAM) {
+	Result accept(LLANG_VISITOR_TYPE_WRAP_PARAM(LLANG_VISITOR_TYPE_PARAM) node,
+	              Param param) {
+		switch(node LLANG_VISITOR_MEMBER_PARAM LLANG_VISITOR_TAG_PARAM) {
 
 		// Generate cases
 		LLANG_VISITOR_TABLE_PARAM(GENERATE_CASE)
@@ -48,11 +54,11 @@ public:
 #undef GENERATE_CASE
 
 #define GENERATE_VIRTUAL_METHOD(name, nameCaps) \
-	virtual Result visit(name&) { assert(false); }
+	virtual Result visit(LLANG_VISITOR_TYPE_WRAP_PARAM(name)) { assert(false); }
 
 #define GENERATE_CASE(name, nameCaps) \
 	case LLANG_VISITOR_TYPE_PARAM::nameCaps: \
-		return visit(static_cast<name&>(node)); 
+		return visit(LLANG_VISITOR_CAST_PARAM(name)(node)); 
 
 template <typename Result> class Visitor <void, Result> {
 protected:
@@ -61,8 +67,9 @@ protected:
 public:
 	virtual ~Visitor() {}
 
-	Result accept(LLANG_VISITOR_TYPE_PARAM& node) {
-		switch(node.LLANG_VISITOR_TAG_PARAM) {
+	Result accept(
+		LLANG_VISITOR_TYPE_WRAP_PARAM(LLANG_VISITOR_TYPE_PARAM) node) {
+		switch(node LLANG_VISITOR_MEMBER_PARAM LLANG_VISITOR_TAG_PARAM) {
 
 		LLANG_VISITOR_TABLE_PARAM(GENERATE_CASE)
 

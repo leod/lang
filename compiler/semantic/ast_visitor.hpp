@@ -2,8 +2,8 @@
 #define LLANG_SEMANTIC_AST_VISITOR_HPP_INCLUDED
 
 #include <list>
-#include <boost/scoped_ptr.hpp>
 
+#include "util/smart_ptr.hpp"
 #include "common/context.hpp"
 #include "ast/visitor.hpp"
 #include "semantic/expression_ptr.hpp"
@@ -16,13 +16,17 @@ namespace semantic {
 
 class AstVisitors {
 public:
-	boost::scoped_ptr<ast::Visitor<ScopeState, TypePtr> > typeVisitor;
-	boost::scoped_ptr<ast::Visitor<ScopeState, SymbolPtr> > declarationVisitor;
-	boost::scoped_ptr<ast::Visitor<ScopeState, ExpressionPtr> > expressionVisitor;
+	typedef ast::Visitor<ScopeState, TypePtr> TypeVisitor;
+	typedef ast::Visitor<ScopeState, SymbolPtr> DeclarationVisitor;
+	typedef ast::Visitor<ScopeState, ExpressionPtr> ExpressionVisitor;
 
-	AstVisitors(ast::Visitor<ScopeState, TypePtr>* typeVisitor,
-	            ast::Visitor<ScopeState, SymbolPtr>* declarationVisitor,
-	            ast::Visitor<ScopeState, ExpressionPtr>* expressionVisitor)
+	scoped_ptr<TypeVisitor> typeVisitor;
+	scoped_ptr<DeclarationVisitor> declarationVisitor;
+	scoped_ptr<ExpressionVisitor> expressionVisitor;
+
+	AstVisitors(TypeVisitor* typeVisitor,
+	            DeclarationVisitor* declarationVisitor,
+	            ExpressionVisitor* expressionVisitor)
 		: typeVisitor(typeVisitor),
 		  declarationVisitor(declarationVisitor),
 		  expressionVisitor(expressionVisitor) {

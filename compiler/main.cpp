@@ -12,8 +12,9 @@
 #include "ast/type.hpp"
 #include "ast/expression.hpp"
 #include "parser/parser.hpp"
-#include "semantic/ast_visitor.hpp"
 #include "semantic/symbol.hpp"
+#include "semantic/ast_visitor.hpp"
+#include "semantic/semantic_visitor.hpp"
 
 using namespace llang;
 
