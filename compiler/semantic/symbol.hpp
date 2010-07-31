@@ -40,12 +40,16 @@ protected:
 	}
 };
 
+typedef shared_ptr<ScopedSymbol> ScopedSymbolPtr;
+
 class Module : public ScopedSymbol {
 public:
 	Module(const ast::Module& astNode, Scope* scope)
 		: ScopedSymbol(Node::MODULE, astNode, astNode.name, scope) {
 	}
 };
+
+typedef shared_ptr<Module> ModulePtr;
 
 class ParameterSymbol;
 typedef shared_ptr<ParameterSymbol> ParameterSymbolPtr;
@@ -84,6 +88,8 @@ public:
 	TypePtr type;
 };
 
+typedef shared_ptr<FunctionSymbol> FunctionSymbolPtr;
+
 class VariableSymbol : public Symbol {
 public:
 	VariableSymbol(const ast::VariableDeclaration& astNode,
@@ -99,6 +105,8 @@ public:
 	TypePtr type;
 	ExpressionPtr initializer;
 };
+
+typedef shared_ptr<VariableSymbol> VariableSymbolPtr;
 
 class ParameterSymbol : public Symbol {
 public:

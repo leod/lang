@@ -36,12 +36,16 @@ public:
 	ExpressionPtr left, right;
 };
 
+typedef shared_ptr<BinaryExpression> BinaryExpressionPtr;
+
 class LiteralNumberExpression : public Expression {
 public:
 	LiteralNumberExpression(const ast::Node& astNode, TypePtr type)
 		: Expression(Node::LITERAL_NUMBER_EXPRESSION, astNode, type) {
 	}
 };
+
+typedef shared_ptr<LiteralNumberExpression> LiteralNumberExpressionPtr;
 
 class BlockExpression : public Expression {
 public:
@@ -55,6 +59,8 @@ public:
 
 	expression_list_t expressions;
 };
+
+typedef shared_ptr<BlockExpression> BlockExpressionPtr;
 
 class IfElseExpression : public Expression {
 public:
@@ -74,12 +80,16 @@ public:
 	ExpressionPtr elseExpression;
 };
 
+typedef shared_ptr<IfElseExpression> IfElseExpressionPtr;
+
 class VoidExpression : public Expression {
 public:
 	VoidExpression(const ast::Node& astNode, TypePtr type)
 		: Expression(Node::VOID_EXPRESSION, astNode, type) {
 	}
 };
+
+typedef shared_ptr<VoidExpression> VoidExpressionPtr;
 
 class SymbolExpression : public Expression {
 public:
@@ -92,6 +102,8 @@ public:
 
 	SymbolPtr symbol;
 };
+
+typedef shared_ptr<SymbolExpression> SymbolExpressionPtr;
 
 class CallExpression : public Expression {
 public:
@@ -106,6 +118,8 @@ public:
 	ExpressionPtr callee;
 	argument_list_t arguments;
 };
+
+typedef shared_ptr<CallExpression> CallExpressionPtr;
 
 } // namespace ast
 } // namespace llang

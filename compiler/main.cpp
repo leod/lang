@@ -40,9 +40,6 @@ int main() {
 	parser::Parser parser(context, filename, ts);
 	scoped_ptr<ast::Module> module(parser.parseModule());
 
-	//ast::PrintVisitor printer;
-	//printer.accept(*module);
-
 	scoped_ptr<semantic::AstVisitors> astVisitors(
 		semantic::makeAstVisitors(context));
 	semantic::ScopeState state;
