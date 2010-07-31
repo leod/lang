@@ -4,6 +4,8 @@
 // see http://www.drdobbs.com/blog/archives/2010/06/the_x_macro.html
 
 #define LLANG_AST_NODE_TABLE(X) \
+	X(DummyNode, DUMMY_NODE) \
+	\
 	X(Module, MODULE) \
 	X(FunctionDeclaration, FUNCTION_DECLARATION) \
 	X(VariableDeclaration, VARIABLE_DECLARATION) \

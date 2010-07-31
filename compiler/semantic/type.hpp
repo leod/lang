@@ -33,6 +33,27 @@ protected:
 	}
 };
 
+// Used only internally
+class UndefinedType : public Type {
+public:
+	UndefinedType(const ast::Node& astNode)
+		: Type(Node::UNDEFINED_TYPE, astNode) {
+	}
+
+	virtual bool equals(const Type*) const { return false; }	
+	virtual std::string name() const { return "<undefined>"; }
+
+	TypePtr singleton() {
+		// Have you ever seen a multithreaded compiler? Huh? HUH?!
+		static ast::DummyNode dummy;
+		static UndefinedType instance(dummy);
+		static shared_ptr<UndefinedType> ptr(&instance);
+		return ptr;
+	}
+};
+
+typedef shared_ptr<UndefinedType> UndefinedTypePtr;
+
 class IntegralType : public Type {
 public:
 	IntegralType(const ast::IntegralType& astNode)
@@ -44,7 +65,6 @@ public:
 		: Type(Node::INTEGRAL_TYPE, astNode),
 		  type(type) {
 	}
-	             
 
 	virtual bool equals(const Type* other) const {
 		const IntegralType* type = other->isA<IntegralType>();
@@ -66,6 +86,8 @@ public:
 
 	const lexer::Token::Type type;
 };
+
+typedef shared_ptr<IntegralType> IntegralTypePtr;
 
 class FunctionType : public Type {
 public:
@@ -121,6 +143,8 @@ public:
 	TypePtr returnType;
 	parameter_type_list_t parameterTypes;	
 };
+
+typedef shared_ptr<FunctionType> FunctionTypePtr;
 
 } // namespace ast
 } // namespace llang

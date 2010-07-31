@@ -7,6 +7,7 @@
 	X(VariableSymbol, VARIABLE_SYMBOL) \
 	X(ParameterSymbol, PARAMETER_SYMBOL) \
 	\
+	X(UndefinedType, UNDEFINED_TYPE) \
 	X(IntegralType, INTEGRAL_TYPE) \
 	X(FunctionType, FUNCTION_TYPE) \
 	\

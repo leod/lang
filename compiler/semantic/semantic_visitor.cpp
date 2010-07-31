@@ -73,6 +73,6 @@ SemanticVisitors* makeSemanticVisitors(Context& context) {
 	return visitors;
 }
 
-} // namespace ast
+} // namespace semantic
 } // namespace llang
 

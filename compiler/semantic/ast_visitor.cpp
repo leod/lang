@@ -77,7 +77,7 @@ protected:
 			std::string expectedType = type->name();
 			std::string gotType = initializer->type->name();
 
-			context.diag.error(variable.location,
+			context.diag.error(variable.location(),
 				"wrong type in initializer of %s: expected '%s', got '%s'",
 				variable.name.c_str(), expectedType.c_str(), gotType.c_str());
 		}
@@ -152,7 +152,7 @@ protected:
 		SymbolPtr symbol = state.scope->lookup(expression.name);
 
 		if (!symbol)
-			context.diag.error(expression.location,
+			context.diag.error(expression.location(),
 			                   "cannot find symbol '%s'",
 			                   expression.name.c_str());
 
@@ -171,7 +171,7 @@ protected:
 			type = parameter->type;
 		}
 		else {
-			context.diag.error(expression.location,
+			context.diag.error(expression.location(),
 			                   "cannot use %s in expression",
 			                   expression.name.c_str());
 		}
@@ -187,12 +187,12 @@ protected:
 
 		if (!type) { 
 			std::string typeName = callee->type->name();
-			context.diag.error(call.location,
+			context.diag.error(call.location(),
 				"can call only functions, not '%s'", typeName.c_str());
 		}
 
 		if (type->parameterTypes.size() != call.arguments.size())
-			context.diag.error(call.location,
+			context.diag.error(call.location(),
 				"wrong number of parameters: expected %d, got %d",
 				type->parameterTypes.size(),
 				call.arguments.size());
@@ -211,7 +211,7 @@ protected:
 					std::string expectedType = (*it2)->name();
 					std::string gotType = argument->type->name();
 
-					context.diag.error(call.location,
+					context.diag.error(call.location(),
 						"wrong type in %d. argument of function call:"
 						"expected '%s', got '%s'",
 						i, expectedType.c_str(), gotType.c_str());
@@ -280,5 +280,5 @@ AstVisitors* makeAstVisitors(Context& context) {
 	return visitors;
 }
 
-} // namespace ast
+} // namespace semantic
 } // namespace llang
