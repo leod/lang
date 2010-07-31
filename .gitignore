@@ -3,3 +3,6 @@ llc
 *.o
 *.swp
 *~
+.deps
+fabricate.py
+fabricate.pyc
