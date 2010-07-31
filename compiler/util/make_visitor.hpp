@@ -21,13 +21,13 @@
 LLANG_VISITOR_TABLE_PARAM(GENERATE_FORWARD_REFERENCE)
 #undef GENERATE_FORWARD_REFERENCE
 
-#define GENERATE_VIRTUAL_METHOD(name, nameCaps) \
-	virtual Result visit(LLANG_VISITOR_TYPE_WRAP_PARAM(name), Param) \
+#define GENERATE_VIRTUAL_METHOD(name_, nameCaps) \
+	virtual Result visit(LLANG_VISITOR_TYPE_WRAP_PARAM(name_), Param) \
 	{ assert(false); }
 
-#define GENERATE_CASE(name, nameCaps) \
+#define GENERATE_CASE(name_, nameCaps) \
 	case LLANG_VISITOR_TYPE_PARAM::nameCaps: \
-		return visit(LLANG_VISITOR_CAST_PARAM(name)(node), param);
+		return visit(LLANG_VISITOR_CAST_PARAM(name_)(node), param);
 
 template <typename Param, typename Result> class Visitor {
 protected:

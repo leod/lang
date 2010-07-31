@@ -10,6 +10,13 @@ struct ScopeState {
 	Scope* scope;
 
 	ScopeState() : scope(0) {}
+
+	ScopeState withScope(Scope* scope) const {
+		ScopeState result = *this;
+		result.scope = scope;
+
+		return result;
+	}
 };
 
 } // namespace ast

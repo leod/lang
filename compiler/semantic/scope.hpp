@@ -19,12 +19,11 @@ public:
 	Scope* parent() { return parent_; }
 	const Scope* parent() const { return parent_; }
 
-private:
 	typedef std::map<identifier_t, SymbolPtr> symbol_map_t;
-
-	Scope* parent_;
-
 	symbol_map_t symbols;
+
+private:
+	Scope* parent_;
 };
 
 } // namespace semantic
