@@ -3,8 +3,8 @@
 
 #include <list>
 #include <cassert>
-#include <boost/shared_ptr.hpp>
 
+#include "util/smart_ptr.hpp"
 #include "ast/node.hpp"
 #include "semantic/node.hpp"
 #include "semantic/type_ptr.hpp"
@@ -24,8 +24,6 @@ protected:
 		: Node(tag, astNode), type(type) {
 	}
 };
-
-typedef boost::shared_ptr<Expression> ExpressionPtr;
 
 class BinaryExpression : public Expression {
 public:

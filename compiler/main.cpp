@@ -2,6 +2,7 @@
 #include <sstream>
 #include <fstream>
 
+#include "util/smart_ptr.hpp"
 #include "common/diagnostics.hpp"
 #include "common/config.hpp"
 #include "common/context.hpp"
@@ -37,12 +38,12 @@ int main() {
 	lexer::TokenStream ts(lexer);
 
 	parser::Parser parser(context, filename, ts);
-	boost::scoped_ptr<ast::Module> module(parser.parseModule());
+	scoped_ptr<ast::Module> module(parser.parseModule());
 
 	//ast::PrintVisitor printer;
 	//printer.accept(*module);
 
-	boost::scoped_ptr<semantic::AstVisitors> visitors(
+	scoped_ptr<semantic::AstVisitors> visitors(
 		semantic::makeAstVisitors(context));
 	semantic::ScopeState state;
 

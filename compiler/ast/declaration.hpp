@@ -3,9 +3,7 @@
 
 #include <list>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
-
+#include "util/smart_ptr.hpp"
 #include "common/identifier.hpp"
 #include "ast/node.hpp"
 
@@ -22,7 +20,7 @@ protected:
 	}
 };
 
-typedef boost::shared_ptr<Declaration> DeclarationPtr;
+typedef shared_ptr<Declaration> DeclarationPtr;
 
 class Module : public Declaration {
 public:
@@ -41,7 +39,7 @@ public:
 class FunctionDeclaration : public Declaration {
 public:
 	struct Parameter {
-		boost::shared_ptr<Type> type; // need shared_ptr for std::list
+		shared_ptr<Type> type; // need shared_ptr for std::list
 		const bool hasName;
 		const identifier_t name;
 
@@ -61,10 +59,10 @@ public:
 
 	virtual ~FunctionDeclaration();
 
-	boost::scoped_ptr<Type> returnType;
+	scoped_ptr<Type> returnType;
 	const identifier_t name;
 	parameter_list_t parameters;	
-	boost::scoped_ptr<Expression> body;	
+	scoped_ptr<Expression> body;	
 };
 
 class VariableDeclaration : public Declaration {
@@ -76,9 +74,9 @@ public:
 
 	virtual ~VariableDeclaration();
 
-	boost::scoped_ptr<Type> type;
+	scoped_ptr<Type> type;
 	const identifier_t name;
-	boost::scoped_ptr<Expression> initializer;
+	scoped_ptr<Expression> initializer;
 };
 
 } // namespace ast
