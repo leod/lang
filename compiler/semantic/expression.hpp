@@ -25,6 +25,18 @@ protected:
 	}
 };
 
+// Used only internally
+class DelayedExpression : public Expression {
+public:
+	DelayedExpression(const ast::Node& astNode, TypePtr type, 
+	                  SymbolPtr delayedSymbol)
+		: Expression(Node::DELAYED_EXPRESSION, astNode, type),
+		  delayedSymbol(delayedSymbol) {
+	}
+	
+	SymbolPtr delayedSymbol;		
+};
+
 class BinaryExpression : public Expression {
 public:
 	BinaryExpression(const ast::Node& astNode, TypePtr type,
