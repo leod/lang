@@ -5,7 +5,6 @@
 namespace llang {
 namespace ast {
 
-
 FunctionDeclaration::Parameter::Parameter(Type* type, 
                                           bool hasName,
                                           const identifier_t& name)

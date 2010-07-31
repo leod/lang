@@ -11,7 +11,7 @@ namespace ast {
 #define LLANG_VISITOR_TYPE_PARAM  Node
 #define LLANG_VISITOR_TAG_PARAM   tag
 
-#include "common/make_visitor.hpp"
+#include "util/make_visitor.hpp"
 
 #undef LLANG_VISITOR_TABLE_PARAM
 #undef LLANG_VISITOR_TYPE_PARAM
