@@ -1,6 +1,8 @@
 #ifndef LLANG_AST_NODE_HPP_INCLUDED
 #define LLANG_AST_NODE_HPP_INCLUDED
 
+#include <cassert>
+
 #include "common/location.hpp"
 #include "ast/node_table.hpp"
 
@@ -18,13 +20,31 @@ public:
 #undef GENERATE_ENUM_ENTRY
 
 	Node(const Tag tag, const Location& location)
-		: tag(tag), location(location) {
+		: tag(tag), location_(location) {
 	}
 
 	virtual ~Node() {}
 	
+	virtual Location location() const {
+		return location_;
+	}
+
 	const Tag tag;
-	const Location location;
+
+private:
+	const Location location_;
+};
+
+class DummyNode : public Node {
+public:	
+	DummyNode()
+		: Node(Node::DUMMY_NODE, Location("", 0, 0)) {
+	}
+
+	virtual Location location() const {
+		assert(false);
+		return Node::location();
+	}
 };
 
 } // namespace ast
