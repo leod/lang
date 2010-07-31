@@ -41,6 +41,13 @@ template <typename T, typename U> shared_ptr<T> isA(shared_ptr<U> p) {
 	return dynamic_pointer_cast<T>(p);
 }
 
+template <typename T, typename U> shared_ptr<T> assumeIsA(shared_ptr<U> p) {
+	shared_ptr<T> t = isA<T>(p);
+	assert(t.get());
+
+	return t;
+}
+
 } // namespace semantic
 } // namespace llang
 

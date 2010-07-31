@@ -35,7 +35,7 @@ public:
 
 AstVisitors* makeAstVisitors(Context&);
 
-} // namespace ast
+} // namespace semantic
 } // namespace llang
 
 #endif

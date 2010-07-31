@@ -12,13 +12,13 @@
 namespace llang {
 namespace semantic {
 
-template <typename Result> class VisitorBase
+template <typename Result> class ASTVisitorBase
 	: public ast::Visitor<ScopeState, Result> {
 protected:
 	AstVisitors* visitors;
 	Context& context;
 
-	VisitorBase(Context& context) : context(context) {}
+	ASTVisitorBase(Context& context) : context(context) {}
 	friend AstVisitors* makeAstVisitors(Context&);
 
 	TypePtr accept(ast::Type& n, const ScopeState& p) {
@@ -34,10 +34,10 @@ protected:
 	}
 };
 
-class TypeVisitor : public VisitorBase<TypePtr> {
+class ASTTypeVisitor : public ASTVisitorBase<TypePtr> {
 private:
-	TypeVisitor(Context& context)
-		: VisitorBase<TypePtr>(context) {}
+	ASTTypeVisitor(Context& context)
+		: ASTVisitorBase<TypePtr>(context) {}
 	friend AstVisitors* makeAstVisitors(Context&);
 
 protected:
@@ -46,15 +46,15 @@ protected:
 	}
 };
 
-class DeclarationVisitor : public VisitorBase<SymbolPtr> {
+class ASTDeclarationVisitor : public ASTVisitorBase<SymbolPtr> {
 private:
-	DeclarationVisitor(Context& context)
-		: VisitorBase<SymbolPtr>(context) {}
+	ASTDeclarationVisitor(Context& context)
+		: ASTVisitorBase<SymbolPtr>(context) {}
 	friend AstVisitors* makeAstVisitors(Context&);
 
 protected:
 	virtual SymbolPtr visit(ast::Module& module, ScopeState state) {
-		Scope* scope = new Scope(0);
+		Scope* scope = new Scope(0); // TODO
 		state.scope = scope;
 
 		shared_ptr<Module> symbol(new Module(module, scope));
@@ -120,10 +120,10 @@ protected:
 // Does nothing more than translate the ast into the semantic tree.
 // Typechecking is done in the second semantic phase.
 // This should allow us to easily deal with forward references.
-class ExpressionVisitor : public VisitorBase<ExpressionPtr> {
+class ASTExpressionVisitor : public ASTVisitorBase<ExpressionPtr> {
 private:
-	ExpressionVisitor(Context& context)
-		: VisitorBase<ExpressionPtr>(context) {}
+	ASTExpressionVisitor(Context& context)
+		: ASTVisitorBase<ExpressionPtr>(context) {}
 	friend AstVisitors* makeAstVisitors(Context&);
 
 protected:
@@ -207,9 +207,10 @@ protected:
 };
 
 AstVisitors* makeAstVisitors(Context& context) {
-	TypeVisitor* typeVisitor = new TypeVisitor(context);
-	DeclarationVisitor* declarationVisitor = new DeclarationVisitor(context);
-	ExpressionVisitor* expressionVisitor = new ExpressionVisitor(context);
+	ASTTypeVisitor* typeVisitor = new ASTTypeVisitor(context);
+	ASTDeclarationVisitor* declarationVisitor =
+		new ASTDeclarationVisitor(context);
+	ASTExpressionVisitor* expressionVisitor = new ASTExpressionVisitor(context);
 
 	AstVisitors* visitors = new AstVisitors(typeVisitor, declarationVisitor,
 	                                        expressionVisitor);
