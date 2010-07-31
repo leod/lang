@@ -2,9 +2,8 @@
 #define LLANG_AST_EXPRESSION_HPP_INCLUDED
 
 #include <list>
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 
+#include "util/smart_ptr.hpp"
 #include "ast/node.hpp"
 
 namespace llang {
@@ -20,7 +19,7 @@ protected:
 	}
 };
 
-typedef boost::shared_ptr<Expression> ExpressionPtr;
+typedef shared_ptr<Expression> ExpressionPtr;
 
 class BinaryExpression : public Expression {
 public:
@@ -40,7 +39,7 @@ public:
 	}
 
 	const Operation operation;
-	boost::scoped_ptr<Expression> left, right;
+	scoped_ptr<Expression> left, right;
 };
 
 class LiteralNumberExpression : public Expression {
@@ -80,9 +79,9 @@ public:
 		  elseExpression(elseExpression) {
 	}
 
-	boost::scoped_ptr<Expression> condition;
-	boost::scoped_ptr<Expression> ifExpression;
-	boost::scoped_ptr<Expression> elseExpression;
+	scoped_ptr<Expression> condition;
+	scoped_ptr<Expression> ifExpression;
+	scoped_ptr<Expression> elseExpression;
 };
 
 class VoidExpression : public Expression {
@@ -112,7 +111,7 @@ public:
 		  callee(callee), arguments(arguments) {
 	}
 	
-	boost::scoped_ptr<Expression> callee;
+	scoped_ptr<Expression> callee;
 	argument_list_t arguments;
 };
 
@@ -123,7 +122,7 @@ public:
 		  declaration(declaration) {
 	}
 
-	boost::scoped_ptr<Declaration> declaration;	
+	scoped_ptr<Declaration> declaration;	
 };
 
 } // namespace ast

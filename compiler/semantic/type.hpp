@@ -4,8 +4,6 @@
 #include <list>
 #include <sstream>
 #include <string>
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include "lexer/token.hpp"
 #include "ast/type.hpp"
@@ -20,10 +18,10 @@ public:
 	// TODO: consider making all types singletons to make
 	//       comparing them easier and faster
 	virtual bool equals(const Type* other) const = 0;
-	bool equals(const boost::scoped_ptr<Type>& other) {
+	bool equals(const scoped_ptr<Type>& other) {
 		return equals(other.get());
 	}
-	bool equals(const boost::shared_ptr<Type>& other) {
+	bool equals(const shared_ptr<Type>& other) {
 		return equals(other.get());
 	}
 

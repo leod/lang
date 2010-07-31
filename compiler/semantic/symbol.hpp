@@ -1,7 +1,7 @@
 #ifndef LLANG_SEMANTIC_SYMBOL_HPP_INCLUDED
 #define LLANG_SEMANTIC_SYMBOL_HPP_INCLUDED
 
-#include <boost/scoped_ptr.hpp>
+#include "util/smart_ptr.hpp"
 
 #include "ast/declaration.hpp"
 #include "semantic/node.hpp"
@@ -28,11 +28,9 @@ protected:
 	}
 };
 
-typedef boost::shared_ptr<Symbol> SymbolPtr;
-
 class ScopedSymbol : public Symbol {
 public:
-	boost::scoped_ptr<Scope> scope;
+	scoped_ptr<Scope> scope;
 
 protected:
 	ScopedSymbol(Node::Tag tag, const ast::Node& astNode,
@@ -50,7 +48,7 @@ public:
 };
 
 class ParameterSymbol;
-typedef boost::shared_ptr<ParameterSymbol> ParameterSymbolPtr;
+typedef shared_ptr<ParameterSymbol> ParameterSymbolPtr;
 
 class FunctionSymbol : public ScopedSymbol {
 public:

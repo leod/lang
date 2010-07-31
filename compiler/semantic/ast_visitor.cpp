@@ -57,7 +57,7 @@ protected:
 		Scope* scope = new Scope(0);
 		state.scope = scope;
 
-		boost::shared_ptr<Module> symbol(new Module(module, scope));
+		shared_ptr<Module> symbol(new Module(module, scope));
 
 		for (auto it = module.declarations.begin();
 		     it != module.declarations.end();
@@ -159,13 +159,13 @@ protected:
 		// TODO: this isn't very good... maybe add a TypePtr in the
 		//       symbol base class?
 		TypePtr type;
-		if (boost::shared_ptr<FunctionSymbol> function =
+		if (shared_ptr<FunctionSymbol> function =
 			isA<FunctionSymbol>(symbol))
 			type = function->type;
-		else if (boost::shared_ptr<VariableSymbol> variable =
+		else if (shared_ptr<VariableSymbol> variable =
 			isA<VariableSymbol>(symbol))
 			type = variable->type;
-		else if (boost::shared_ptr<ParameterSymbol> parameter =
+		else if (shared_ptr<ParameterSymbol> parameter =
 			isA<ParameterSymbol>(symbol))
 			type = parameter->type;
 		else
@@ -180,7 +180,7 @@ protected:
 	                            ScopeState state) {
 		ExpressionPtr callee = accept(*call.callee, state);
 
-		boost::shared_ptr<FunctionType> type = isA<FunctionType>(callee->type);
+		shared_ptr<FunctionType> type = isA<FunctionType>(callee->type);
 
 		if (!type) { 
 			std::string typeName = callee->type->name();

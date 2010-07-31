@@ -11,6 +11,7 @@ namespace llang {
 using boost::scoped_ptr;
 using boost::shared_ptr;
 using boost::static_pointer_cast;
+using boost::dynamic_pointer_cast;
 
 using std::unique_ptr;
 

@@ -1,8 +1,7 @@
 #ifndef LLANG_SEMANTIC_NODE_HPP_INCLUDED
 #define LLANG_SEMANTIC_NODE_HPP_INCLUDED
 
-#include <boost/shared_ptr.hpp>
-
+#include "util/smart_ptr.hpp"
 #include "ast/node.hpp"
 #include "semantic/node_table.hpp"
 
@@ -36,10 +35,8 @@ public:
 	const ast::Node& astNode;
 };
 
-template <typename T, typename U>
-boost::shared_ptr<T> isA(boost::shared_ptr<U> p) {
-	// TODO: use Tag to check type
-	return boost::dynamic_pointer_cast<T>(p);
+template <typename T, typename U> shared_ptr<T> isA(shared_ptr<U> p) {
+	return dynamic_pointer_cast<T>(p);
 }
 
 } // namespace semantic
