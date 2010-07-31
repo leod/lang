@@ -1,7 +1,9 @@
 #include <cassert>
-#include <boost/make_shared.hpp>
 
 #include "ast/print_visitor.hpp"
+#include "ast/type.hpp"
+#include "ast/declaration.hpp"
+#include "ast/expression.hpp"
 #include "semantic/ast_visitor.hpp"
 #include "semantic/symbol.hpp"
 #include "semantic/expression.hpp"

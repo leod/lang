@@ -10,7 +10,6 @@
 */
 
 #include <cassert>
-#include <cstdio>
 
 // Generate forward references
 #define GENERATE_FORWARD_REFERENCE(name, nameInCaps) \
@@ -23,7 +22,7 @@ LLANG_VISITOR_TABLE_PARAM(GENERATE_FORWARD_REFERENCE)
 
 #define GENERATE_CASE(name, nameCaps) \
 	case LLANG_VISITOR_TYPE_PARAM::nameCaps: \
-		return visit(dynamic_cast<name&>(node), param);
+		return visit(static_cast<name&>(node), param);
 
 template <typename Param, typename Result> class Visitor {
 protected:

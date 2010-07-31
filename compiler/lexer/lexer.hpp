@@ -2,7 +2,6 @@
 #define LLANG_LEXER_LEXER_HPP_INCLUDED
 
 #include <string>
-#include <map>
 
 #include "common/context.hpp"
 #include "lexer/token.hpp"

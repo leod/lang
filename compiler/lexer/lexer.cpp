@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include <cassert>
 #include <cctype>
+#include <map>
 
 #include "lexer/lexer.hpp"
 

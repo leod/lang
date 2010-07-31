@@ -4,9 +4,7 @@
 #include <list>
 #include <cassert>
 #include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 
-#include "common/identifier.hpp"
 #include "ast/node.hpp"
 #include "semantic/node.hpp"
 #include "semantic/type_ptr.hpp"
