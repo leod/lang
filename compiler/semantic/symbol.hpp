@@ -28,6 +28,15 @@ protected:
 	}
 };
 
+// Used only internally
+class DelayedSymbol : public Symbol {
+public:
+	DelayedSymbol(const ast::Node& astNode, const identifier_t& name,
+	              Scope* declarationScope)
+		: Symbol(Node::DELAYED_SYMBOL, astNode, name, declarationScope) {
+	}
+};
+
 class ScopedSymbol : public Symbol {
 public:
 	scoped_ptr<Scope> scope;

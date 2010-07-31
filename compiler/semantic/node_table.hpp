@@ -2,15 +2,18 @@
 #define LLANG_SEMANTIC_NODE_TABLE_HPP_INCLUDED
 
 #define LLANG_SEMANTIC_NODE_TABLE(X) \
+	X(DelayedSymbol, DELAYED_SYMBOL) \
 	X(Module, MODULE) \
 	X(FunctionSymbol, FUNCTION_SYMBOL) \
 	X(VariableSymbol, VARIABLE_SYMBOL) \
 	X(ParameterSymbol, PARAMETER_SYMBOL) \
 	\
+	X(DelayedType, DELAYED_TYPE) \
 	X(UndefinedType, UNDEFINED_TYPE) \
 	X(IntegralType, INTEGRAL_TYPE) \
 	X(FunctionType, FUNCTION_TYPE) \
 	\
+	X(DelayedExpression, DELAYED_EXPRESSION) \
 	X(BinaryExpression, BINARY_EXPRESSION) \
 	X(LiteralNumberExpression, LITERAL_NUMBER_EXPRESSION) \
 	X(BlockExpression, BLOCK_EXPRESSION) \

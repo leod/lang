@@ -9,6 +9,7 @@
 #include "ast/type.hpp"
 #include "semantic/node.hpp"
 #include "semantic/type_ptr.hpp"
+#include "semantic/symbol_ptr.hpp"
 
 namespace llang {
 namespace semantic {
@@ -34,6 +35,20 @@ protected:
 };
 
 // Used only internally
+class DelayedType : public Type {
+public:
+	DelayedType(const ast::Node& node, SymbolPtr delayedSymbol)
+		: Type(Node::DELAYED_TYPE, node),
+		  delayedSymbol(delayedSymbol) {
+	}
+
+	virtual bool equals(const Type*) const { return false; }	
+	virtual std::string name() const { return "<undefined>"; }
+
+	SymbolPtr delayedSymbol;
+};
+
+// Used only internally
 class UndefinedType : public Type {
 public:
 	UndefinedType(const ast::Node& astNode)
@@ -43,7 +58,7 @@ public:
 	virtual bool equals(const Type*) const { return false; }	
 	virtual std::string name() const { return "<undefined>"; }
 
-	TypePtr singleton() {
+	static TypePtr singleton() {
 		// Have you ever seen a multithreaded compiler? Huh? HUH?!
 		static ast::DummyNode dummy;
 		static UndefinedType instance(dummy);
