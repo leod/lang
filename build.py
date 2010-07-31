@@ -10,7 +10,9 @@ sources = ['parser/parser',
 		   'semantic/ast_visitor',
 		   'semantic/scope',
 		   'lexer/token',
-		   'lexer/lexer']
+		   'lexer/lexer',
+		   'ast/declaration',
+		   'ast/print_visitor']
 
 cflags = '-Icompiler -lstdc++ -Wall -g -pedantic -Wextra -Wformat -Wconversion -std=c++0x -Wfatal-errors'.split()
 

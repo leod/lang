@@ -8,11 +8,12 @@
 
 #include "common/identifier.hpp"
 #include "ast/node.hpp"
-#include "ast/type.hpp"
-#include "ast/expression.hpp"
 
 namespace llang {
 namespace ast {
+
+class Type;
+class Expression;
 
 class Declaration : public Node {
 protected:
@@ -57,13 +58,9 @@ public:
 	                    Type* returnType,
 	                    const identifier_t& name,
 	                    parameter_list_t& parameters,
-	                    Expression* body)
-		: Declaration(Node::FUNCTION_DECLARATION, location),
-		  returnType(returnType),
-		  name(name),
-		  parameters(parameters),
-		  body(body) {
-	}
+	                    Expression* body);
+
+	virtual ~FunctionDeclaration();
 
 	boost::scoped_ptr<Type> returnType;
 	const identifier_t name;
@@ -76,12 +73,9 @@ public:
 	VariableDeclaration(const Location& location,
 	                    Type* type,
 	                    const identifier_t& name,
-	                    Expression* initializer)
-		: Declaration(Node::VARIABLE_DECLARATION, location),
-		  type(type),
-		  name(name),
-		  initializer(initializer) {
-	}
+	                    Expression* initializer);
+
+	virtual ~VariableDeclaration();
 
 	boost::scoped_ptr<Type> type;
 	const identifier_t name;

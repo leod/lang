@@ -3,11 +3,18 @@
 
 #include "common/context.hpp"
 #include "lexer/token_stream.hpp"
-#include "ast/declaration.hpp"
-#include "ast/type.hpp"
-#include "ast/expression.hpp"
 
 namespace llang {
+
+namespace ast {
+
+class Type;
+class Declaration;
+class Module;
+class Expression;
+
+} // namespace ast
+
 namespace parser {
 
 class Parser {

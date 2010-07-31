@@ -2,7 +2,6 @@
 #define LLANG_SEMANTIC_SCOPE_HPP_INCLUDED
 
 #include <map>
-#include <utility>
 
 #include "common/identifier.hpp"
 #include "semantic/symbol_ptr.hpp"

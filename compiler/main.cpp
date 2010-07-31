@@ -9,6 +9,8 @@
 #include "lexer/token_stream.hpp"
 #include "ast/print_visitor.hpp"
 #include "ast/declaration.hpp"
+#include "ast/type.hpp"
+#include "ast/expression.hpp"
 #include "parser/parser.hpp"
 #include "semantic/ast_visitor.hpp"
 #include "semantic/symbol.hpp"

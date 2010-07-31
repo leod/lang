@@ -8,6 +8,7 @@
 #include "semantic/scope.hpp"
 #include "semantic/type_ptr.hpp"
 #include "semantic/symbol_ptr.hpp"
+#include "semantic/expression_ptr.hpp"
 
 namespace llang {
 namespace semantic {

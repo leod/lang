@@ -1,5 +1,8 @@
 #include <cstdarg> 
 
+#include "ast/type.hpp"
+#include "ast/declaration.hpp"
+#include "ast/expression.hpp"
 #include "parser/parser.hpp"
 
 namespace llang {

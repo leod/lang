@@ -32,7 +32,6 @@ public:
 		return dynamic_cast<const T*>(this);
 	}
 
-
 	const Tag tag;
 	const ast::Node& astNode;
 };
