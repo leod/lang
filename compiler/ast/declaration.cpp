@@ -5,6 +5,14 @@
 namespace llang {
 namespace ast {
 
+
+FunctionDeclaration::Parameter::Parameter(Type* type, 
+                                          bool hasName,
+                                          const identifier_t& name)
+	: type(type), hasName(hasName), name(name) {}
+
+FunctionDeclaration::Parameter::~Parameter() {}
+
 FunctionDeclaration::FunctionDeclaration(const Location& location,
                                          Type* returnType,
                                          const identifier_t& name,
