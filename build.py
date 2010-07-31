@@ -2,7 +2,7 @@
 
 from fabricate import *
 
-setup(dirs=['compiler'])
+setup(dirs=['.', 'compiler', '.obj'])
 
 sources = ['parser/parser',
            'common/diagnostics',
@@ -12,13 +12,13 @@ sources = ['parser/parser',
 		   'lexer/token',
 		   'lexer/lexer',
 		   'ast/declaration',
-		   'ast/print_visitor']
+		   'ast/print_visitor',
+		   'semantic/semantic_visitor']
 
 cflags = '-Icompiler -lstdc++ -Wall -g -pedantic -Wextra -Wformat -Wconversion -std=c++0x'.split()
 
 def path_to_object_file(path):
 	return '.obj/' + path.replace('/', '_') + '.o'
-
 
 def build():
     compile()

@@ -126,6 +126,9 @@ protected:
 	}
 };
 
+// Does nothing more than translate the ast into the semantic tree.
+// Typechecking is done in the second semantic phase.
+// This should allow us to easily deal with forward references.
 class ExpressionVisitor : public VisitorBase<ExpressionPtr> {
 private:
 	ExpressionVisitor(Context& context)
@@ -138,91 +141,39 @@ protected:
 		ExpressionPtr left = accept(*expression.left, state);
 		ExpressionPtr right = accept(*expression.right, state);
 
-		// TODO: later we'll want to do implicit casts here, probably
-		if (!left->type->equals(right->type.get())) assert(false);
-
-		return ExpressionPtr(new BinaryExpression(expression, left->type,
+		return ExpressionPtr(new BinaryExpression(expression,
+		                                          UndefinedType::singleton(),
 		                                          left, right));
 	}
 
-	virtual ExpressionPtr visit(ast::IdentifierExpression& expression,
-	                            ScopeState state) {
-		// TODO: will probably need a second pass to handle forward refs
+	virtual ExpressionPtr visit(ast::IdentifierExpression& identifier,
+	                            ScopeState) {
+		// Delay looking up the symbol to the next semantic phase
 
-		SymbolPtr symbol = state.scope->lookup(expression.name);
-
-		if (!symbol)
-			context.diag.error(expression.location(),
-			                   "cannot find symbol '%s'",
-			                   expression.name.c_str());
-
-		// TODO: this isn't very good... maybe add a TypePtr in the
-		//       symbol base class?
-		TypePtr type;
-		if (shared_ptr<FunctionSymbol> function = isA<FunctionSymbol>(symbol)) {
-			type = function->type;
-		}
-		else if (shared_ptr<VariableSymbol> variable =
-			isA<VariableSymbol>(symbol)) {
-			type = variable->type;
-		}
-		else if (shared_ptr<ParameterSymbol> parameter =
-			isA<ParameterSymbol>(symbol)) {
-			type = parameter->type;
-		}
-		else {
-			context.diag.error(expression.location(),
-			                   "cannot use %s in expression",
-			                   expression.name.c_str());
-		}
-
-		return ExpressionPtr(new SymbolExpression(expression, type, symbol));
+		SymbolPtr symbol(new DelayedSymbol(identifier, identifier.name, 0));
+		TypePtr type(new DelayedType(identifier, symbol));
+		ExpressionPtr expression(
+			new DelayedExpression(identifier, type, symbol));
+     
+		return expression;
 	}
 
 	virtual ExpressionPtr visit(ast::CallExpression& call,
 	                            ScopeState state) {
 		ExpressionPtr callee = accept(*call.callee, state);
 
-		shared_ptr<FunctionType> type = isA<FunctionType>(callee->type);
-
-		if (!type) { 
-			std::string typeName = callee->type->name();
-			context.diag.error(call.location(),
-				"can call only functions, not '%s'", typeName.c_str());
-		}
-
-		if (type->parameterTypes.size() != call.arguments.size())
-			context.diag.error(call.location(),
-				"wrong number of parameters: expected %d, got %d",
-				type->parameterTypes.size(),
-				call.arguments.size());
-
 		CallExpression::argument_list_t arguments;
 
-		{
-			size_t i = 0;
-			auto it1 = call.arguments.begin();
-			auto it2 = type->parameterTypes.begin();
-
-			for (; it1 != call.arguments.end(); ++it1, ++it2, ++i) {
-				ExpressionPtr argument(accept(**it1, state));
-
-				if (!argument->type->equals(*it2)) {
-					std::string expectedType = (*it2)->name();
-					std::string gotType = argument->type->name();
-
-					context.diag.error(call.location(),
-						"wrong type in %d. argument of function call:"
-						"expected '%s', got '%s'",
-						i, expectedType.c_str(), gotType.c_str());
-				}
-
-				arguments.push_back(argument);		
-			}
+		for (auto it = call.arguments.begin();
+			 it != call.arguments.end();
+			 ++it) {
+			ExpressionPtr argument(accept(**it, state));
+			arguments.push_back(argument);		
 		}
 
 		return ExpressionPtr(
-			new CallExpression(call, type->returnType, callee, arguments));
+			new CallExpression(call, UndefinedType::singleton(), callee,
+			                   arguments));
 	}
 
 	virtual ExpressionPtr visit(ast::BlockExpression& block,
@@ -234,10 +185,9 @@ protected:
 			expressions.push_back(accept(**it, state));
 		}
 
-		TypePtr type = expressions.size() ? expressions.back()->type
-			: TypePtr(new IntegralType(block, lexer::Token::KEYWORD_VOID));
-
-		return ExpressionPtr(new BlockExpression(block, type, expressions));
+		return ExpressionPtr(new BlockExpression(block,
+		                                         UndefinedType::singleton(),
+		                                         expressions));
 	}
 
 	virtual ExpressionPtr visit(ast::LiteralNumberExpression& literal,
