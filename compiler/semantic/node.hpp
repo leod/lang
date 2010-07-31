@@ -35,6 +35,8 @@ public:
 	const ast::Node& astNode;
 };
 
+typedef shared_ptr<Node> NodePtr;
+
 template <typename T, typename U> shared_ptr<T> isA(shared_ptr<U> p) {
 	return dynamic_pointer_cast<T>(p);
 }
