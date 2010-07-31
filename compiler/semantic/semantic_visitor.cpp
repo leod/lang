@@ -37,7 +37,7 @@ private:
 	friend SemanticVisitors* makeSemanticVisitors(Context&);
 
 protected:
-}
+};
 
 class SymbolVisitor : public VisitorBase<SymbolPtr> {
 private:
