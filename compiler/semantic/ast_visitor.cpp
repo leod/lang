@@ -73,15 +73,6 @@ protected:
 		TypePtr type = accept(*variable.type, state);
 		ExpressionPtr initializer = accept(*variable.initializer, state);
 
-		if (!initializer->type->equals(type)) {
-			std::string expectedType = type->name();
-			std::string gotType = initializer->type->name();
-
-			context.diag.error(variable.location(),
-				"wrong type in initializer of %s: expected '%s', got '%s'",
-				variable.name.c_str(), expectedType.c_str(), gotType.c_str());
-		}
-		
 		SymbolPtr symbol(new VariableSymbol(variable, state.scope, type,
 		                                    initializer));
 
