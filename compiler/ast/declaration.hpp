@@ -47,9 +47,8 @@ public:
 
 		Parameter(Type* type, 
 		          bool hasName,
-		          const identifier_t& name)
-			: type(type), hasName(hasName), name(name) {
-		}
+		          const identifier_t& name);
+		~Parameter();
 	};
 
 	typedef std::list<Parameter> parameter_list_t;
