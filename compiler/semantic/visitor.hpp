@@ -2,8 +2,11 @@
 #define LLANG_SEMANTIC_VISITOR_HPP_INCLUDED
 
 #include "util/smart_ptr.hpp"
-#include "semantic/node.hpp"
 #include "semantic/node_table.hpp"
+#include "semantic/node.hpp"
+#include "semantic/type.hpp"
+#include "semantic/symbol.hpp"
+#include "semantic/expression.hpp"
 
 namespace llang {
 namespace semantic {
