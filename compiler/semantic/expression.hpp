@@ -85,7 +85,7 @@ class SymbolExpression : public Expression {
 public:
 	SymbolExpression(const ast::Node& astNode, TypePtr type, 
 	                 SymbolPtr symbol)
-		: Expression(Node::IDENTIFIER_EXPRESSION, astNode, type),
+		: Expression(Node::SYMBOL_EXPRESSION, astNode, type),
 		  symbol(symbol) {
 		assert(symbol);
 	}

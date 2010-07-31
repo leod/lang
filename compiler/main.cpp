@@ -43,10 +43,14 @@ int main() {
 	//ast::PrintVisitor printer;
 	//printer.accept(*module);
 
-	scoped_ptr<semantic::AstVisitors> visitors(
+	scoped_ptr<semantic::AstVisitors> astVisitors(
 		semantic::makeAstVisitors(context));
 	semantic::ScopeState state;
 
 	semantic::SymbolPtr semModule(
-		visitors->declarationVisitor->accept(*module, state));
+		astVisitors->declarationVisitor->accept(*module, state));
+
+	scoped_ptr<semantic::SemanticVisitors> semanticVisitors(
+		semantic::makeSemanticVisitors(context));
+	semModule = semanticVisitors->symbolVisitor->accept(semModule, state);
 }

@@ -159,19 +159,22 @@ protected:
 		// TODO: this isn't very good... maybe add a TypePtr in the
 		//       symbol base class?
 		TypePtr type;
-		if (shared_ptr<FunctionSymbol> function =
-			isA<FunctionSymbol>(symbol))
+		if (shared_ptr<FunctionSymbol> function = isA<FunctionSymbol>(symbol)) {
 			type = function->type;
+		}
 		else if (shared_ptr<VariableSymbol> variable =
-			isA<VariableSymbol>(symbol))
+			isA<VariableSymbol>(symbol)) {
 			type = variable->type;
+		}
 		else if (shared_ptr<ParameterSymbol> parameter =
-			isA<ParameterSymbol>(symbol))
+			isA<ParameterSymbol>(symbol)) {
 			type = parameter->type;
-		else
+		}
+		else {
 			context.diag.error(expression.location,
 			                   "cannot use %s in expression",
 			                   expression.name.c_str());
+		}
 
 		return ExpressionPtr(new SymbolExpression(expression, type, symbol));
 	}
