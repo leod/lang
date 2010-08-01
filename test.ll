@@ -1,8 +1,1 @@
-// ab c d de f 
-
-fn i32 x(i32 a, void z) = {
-	fn void foo() = void;
-	l + l;
-
-	var void l = foo();
-}
+fn i32 fac(i32 n) = if (n = 0) 1 else n * fac(n - 1)

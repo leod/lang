@@ -37,6 +37,8 @@ public:
 	}
 };
 
+typedef shared_ptr<DelayedSymbol> DelayedSymbolPtr;
+
 class ScopedSymbol : public Symbol {
 public:
 	scoped_ptr<Scope> scope;
