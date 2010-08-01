@@ -1,1 +1,2 @@
-fn i32 main() = 1 + 1 + 3;
+fn i32 foo() = foo();
+fn i32 main() = foo();

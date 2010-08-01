@@ -142,9 +142,42 @@ public:
 
 protected:
 	virtual Value* visit(CallExpressionPtr expression, ScopeState state) {
-		// TODO
-		assert(false);
+		if (SymbolExpressionPtr callee =
+				isA<SymbolExpression>(expression->callee)) {
+			if (FunctionSymbolPtr function =
+					isA<FunctionSymbol>(SymbolPtr(callee->symbol))) {
+				Function* llvmFunction = module->getFunction(function->name);
+				assert(llvmFunction);
+
+				std::vector<Value*> arguments;
+				for (auto it = expression->arguments.begin();
+				     it != expression->arguments.end();
+				     ++it) {
+					arguments.push_back(accept(*it, state));
+				}
+
+				return builder.CreateCall(llvmFunction, arguments.begin(),
+				                          arguments.end(), "calltmp");
+			}
+			else assert(false); // TODO
+		}
+		else assert(false); // TODO
 	}
+
+	virtual Value* visit(VoidExpressionPtr, ScopeState) {
+		return 0;
+	}
+
+	virtual Value* visit(BlockExpressionPtr block, ScopeState state) {
+		Value* value = 0;
+		for (auto it = block->expressions.begin();
+		     it != block->expressions.end();
+		     ++it) {
+			value = accept(*it, state);	
+		}
+
+		return value;
+	}		
 		
 	virtual Value* visit(LiteralNumberExpressionPtr expression, ScopeState) {
 		return ConstantInt::get(llvmContext,
@@ -177,7 +210,7 @@ protected:
 Codegen::Impl::Impl(Context& context, ModulePtr moduleSymbol)
 	: llvmContext(),
 	  module(new llvm::Module(llvm::StringRef("test"), llvmContext)),
-      builder(llvmContext),
+	  builder(llvmContext),
 	  typeVisitor(new TypeVisitor(*this, context, module.get(), builder)),
 	  symbolVisitor(new SymbolVisitor(*this, context, module.get(), builder)),
 	  expressionVisitor(new ExpressionVisitor(*this, context, module.get(),
