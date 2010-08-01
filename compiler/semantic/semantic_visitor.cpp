@@ -229,6 +229,7 @@ protected:
 		acceptOn(binary->left, state);
 		acceptOn(binary->right, state);
 
+		// TODO
 		if (!binary->left->type->equals(binary->right->type))
 			context.diag.error(binary->astNode.location(),
 				"'%s' and '%s' are not the same type in binary expression",
@@ -238,6 +239,22 @@ protected:
 		binary->type = binary->left->type;
 
 		return binary;
+	}
+
+	virtual ExpressionPtr visit(IfElseExpressionPtr ifElse, ScopeState state) {
+		acceptOn(ifElse->condition, state);
+		acceptOn(ifElse->ifExpression, state);
+		acceptOn(ifElse->elseExpression, state);
+
+		// TODO
+		if (!ifElse->ifExpression->type->equals(ifElse->elseExpression->type))
+			context.diag.error(ifElse->astNode.location(),
+				"type of if and else expression need to be equivalent: "
+				"'%s' vs '%s'",
+				ifElse->ifExpression->type->name().c_str(),
+				ifElse->elseExpression->type->name().c_str());
+
+		return ifElse;
 	}
 };
 

@@ -194,20 +194,31 @@ protected:
 		return ExpressionPtr(new LiteralNumberExpression(literal, type));
 	}
 
-	virtual ExpressionPtr visit(ast::VoidExpression& voidExpression, ScopeState) {
+	virtual ExpressionPtr visit(ast::VoidExpression& voidExpression,
+	                            ScopeState) {
 		TypePtr type(new IntegralType(voidExpression,
 		                              lexer::Token::KEYWORD_VOID));
 		return ExpressionPtr(new VoidExpression(voidExpression, type));
 	}
 
 	virtual ExpressionPtr visit(ast::DeclarationExpression& declaration,
-                              ScopeState state) {
+                                ScopeState state) {
 		state.scope->addSymbol(accept(*declaration.declaration, state));
 
 		TypePtr type(new IntegralType(declaration,
 		                              lexer::Token::KEYWORD_VOID));
 		return ExpressionPtr(new VoidExpression(declaration, type));
 	}	
+
+	virtual ExpressionPtr visit(ast::IfElseExpression& ifElse,
+	                            ScopeState state) {
+		return ExpressionPtr(
+			new IfElseExpression(ifElse,
+			                     UndefinedType::singleton(),
+			                     accept(*ifElse.condition, state),
+			                     accept(*ifElse.ifExpression, state),
+			                     accept(*ifElse.elseExpression, state)));
+	}
 };
 
 AstVisitors* makeAstVisitors(Context& context) {
