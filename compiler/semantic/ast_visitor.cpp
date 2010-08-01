@@ -169,6 +169,9 @@ protected:
 
 	virtual ExpressionPtr visit(ast::BlockExpression& block,
 	                            ScopeState state) {
+		Scope* scope = new Scope(state.scope); // TODO
+		state.scope = scope;
+
 		BlockExpression::expression_list_t expressions;
 		for (auto it = block.expressions.begin();
 		     it != block.expressions.end();
@@ -178,6 +181,7 @@ protected:
 
 		return ExpressionPtr(new BlockExpression(block,
 		                                         UndefinedType::singleton(),
+		                                         scope,
 		                                         expressions));
 	}
 

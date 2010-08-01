@@ -61,8 +61,7 @@ public:
 	static TypePtr singleton() {
 		// Have you ever seen a multithreaded compiler? Huh? HUH?!
 		static ast::DummyNode dummy;
-		static UndefinedType instance(dummy);
-		static shared_ptr<UndefinedType> ptr(&instance);
+		static shared_ptr<UndefinedType> ptr(new UndefinedType(dummy));
 		return ptr;
 	}
 };

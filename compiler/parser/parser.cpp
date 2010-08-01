@@ -1,4 +1,5 @@
 #include <cstdarg> 
+#include <cstdio>
 
 #include "ast/type.hpp"
 #include "ast/declaration.hpp"

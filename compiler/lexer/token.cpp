@@ -21,8 +21,8 @@ const char* typeToStringArray[] =
 	  "fn",
 	  "var",
 	  "if",
-	  "i32",
 	  "else",
+	  "i32",
 	  "void"
 	};
 

@@ -37,6 +37,8 @@ public:
 	SymbolPtr delayedSymbol;		
 };
 
+typedef shared_ptr<DelayedExpression> DelayedExpressionPtr;
+
 class BinaryExpression : public Expression {
 public:
 	BinaryExpression(const ast::Node& astNode, TypePtr type,
@@ -64,11 +66,12 @@ public:
 	typedef std::list<ExpressionPtr> expression_list_t;
 
 	BlockExpression(const ast::Node& astNode, TypePtr type,
-	                const expression_list_t& expressions)
+	                Scope* scope, const expression_list_t& expressions)
 		: Expression(Node::BLOCK_EXPRESSION, astNode, type),
-		  expressions(expressions) {
+		  scope(scope), expressions(expressions) {
 	}
 
+	scoped_ptr<Scope> scope;
 	expression_list_t expressions;
 };
 
