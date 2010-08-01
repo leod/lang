@@ -3,6 +3,7 @@
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 
 #include <utility>
 
@@ -10,6 +11,7 @@ namespace llang {
 
 using boost::scoped_ptr;
 using boost::shared_ptr;
+using boost::weak_ptr;
 using boost::static_pointer_cast;
 using boost::dynamic_pointer_cast;
 

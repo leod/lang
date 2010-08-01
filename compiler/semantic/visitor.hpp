@@ -27,7 +27,7 @@ namespace semantic {
 #undef LLANG_VISITOR_CAST_PARAM
 #undef LLANG_VISITOR_MEMBER_PARAM
 
-} // namespace ast
+} // namespace semantic
 } // namespace llang
 
 #endif

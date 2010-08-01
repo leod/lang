@@ -124,7 +124,7 @@ public:
 		assert(symbol);
 	}
 
-	SymbolPtr symbol;
+	weak_ptr<Symbol> symbol;
 };
 
 typedef shared_ptr<SymbolExpression> SymbolExpressionPtr;
@@ -138,14 +138,14 @@ public:
 		: Expression(Node::CALL_EXPRESSION, astNode, type),
 		  callee(callee), arguments(arguments) {
 	}
-	
+
 	ExpressionPtr callee;
 	argument_list_t arguments;
 };
 
 typedef shared_ptr<CallExpression> CallExpressionPtr;
 
-} // namespace ast
+} // namespace semantic
 } // namespace llang
 
 #endif
