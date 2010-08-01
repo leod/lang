@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <stdexcept>
 
 #include "util/smart_ptr.hpp"
 #include "common/diagnostics.hpp"
@@ -19,12 +20,23 @@
 
 using namespace llang;
 
-int main() {
-	std::string filename = "test.ll";
+int main(int argc, const char** argv) {
+	std::string filename;
+	if (argc == 1)
+		filename = "test.ll";
+	else if (argc == 2)
+		filename = argv[1];
+	else
+		throw std::runtime_error("wrong number of parameters");
+
 	std::string code;
 
 	{
 		std::fstream ifs(filename.c_str());
+
+		if (ifs.fail())
+			throw std::runtime_error("couldn't read file " + filename);
+
 		std::stringstream oss;
 		oss << ifs.rdbuf();
 		code = oss.str();
