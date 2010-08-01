@@ -80,6 +80,9 @@ protected:
 		case ast::IntegralType::I32:
 			return llvm::Type::getInt32Ty(llvmContext);
 
+		case ast::IntegralType::VOID:
+			return llvm::Type::getVoidTy(llvmContext);
+
 		default:
 			assert(false);
 		}
@@ -150,8 +153,12 @@ protected:
 		BasicBlock* block = BasicBlock::Create(llvmContext, "entry", f);
 		builder.SetInsertPoint(block);
 
-		if (Value* returnValue = accept(function->body, state)) {
-			builder.CreateRet(returnValue);
+		IntegralTypePtr returnType = isA<IntegralType>(function->returnType);
+		
+		Value* bodyValue = accept(function->body, state);
+
+		if (!returnType || returnType->type != ast::IntegralType::VOID) {
+			builder.CreateRet(bodyValue);
 			llvm::verifyFunction(*f);
 		}
 	}
