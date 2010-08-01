@@ -13,9 +13,11 @@ sources = ['parser/parser',
 		   'lexer/lexer',
 		   'ast/declaration',
 		   'ast/print_visitor',
-		   'semantic/semantic_visitor']
+		   'semantic/semantic_visitor',
+		   'codegen/llvm/codegen']
 
-cflags = '-Icompiler -lstdc++ -Wall -g -pedantic -Wextra -Wformat -Wconversion -std=c++0x'.split()
+cflags = '-Icompiler -Wall -g -pedantic -Wextra -Wformat -Wconversion -std=c++0x'.split()
+lflags = '-L/usr/lib/llvm -lstdc++ -lLLVM-2.7'.split()
 
 def path_to_object_file(path):
 	return '.obj/' + path.replace('/', '_') + '.o'
@@ -30,7 +32,7 @@ def compile():
 
 def link():
     objects = [path_to_object_file(s) for s in sources]
-    run('gcc', '-o', 'llc', objects, cflags)
+    run('gcc', '-o', 'llc', objects, lflags)
 
 def clean():
     autoclean()

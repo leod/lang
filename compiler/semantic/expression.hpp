@@ -6,6 +6,7 @@
 
 #include "util/smart_ptr.hpp"
 #include "ast/node.hpp"
+#include "ast/expression.hpp"
 #include "semantic/node.hpp"
 #include "semantic/type_ptr.hpp"
 #include "semantic/symbol_ptr.hpp"
@@ -41,12 +42,13 @@ typedef shared_ptr<DelayedExpression> DelayedExpressionPtr;
 
 class BinaryExpression : public Expression {
 public:
-	BinaryExpression(const ast::Node& astNode, TypePtr type,
+	BinaryExpression(const ast::BinaryExpression& astNode, TypePtr type,
 	                 ExpressionPtr left, ExpressionPtr right)
 		: Expression(Node::BINARY_EXPRESSION, astNode, type),
-		  left(left), right(right) {
+		  operation(astNode.operation), left(left), right(right) {
 	}
 
+	ast::BinaryExpression::Operation operation;
 	ExpressionPtr left, right;
 };
 
@@ -54,9 +56,13 @@ typedef shared_ptr<BinaryExpression> BinaryExpressionPtr;
 
 class LiteralNumberExpression : public Expression {
 public:
-	LiteralNumberExpression(const ast::Node& astNode, TypePtr type)
-		: Expression(Node::LITERAL_NUMBER_EXPRESSION, astNode, type) {
+	LiteralNumberExpression(const ast::LiteralNumberExpression& astNode,
+	                        TypePtr type)
+		: Expression(Node::LITERAL_NUMBER_EXPRESSION, astNode, type),
+		  number(astNode.number) {
 	}
+
+	int_t number;
 };
 
 typedef shared_ptr<LiteralNumberExpression> LiteralNumberExpressionPtr;
