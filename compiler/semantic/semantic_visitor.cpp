@@ -118,6 +118,16 @@ protected:
 		acceptOn(function->returnType, state);
 		acceptOn(function->body, state.withScope(function->scope.get()));
 
+		// TODO
+		if (!function->body->type->equals(function->returnType)) {
+			context.diag.error(function->body->astNode.location(),
+				"wrong type in function body expression of '%s': "
+				"expected '%s', got '%s'",
+				function->name.c_str(),
+				function->returnType->name().c_str(),
+				function->body->type->name().c_str());
+		}
+
 		return function;
 	}
 
@@ -253,6 +263,8 @@ protected:
 				"'%s' vs '%s'",
 				ifElse->ifExpression->type->name().c_str(),
 				ifElse->elseExpression->type->name().c_str());
+
+		ifElse->type = ifElse->ifExpression->type;
 
 		return ifElse;
 	}
