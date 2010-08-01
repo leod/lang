@@ -115,7 +115,31 @@ protected:
 		}
 	}
 
+	struct SaveInsertPoint {
+		SaveInsertPoint(IRBuilder<>& builder)
+			: builder(builder),
+			  block(builder.GetInsertBlock()),
+			  point(builder.GetInsertPoint()) {
+		}
+
+		~SaveInsertPoint() {
+			builder.SetInsertPoint(block, point);
+		}
+		
+		IRBuilder<>& builder;
+		BasicBlock* block;
+		BasicBlock::iterator point;
+	};
+
 	virtual void visit(FunctionSymbolPtr function, ScopeState state) {
+		// Need to save insert point as we might already be generating
+		// a function right now!
+		SaveInsertPoint saveInsertPoint(builder);
+		
+		// First check if we generated this function already
+		// (due to forward references)
+		if (module->getFunction(function->name)) return;
+
 		const llvm::FunctionType* type =
 			llvm::cast<llvm::FunctionType>(accept(function->type, state));
 		llvm::Function* f = Function::Create(type,
@@ -140,13 +164,27 @@ public:
 		: VisitorBase<Value*>(visitors, context, module, builder) {
 	}
 
+private:
+	Function* getFunction(FunctionSymbolPtr function, ScopeState state) {
+		if (Function* llvmFunction = module->getFunction(function->name)) {
+			return llvmFunction;
+		}
+
+		accept(function, state);
+
+		Function* llvmFunction = module->getFunction(function->name);
+		assert(llvmFunction);
+
+		return llvmFunction;
+	}
+
 protected:
 	virtual Value* visit(CallExpressionPtr expression, ScopeState state) {
 		if (SymbolExpressionPtr callee =
 				isA<SymbolExpression>(expression->callee)) {
 			if (FunctionSymbolPtr function =
 					isA<FunctionSymbol>(SymbolPtr(callee->symbol))) {
-				Function* llvmFunction = module->getFunction(function->name);
+				Function* llvmFunction = getFunction(function, state);
 				assert(llvmFunction);
 
 				std::vector<Value*> arguments;
