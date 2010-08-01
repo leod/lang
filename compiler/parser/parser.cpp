@@ -17,6 +17,7 @@ Module* Parser::parseModule() {
 
 	while (ts.get().type != Token::END_OF_FILE) {
 		declarations.push_back(DeclarationPtr(parseDeclaration()));
+		assumeNext(Token::SEMICOLON);
 	}
 
 	return new Module(Location(moduleName, 1, 1), moduleName, declarations);

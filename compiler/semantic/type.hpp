@@ -189,7 +189,7 @@ public:
 
 typedef shared_ptr<ArrayType> ArrayTypePtr;
 
-} // namespace ast
+} // namespace semantic
 } // namespace llang
 
 #endif
