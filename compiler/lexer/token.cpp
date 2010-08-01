@@ -17,13 +17,16 @@ const char* typeToStringArray[] =
 	  "star",
 	  "minus",
 	  "slash",
+	  "string literal",
 	  "end_of_file",
 	  "fn",
 	  "var",
 	  "if",
 	  "else",
 	  "i32",
-	  "void"
+	  "char",
+	  "void",
+	  "string",
 	};
 
 const char* Token::typeToString(Token::Type type) {

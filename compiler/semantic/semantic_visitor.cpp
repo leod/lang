@@ -79,6 +79,11 @@ protected:
 
 		return type;
 	}
+
+	virtual TypePtr visit(ArrayTypePtr type, ScopeState state) {
+		acceptOn(type->inner, state);
+		return type;
+	}
 };
 
 class SemanticSymbolVisitor : public SemanticVisitorBase<SymbolPtr> {
@@ -157,10 +162,12 @@ protected:
 
 	ID_VISIT(VoidExpression)
 	ID_VISIT(LiteralNumberExpression)
+	ID_VISIT(LiteralStringExpression)
 
 #undef ID_VISIT
 
-	virtual ExpressionPtr visit(DelayedExpressionPtr delayed, ScopeState state) {
+	virtual ExpressionPtr visit(DelayedExpressionPtr delayed,
+	                            ScopeState state) {
 		SymbolPtr symbol = accept(delayed->delayedSymbol, state);
 		
 		TypePtr type;
@@ -189,7 +196,7 @@ protected:
 		block->type = block->expressions.size() ?
 			block->expressions.back()->type :
 			TypePtr(new IntegralType(block->astNode,
-			                         lexer::Token::KEYWORD_VOID));
+			                         ast::IntegralType::VOID));
 
 		return block;
 	}

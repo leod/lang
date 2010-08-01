@@ -14,6 +14,7 @@
 	\
 	X(BinaryExpression, BINARY_EXPRESSION) \
 	X(LiteralNumberExpression, LITERAL_NUMBER_EXPRESSION) \
+	X(LiteralStringExpression, LITERAL_STRING_EXPRESSION) \
 	X(BlockExpression, BLOCK_EXPRESSION) \
 	X(IfElseExpression, IF_ELSE_EXPRESSION) \
 	X(VoidExpression, VOID_EXPRESSION) \

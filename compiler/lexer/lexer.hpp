@@ -23,6 +23,7 @@ public:
 private:
 	Token lexIdentifier(const Location& location);
 	Token lexNumber(const Location& location);
+	Token lexStringLiteral(const Location& location);
 
 	bool eatWhitespace();
 	bool eatComments();

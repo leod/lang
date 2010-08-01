@@ -43,11 +43,19 @@ Type* Parser::parseType() {
 	switch (ts.get().type) {
 	case Token::KEYWORD_I32:
 		ts.next();
-		return new IntegralType(location, Token::KEYWORD_I32);
+		return new IntegralType(location, IntegralType::I32);
+
+	case Token::KEYWORD_CHAR:
+		ts.next();
+		return new IntegralType(location, IntegralType::CHAR);
 
 	case Token::KEYWORD_VOID:
 		ts.next();
-		return new IntegralType(location, Token::KEYWORD_VOID);
+		return new IntegralType(location, IntegralType::VOID);
+
+	case Token::KEYWORD_STRING:
+		ts.next();
+		return new IntegralType(location, IntegralType::STRING);
 
 	default:
 		expectedError("type");
@@ -264,6 +272,13 @@ Expression* Parser::parsePrimaryExpression() {
 		const int_t number = ts.get().number;
 		ts.next();
 		expression = new LiteralNumberExpression(location, number);
+		break;
+	}
+
+	case Token::STRING: {
+		const std::string string = ts.get().identifier;
+		ts.next();
+		expression = new LiteralStringExpression(location, string);
 		break;
 	}
 

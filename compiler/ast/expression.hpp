@@ -4,6 +4,8 @@
 #include <list>
 
 #include "util/smart_ptr.hpp"
+#include "common/number.hpp"
+#include "common/identifier.hpp"
 #include "ast/node.hpp"
 
 namespace llang {
@@ -52,6 +54,16 @@ public:
 	}
 
 	const Number number;
+};
+
+class LiteralStringExpression : public Expression {
+public:
+	LiteralStringExpression(const Location& location, const std::string& string)
+		: Expression(Node::LITERAL_STRING_EXPRESSION, location),
+		  string(string) {
+	}
+
+	const std::string string;
 };
 
 class BlockExpression : public Expression {

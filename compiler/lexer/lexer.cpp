@@ -20,6 +20,8 @@ keyword_map_t makeKeywordMap()
 	map["else"] = Token::KEYWORD_ELSE;
 	map["i32"] = Token::KEYWORD_I32;
 	map["void"] = Token::KEYWORD_VOID;
+	map["string"] = Token::KEYWORD_STRING;
+	map["char"] = Token::KEYWORD_CHAR;
 
 	return map;
 }
@@ -79,6 +81,8 @@ Token Lexer::lexToken() {
 		case '/':
 			++c;
 			return Token(location, Token::SLASH);
+		case '"':
+			return lexStringLiteral(location);
 		case '\0':
 			endOfFile = true;
 			return Token(location, Token::END_OF_FILE);
@@ -128,6 +132,21 @@ Token Lexer::lexNumber(const Location& location) {
 	}
 
 	return Token(location, number);
+}
+
+Token Lexer::lexStringLiteral(const Location& location) {
+	assert(*c == '"');
+	++c;
+
+	const char* start = c;
+	size_t length = 0;
+
+	// TODO: escape sequences
+	while (*c++ != '"') ++length;
+
+	std::string string(start, length);
+
+	return Token(location, string, Token::STRING);
 }
 
 bool Lexer::eatWhitespace() {

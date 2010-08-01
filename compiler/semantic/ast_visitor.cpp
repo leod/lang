@@ -42,6 +42,10 @@ private:
 
 protected:
 	virtual TypePtr visit(ast::IntegralType& type, ScopeState) {
+		if (type.type == ast::IntegralType::STRING)
+			return TypePtr(new ArrayType(type,
+				TypePtr(new IntegralType(type, ast::IntegralType::CHAR))));
+		
 		return TypePtr(new IntegralType(type));
 	}
 };
@@ -189,15 +193,24 @@ protected:
 	                            ScopeState) {
 		// TODO: This type is not right. Literal numbers have an unspecified
 		//       int type and are implicitly casteable to i32.
-		TypePtr type(new IntegralType(literal, lexer::Token::KEYWORD_I32));
+		
+		TypePtr type(new IntegralType(literal, ast::IntegralType::I32));
 
 		return ExpressionPtr(new LiteralNumberExpression(literal, type));
+	}
+
+	virtual ExpressionPtr visit(ast::LiteralStringExpression& literal,
+	                            ScopeState) {
+		TypePtr type(new ArrayType(literal,
+				TypePtr(new IntegralType(literal, ast::IntegralType::CHAR))));
+
+		return ExpressionPtr(new LiteralStringExpression(literal, type));
 	}
 
 	virtual ExpressionPtr visit(ast::VoidExpression& voidExpression,
 	                            ScopeState) {
 		TypePtr type(new IntegralType(voidExpression,
-		                              lexer::Token::KEYWORD_VOID));
+		                              ast::IntegralType::VOID));
 		return ExpressionPtr(new VoidExpression(voidExpression, type));
 	}
 
@@ -206,7 +219,7 @@ protected:
 		state.scope->addSymbol(accept(*declaration.declaration, state));
 
 		TypePtr type(new IntegralType(declaration,
-		                              lexer::Token::KEYWORD_VOID));
+		                              ast::IntegralType::VOID));
 		return ExpressionPtr(new VoidExpression(declaration, type));
 	}	
 

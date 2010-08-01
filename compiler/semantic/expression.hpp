@@ -61,6 +61,15 @@ public:
 
 typedef shared_ptr<LiteralNumberExpression> LiteralNumberExpressionPtr;
 
+class LiteralStringExpression : public Expression {
+public:
+	LiteralStringExpression(const ast::Node& astNode, TypePtr type)
+		: Expression(Node::LITERAL_STRING_EXPRESSION, astNode, type) {
+	}
+};
+
+typedef shared_ptr<LiteralStringExpression> LiteralStringExpressionPtr;
+
 class BlockExpression : public Expression {
 public:
 	typedef std::list<ExpressionPtr> expression_list_t;
