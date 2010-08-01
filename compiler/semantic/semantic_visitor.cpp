@@ -101,6 +101,16 @@ protected:
 	virtual SymbolPtr visit(VariableSymbolPtr variable, ScopeState state) {
 		acceptOn(variable->type, state);
 		acceptOn(variable->initializer, state);
+
+		if (!variable->type->equals(variable->initializer->type)) {
+			context.diag.error(variable->astNode.location(),
+				"initializer of %s has wrong type: "
+				"expected '%s', got '%s'",
+				variable->name.c_str(),
+				variable->type->name().c_str(),
+				variable->initializer->type->name().c_str());
+		}
+
 		return variable;
 	}
 
