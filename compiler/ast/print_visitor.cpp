@@ -63,7 +63,7 @@ protected:
 		print("literal: %d", num.number);
 	}
 
-	virtual void visit(VoidExpression& num) {
+	virtual void visit(VoidExpression&) {
 		print("void");
 	}
 
@@ -142,10 +142,10 @@ protected:
 
 	virtual void visit(IntegralType& type) {
 		switch (type.type) {
-		case lexer::Token::KEYWORD_I32:
+		case ast::IntegralType::I32:
 			print("i32");
 			break;
-		case lexer::Token::KEYWORD_VOID:
+		case ast::IntegralType::VOID:
 			print("void");
 			break;
 		default:

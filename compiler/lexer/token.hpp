@@ -27,6 +27,7 @@ struct Token {
 		STAR,
 		MINUS,
 		SLASH,
+		STRING,
 		END_OF_FILE,
 
 		KEYWORD_FN,
@@ -34,7 +35,9 @@ struct Token {
 		KEYWORD_IF,
 		KEYWORD_ELSE,
 		KEYWORD_I32,
+		KEYWORD_CHAR,
 		KEYWORD_VOID,
+		KEYWORD_STRING,
 
 		ENUM_MAX
 	} type;
@@ -51,8 +54,9 @@ struct Token {
 		  identifier("error") {
 	}
 
-	Token(const Location& location, const identifier_t& identifier)
-		: location(location), type(IDENTIFIER), number(-666),
+	Token(const Location& location, const identifier_t& identifier,
+	      Type type = IDENTIFIER)
+		: location(location), type(type), number(-666),
 		  identifier(identifier) {
 	}
 

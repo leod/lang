@@ -75,7 +75,7 @@ public:
 		  type(astNode.type) {
 	}
 
-	IntegralType(const ast::Node& astNode, lexer::Token::Type type)
+	IntegralType(const ast::Node& astNode, ast::IntegralType::Kind type)
 		: Type(Node::INTEGRAL_TYPE, astNode),
 		  type(type) {
 	}
@@ -89,16 +89,18 @@ public:
 
 	virtual std::string name() const {
 		switch (type) {
-		case lexer::Token::KEYWORD_I32:
+		case ast::IntegralType::I32:
 			return "i32";
-		case lexer::Token::KEYWORD_VOID:
+		case ast::IntegralType::VOID:
 			return "void";
+		case ast::IntegralType::CHAR:
+			return "char";
 		default:
 			assert(false);
 		}
 	}
 
-	const lexer::Token::Type type;
+	const ast::IntegralType::Kind type;
 };
 
 typedef shared_ptr<IntegralType> IntegralTypePtr;
@@ -159,6 +161,33 @@ public:
 };
 
 typedef shared_ptr<FunctionType> FunctionTypePtr;
+
+class ArrayType : public Type {
+public:
+	TypePtr inner;
+
+	ArrayType(const ast::Node& astNode, TypePtr inner)
+		: Type(Node::ARRAY_TYPE, astNode), inner(inner) {
+	}
+
+	virtual bool equals(const Type* other) const {
+		const ArrayType* type = other->isA<ArrayType>();
+		if (!type) return false;
+
+		return type->inner->equals(inner);
+	}
+
+	virtual std::string name() const {
+		std::stringstream ss;
+
+		ss << inner->name()
+		   << "[]";
+
+		return ss.str();
+	}
+};
+
+typedef shared_ptr<ArrayType> ArrayTypePtr;
 
 } // namespace ast
 } // namespace llang
