@@ -63,6 +63,10 @@ protected:
 		print("literal: %d", num.number);
 	}
 
+	virtual void visit(VoidExpression& num) {
+		print("void");
+	}
+
 	virtual void visit(IfElseExpression& ifElse) {
 		print("if/else");
 
@@ -94,6 +98,12 @@ protected:
 			break;
 		case BinaryExpression::MUL:
 			type = "*";
+			break;
+		case BinaryExpression::SUB:
+			type = "-";
+			break;
+		case BinaryExpression::EQUALS:
+			type = "=";
 			break;
 
 		default:

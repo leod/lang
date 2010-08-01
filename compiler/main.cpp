@@ -39,6 +39,7 @@ int main() {
 
 	parser::Parser parser(context, filename, ts);
 	scoped_ptr<ast::Module> module(parser.parseModule());
+	//print(*module);
 
 	scoped_ptr<semantic::AstVisitors> astVisitors(
 		semantic::makeAstVisitors(context));
