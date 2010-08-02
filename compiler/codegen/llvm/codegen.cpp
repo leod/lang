@@ -149,12 +149,26 @@ protected:
 		                                     Function::ExternalLinkage,
 		                                     function->name,
 		                                     module);
+		
+		
+		{
+			assert(f->arg_size() == function->parameters.size()); // TODO
+
+			auto it1 = f->arg_begin();
+			auto it2 = function->parameters.begin();
+			for (; it1 != f->arg_end(); ++it1, ++it2) {
+				if (!it2->symbol) continue; // unnamed parameter
+
+				it1->setName(it2->symbol->name);
+				state.function.variables[it2->symbol] = it1;
+			}
+		}
 
 		BasicBlock* block = BasicBlock::Create(llvmContext, "entry", f);
 		builder.SetInsertPoint(block);
 
 		IntegralTypePtr returnType = isA<IntegralType>(function->returnType);
-		
+
 		Value* bodyValue = accept(function->body, state);
 
 		if (!returnType || returnType->type != ast::IntegralType::VOID) {
@@ -186,6 +200,18 @@ private:
 	}
 
 protected:
+	virtual Value* visit(SymbolExpressionPtr expression, ScopeState state) {
+		if (VariableSymbolPtr symbol =
+				isA<VariableSymbol>(SymbolPtr(expression->symbol))) {
+			return state.function.variables[symbol];
+		}
+		if (ParameterSymbolPtr symbol =
+				isA<ParameterSymbol>(SymbolPtr(expression->symbol))) {
+			return state.function.variables[symbol];
+		}
+		else assert(false); // TODO
+	}
+
 	virtual Value* visit(CallExpressionPtr expression, ScopeState state) {
 		if (SymbolExpressionPtr callee =
 				isA<SymbolExpression>(expression->callee)) {
@@ -235,16 +261,16 @@ protected:
 
 		switch (expression->operation) {
 		case ast::BinaryExpression::ADD:
-			return builder.CreateFAdd(left, right, "addtmp");
+			return builder.CreateAdd(left, right, "addtmp");
 
 		case ast::BinaryExpression::SUB:
-			return builder.CreateFSub(left, right, "subtmp");
+			return builder.CreateSub(left, right, "subtmp");
 
 		case ast::BinaryExpression::MUL:
-			return builder.CreateFMul(left, right, "multmp");
+			return builder.CreateMul(left, right, "multmp");
 
-		case ast::BinaryExpression::DIV:
-			return builder.CreateFDiv(left, right, "divtmp");
+		//case ast::BinaryExpression::DIV:
+			//return builder.CreateSDiv(left, right, "divtmp");
 
 		default:
 			assert(false);
