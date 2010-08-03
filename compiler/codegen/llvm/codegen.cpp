@@ -18,9 +18,24 @@ using namespace semantic;
 using namespace llvm;
 
 struct ScopeState {
-	struct {
+	struct Function {
+		llvm::Function* llvmFunction;
 		std::map<SymbolPtr, Value*> variables;
-	} function;
+	};
+
+	// Null outside of functions
+	Function* function;
+
+	ScopeState()
+		: function(0) {
+	}
+
+	ScopeState withFunction(Function* function) const {
+		ScopeState result = *this;
+		result.function = function;		
+
+		return result;
+	}
 };
 
 struct Codegen::Impl {
@@ -151,6 +166,9 @@ protected:
 		                                     module);
 		
 		
+		ScopeState::Function functionState;
+		functionState.llvmFunction = f;
+
 		{
 			assert(f->arg_size() == function->parameters.size()); // TODO
 
@@ -160,7 +178,7 @@ protected:
 				if (!it2->symbol) continue; // unnamed parameter
 
 				it1->setName(it2->symbol->name);
-				state.function.variables[it2->symbol] = it1;
+				functionState.variables[it2->symbol] = it1;
 			}
 		}
 
@@ -169,12 +187,30 @@ protected:
 
 		IntegralTypePtr returnType = isA<IntegralType>(function->returnType);
 
-		Value* bodyValue = accept(function->body, state);
+		Value* bodyValue = accept(function->body,
+		                          state.withFunction(&functionState));
 
 		if (!returnType || returnType->type != ast::IntegralType::VOID) {
 			builder.CreateRet(bodyValue);
 			llvm::verifyFunction(*f);
 		}
+	}
+
+	virtual void visit(VariableSymbolPtr variable, ScopeState state) {
+		assert(state.function); // TODO
+
+		llvm::Function* llvmFunction = state.function->llvmFunction;
+
+		IRBuilder<> entryBuilder(&llvmFunction->getEntryBlock(),
+		                         llvmFunction->getEntryBlock().begin());
+		AllocaInst* alloca = entryBuilder.CreateAlloca(
+			accept(variable->type, state), 0, variable->name);
+		assert(alloca);
+	
+		Value* init = accept(variable->initializer, state);
+		builder.CreateStore(init, alloca);
+
+		state.function->variables[variable] = alloca;
 	}
 };
 
@@ -203,11 +239,12 @@ protected:
 	virtual Value* visit(SymbolExpressionPtr expression, ScopeState state) {
 		if (VariableSymbolPtr symbol =
 				isA<VariableSymbol>(SymbolPtr(expression->symbol))) {
-			return state.function.variables[symbol];
+			return builder.CreateLoad(state.function->variables[symbol],
+			                          symbol->name);
 		}
 		if (ParameterSymbolPtr symbol =
 				isA<ParameterSymbol>(SymbolPtr(expression->symbol))) {
-			return state.function.variables[symbol];
+			return state.function->variables[symbol];
 		}
 		else assert(false); // TODO
 	}
@@ -259,6 +296,9 @@ protected:
 		Value* left  = accept(expression->left, state);
 		Value* right = accept(expression->right, state);
 
+		assert(left);
+		assert(right);
+
 		switch (expression->operation) {
 		case ast::BinaryExpression::ADD:
 			return builder.CreateAdd(left, right, "addtmp");
@@ -276,11 +316,18 @@ protected:
 			assert(false);
 		}
 	}
+
+	virtual Value* visit(DeclarationExpressionPtr expression,
+	                     ScopeState state) {
+		
+		accept(expression->symbol, state);
+		return 0; // TODO?
+	}
 };
 
 Codegen::Impl::Impl(Context& context, ModulePtr moduleSymbol)
 	: llvmContext(),
-	  module(new llvm::Module(llvm::StringRef("test"), llvmContext)),
+	  module(new llvm::Module("test", llvmContext)),
 	  builder(llvmContext),
 	  typeVisitor(new TypeVisitor(*this, context, module.get(), builder)),
 	  symbolVisitor(new SymbolVisitor(*this, context, module.get(), builder)),

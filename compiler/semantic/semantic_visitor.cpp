@@ -173,6 +173,7 @@ protected:
 	ID_VISIT(VoidExpression)
 	ID_VISIT(LiteralNumberExpression)
 	ID_VISIT(LiteralStringExpression)
+	ID_VISIT(DeclarationExpression)
 
 #undef ID_VISIT
 
