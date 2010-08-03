@@ -151,6 +151,19 @@ public:
 
 typedef shared_ptr<CallExpression> CallExpressionPtr;
 
+class DeclarationExpression : public Expression {
+public:
+	DeclarationExpression(const ast::Node& astNode, TypePtr type,
+	                      SymbolPtr symbol)
+		: Expression(Node::DECLARATION_EXPRESSION, astNode, type),
+		  symbol(symbol) {
+	}
+
+	SymbolPtr symbol;
+};
+
+typedef shared_ptr<DeclarationExpression> DeclarationExpressionPtr;
+
 } // namespace semantic
 } // namespace llang
 

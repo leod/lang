@@ -22,6 +22,7 @@
 	X(IfElseExpression, IF_ELSE_EXPRESSION) \
 	X(VoidExpression, VOID_EXPRESSION) \
 	X(CallExpression, CALL_EXPRESSION) \
-	X(SymbolExpression, SYMBOL_EXPRESSION)
+	X(SymbolExpression, SYMBOL_EXPRESSION) \
+	X(DeclarationExpression, DECLARATION_EXPRESSION)
 
 #endif

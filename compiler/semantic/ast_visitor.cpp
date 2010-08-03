@@ -216,11 +216,12 @@ protected:
 
 	virtual ExpressionPtr visit(ast::DeclarationExpression& declaration,
                                 ScopeState state) {
-		state.scope->addSymbol(accept(*declaration.declaration, state));
+		SymbolPtr symbol(accept(*declaration.declaration, state));
+		state.scope->addSymbol(symbol);
 
-		TypePtr type(new IntegralType(declaration,
-		                              ast::IntegralType::VOID));
-		return ExpressionPtr(new VoidExpression(declaration, type));
+		TypePtr type(new IntegralType(declaration, ast::IntegralType::VOID));
+		return ExpressionPtr(
+			new DeclarationExpression(declaration, type, symbol));
 	}	
 
 	virtual ExpressionPtr visit(ast::IfElseExpression& ifElse,
