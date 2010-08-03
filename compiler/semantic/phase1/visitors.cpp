@@ -1,4 +1,5 @@
 #include <cassert>
+#include <iostream>
 
 #include "ast/type.hpp"
 #include "ast/decl.hpp"
@@ -55,6 +56,11 @@ protected:
 		return variable;
 	}
 
+	virtual DeclPtr visit(ParameterDeclPtr variable, ScopeState state) {
+		acceptOn(variable->type, state);
+		return variable;
+	}
+
 	virtual DeclPtr visit(FunctionDeclPtr function, ScopeState state) {
 		function->scope = ScopePtr(new Scope(state.scope));
 		state.scope = function->scope.get();
@@ -65,6 +71,8 @@ protected:
 		     it != function->parameters.end();
 		     ++it) {
 			*it = assumeIsA<ParameterDecl>(accept(*it, state));
+			state.scope->addDecl(*it);
+
 			parameterTypes.push_back((*it)->type);
 		}
 
@@ -93,11 +101,13 @@ protected:
 		return expr;
 	}
 
-	virtual ExprPtr visit(IdentifierExprPtr identifier, ScopeState) {
+	virtual ExprPtr visit(IdentifierExprPtr identifier, ScopeState state) {
 		// Delay looking up the decl to the next semantic phase
 
 		DeclPtr decl(
 			new DelayedDecl(identifier->location(), identifier->name));
+		decl->declScope = state.scope;
+
 		ExprPtr expr(
 			new DelayedExpr(identifier->location(), decl));
      
@@ -113,9 +123,9 @@ protected:
 
 	virtual ExprPtr visit(BlockExprPtr block, ScopeState state) {
 		block->scope = ScopePtr(new Scope(state.scope));
-		state.scope = block->scope.get();
 
-		acceptOn(block->exprs.begin(), block->exprs.end(), state);
+		acceptOn(block->exprs.begin(), block->exprs.end(),
+		         state.withScope(block->scope.get()));
 
 		return block;
 	}
@@ -140,8 +150,7 @@ protected:
 		return literal;
 	}
 
-	virtual ExprPtr visit(LiteralBoolExprPtr literal,
-	                            ScopeState) {
+	virtual ExprPtr visit(LiteralBoolExprPtr literal, ScopeState) {
 		TypePtr type(new IntegralType(literal->location(), IntegralType::BOOL));
 
 		literal->type = type;
@@ -158,14 +167,16 @@ protected:
 		return voidExpr;
 	}
 
-	virtual ExprPtr visit(DeclExprPtr decl, ScopeState state) {
-		decl->decl = accept(DeclPtr(decl->decl), state); 
-		state.scope->addDecl(DeclPtr(decl->decl));
+	virtual ExprPtr visit(DeclExprPtr declExpr, ScopeState state) {
+		DeclPtr decl = accept(declExpr->decl, state); 
 
-		TypePtr type(new IntegralType(decl->location(), IntegralType::VOID));
-		decl->type = type;
+		state.scope->addDecl(decl);
+		declExpr->decl = decl;
 
-		return decl;
+		TypePtr type(new IntegralType(declExpr->location(), IntegralType::VOID));
+		declExpr->type = type;
+
+		return declExpr;
 	}	
 
 	virtual ExprPtr visit(IfElseExprPtr ifElse, ScopeState state) {
