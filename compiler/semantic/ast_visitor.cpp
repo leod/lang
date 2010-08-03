@@ -12,14 +12,15 @@
 namespace llang {
 namespace semantic {
 
-template <typename Result> class ASTVisitorBase
+namespace {
+
+template <typename Result> class VisitorBase
 	: public ast::Visitor<ScopeState, Result> {
 protected:
 	AstVisitors* visitors;
 	Context& context;
 
-	ASTVisitorBase(Context& context) : context(context) {}
-	friend AstVisitors* makeAstVisitors(Context&);
+	VisitorBase(Context& context) : context(context) {}
 
 	TypePtr accept(ast::Type& n, const ScopeState& p) {
 		return visitors->typeVisitor->accept(n, p);
@@ -34,11 +35,11 @@ protected:
 	}
 };
 
-class ASTTypeVisitor : public ASTVisitorBase<TypePtr> {
+class TypeVisitor : public VisitorBase<TypePtr> {
 private:
-	ASTTypeVisitor(Context& context)
-		: ASTVisitorBase<TypePtr>(context) {}
-	friend AstVisitors* makeAstVisitors(Context&);
+	TypeVisitor(Context& context)
+		: VisitorBase<TypePtr>(context) {}
+	friend AstVisitors* semantic::makeAstVisitors(Context&);
 
 protected:
 	virtual TypePtr visit(ast::IntegralType& type, ScopeState) {
@@ -50,11 +51,11 @@ protected:
 	}
 };
 
-class ASTDeclarationVisitor : public ASTVisitorBase<SymbolPtr> {
+class DeclarationVisitor : public VisitorBase<SymbolPtr> {
 private:
-	ASTDeclarationVisitor(Context& context)
-		: ASTVisitorBase<SymbolPtr>(context) {}
-	friend AstVisitors* makeAstVisitors(Context&);
+	DeclarationVisitor(Context& context)
+		: VisitorBase<SymbolPtr>(context) {}
+	friend AstVisitors* semantic::makeAstVisitors(Context&);
 
 protected:
 	virtual SymbolPtr visit(ast::Module& module, ScopeState state) {
@@ -124,11 +125,11 @@ protected:
 // Does nothing more than translate the ast into the semantic tree.
 // Typechecking is done in the second semantic phase.
 // This should allow us to easily deal with forward references.
-class ASTExpressionVisitor : public ASTVisitorBase<ExpressionPtr> {
+class ExpressionVisitor : public VisitorBase<ExpressionPtr> {
 private:
-	ASTExpressionVisitor(Context& context)
-		: ASTVisitorBase<ExpressionPtr>(context) {}
-	friend AstVisitors* makeAstVisitors(Context&);
+	ExpressionVisitor(Context& context)
+		: VisitorBase<ExpressionPtr>(context) {}
+	friend AstVisitors* semantic::makeAstVisitors(Context&);
 
 protected:
 	virtual ExpressionPtr visit(ast::BinaryExpression& expression,
@@ -235,11 +236,13 @@ protected:
 	}
 };
 
+} // namespace
+
 AstVisitors* makeAstVisitors(Context& context) {
-	ASTTypeVisitor* typeVisitor = new ASTTypeVisitor(context);
-	ASTDeclarationVisitor* declarationVisitor =
-		new ASTDeclarationVisitor(context);
-	ASTExpressionVisitor* expressionVisitor = new ASTExpressionVisitor(context);
+	TypeVisitor* typeVisitor = new TypeVisitor(context);
+	DeclarationVisitor* declarationVisitor =
+		new DeclarationVisitor(context);
+	ExpressionVisitor* expressionVisitor = new ExpressionVisitor(context);
 
 	AstVisitors* visitors = new AstVisitors(typeVisitor, declarationVisitor,
 	                                        expressionVisitor);
