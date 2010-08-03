@@ -22,6 +22,9 @@ keyword_map_t makeKeywordMap()
 	map["void"] = Token::KEYWORD_VOID;
 	map["string"] = Token::KEYWORD_STRING;
 	map["char"] = Token::KEYWORD_CHAR;
+	map["bool"] = Token::KEYWORD_BOOL;
+	map["true"] = Token::KEYWORD_TRUE;
+	map["false"] = Token::KEYWORD_FALSE;
 
 	return map;
 }

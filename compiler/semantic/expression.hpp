@@ -69,12 +69,29 @@ typedef shared_ptr<LiteralNumberExpression> LiteralNumberExpressionPtr;
 
 class LiteralStringExpression : public Expression {
 public:
-	LiteralStringExpression(const ast::Node& astNode, TypePtr type)
-		: Expression(Node::LITERAL_STRING_EXPRESSION, astNode, type) {
+	LiteralStringExpression(const ast::LiteralStringExpression& astNode,
+	                        TypePtr type)
+		: Expression(Node::LITERAL_STRING_EXPRESSION, astNode, type),
+		  string(astNode.string) {
 	}
+
+	std::string string;
 };
 
 typedef shared_ptr<LiteralStringExpression> LiteralStringExpressionPtr;
+
+class LiteralBoolExpression : public Expression {
+public:
+	LiteralBoolExpression(const ast::LiteralBoolExpression& astNode,
+	                      TypePtr type)
+		: Expression(Node::LITERAL_BOOL_EXPRESSION, astNode, type),
+		  value(astNode.value) {
+	}
+
+	bool value;
+};
+
+typedef shared_ptr<LiteralBoolExpression> LiteralBoolExpressionPtr;
 
 class BlockExpression : public Expression {
 public:

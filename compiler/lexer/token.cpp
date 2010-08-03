@@ -27,6 +27,9 @@ const char* typeToStringArray[] =
 	  "char",
 	  "void",
 	  "string",
+	  "bool",
+	  "true",
+	  "false"
 	};
 
 const char* Token::typeToString(Token::Type type) {

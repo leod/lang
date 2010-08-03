@@ -208,6 +208,13 @@ protected:
 		return ExpressionPtr(new LiteralStringExpression(literal, type));
 	}
 
+	virtual ExpressionPtr visit(ast::LiteralBoolExpression& literal,
+	                            ScopeState) {
+		TypePtr type(new IntegralType(literal, ast::IntegralType::BOOL));
+
+		return ExpressionPtr(new LiteralBoolExpression(literal, type));
+	}
+
 	virtual ExpressionPtr visit(ast::VoidExpression& voidExpression,
 	                            ScopeState) {
 		TypePtr type(new IntegralType(voidExpression,

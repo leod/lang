@@ -6,6 +6,7 @@
 #include "semantic/symbol.hpp"
 #include "semantic/expression.hpp"
 #include "semantic/type.hpp"
+#include "semantic/type_test.hpp"
 
 namespace llang {
 namespace semantic {
@@ -174,6 +175,7 @@ protected:
 	ID_VISIT(VoidExpression)
 	ID_VISIT(LiteralNumberExpression)
 	ID_VISIT(LiteralStringExpression)
+	ID_VISIT(LiteralBoolExpression)
 	ID_VISIT(DeclarationExpression)
 
 #undef ID_VISIT
@@ -265,7 +267,12 @@ protected:
 				binary->left->type->name().c_str(),
 				binary->right->type->name().c_str());
 
-		binary->type = binary->left->type;
+		if (binary->operation == ast::BinaryExpression::EQUALS) {
+			binary->type = TypePtr(new IntegralType(binary->astNode,
+			                                        ast::IntegralType::BOOL));	
+		}
+		else
+			binary->type = binary->left->type;
 
 		return binary;
 	}
@@ -274,6 +281,11 @@ protected:
 		acceptOn(ifElse->condition, state);
 		acceptOn(ifElse->ifExpression, state);
 		acceptOn(ifElse->elseExpression, state);
+
+		if (!isBool(ifElse->condition->type))
+			context.diag.error(ifElse->astNode.location(),
+				"if condition needs to be boolean (got '%s')",
+				ifElse->condition->type->name().c_str());
 
 		// TODO
 		if (!ifElse->ifExpression->type->equals(ifElse->elseExpression->type))
