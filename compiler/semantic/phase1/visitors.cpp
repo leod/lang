@@ -71,7 +71,9 @@ protected:
 		     it != function->parameters.end();
 		     ++it) {
 			*it = assumeIsA<ParameterDecl>(accept(*it, state));
-			state.scope->addDecl(*it);
+
+			if((*it)->hasName)
+				state.scope->addDecl(*it);
 
 			parameterTypes.push_back((*it)->type);
 		}

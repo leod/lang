@@ -114,7 +114,7 @@ DeclPtr Parser::parseFunctionDecl() {
 			}
 
 			parameters.push_back(ParameterDeclPtr(
-				new ParameterDecl(location, name, type)));	
+				new ParameterDecl(location, name, hasName, type)));	
 
 			if (ts.get().type != Token::COMMA)
 				doLoop = false;

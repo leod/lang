@@ -84,13 +84,18 @@ public:
 
 typedef shared_ptr<VariableDecl> VariableDeclPtr;
 
-class ParameterDecl : public VariableDecl {
+class ParameterDecl : public Decl {
 public:
 	ParameterDecl(const Location& location,
 	              const identifier_t& name,
+				  bool hasName,
 	              TypePtr type)
-		: VariableDecl(location, name, type, ExprPtr(), Node::PARAMETER_DECL) {
+		: Decl(Node::PARAMETER_DECL, location, name),
+		  hasName(hasName), type(type) {
 	}
+
+	bool hasName;
+	TypePtr type;
 };
 
 typedef shared_ptr<ParameterDecl> ParameterDeclPtr;
