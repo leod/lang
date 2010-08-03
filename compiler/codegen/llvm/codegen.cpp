@@ -339,6 +339,37 @@ protected:
 
 	virtual Value* visit(IfElseExpressionPtr expression, ScopeState state) {
 		Value* condition = accept(expression->condition, state);
+
+		assert(state.function);
+		Function* llvmFunction = state.function->llvmFunction;
+		assert(llvmFunction);
+
+		BasicBlock* ifBlock = BasicBlock::Create(llvmContext, "ifblock",
+		                                         llvmFunction);
+		BasicBlock* elseBlock = BasicBlock::Create(llvmContext, "elseblock");
+		BasicBlock* mergeBlock = BasicBlock::Create(llvmContext, "mergeblock");
+
+		builder.CreateCondBr(condition, ifBlock, elseBlock);
+
+		builder.SetInsertPoint(ifBlock);
+		Value* ifValue = accept(expression->ifExpression, state);
+		builder.CreateBr(mergeBlock);
+		ifBlock = builder.GetInsertBlock();
+
+		llvmFunction->getBasicBlockList().push_back(elseBlock);
+		builder.SetInsertPoint(elseBlock);
+		Value* elseValue = accept(expression->elseExpression, state);
+		builder.CreateBr(mergeBlock);
+		elseBlock = builder.GetInsertBlock();
+
+		llvmFunction->getBasicBlockList().push_back(mergeBlock);
+		builder.SetInsertPoint(mergeBlock);
+		PHINode* phi = builder.CreatePHI(accept(expression->type, state),
+		                                 "iftmp");
+		phi->addIncoming(ifValue, ifBlock);
+		phi->addIncoming(elseValue, elseBlock);
+
+		return phi;
 	}
 };
 

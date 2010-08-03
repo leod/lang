@@ -1,4 +1,10 @@
-fn bool equals(i32 a, i32 b) = (a = b);
+fn bool makeTrue() = true;
+fn bool makeFalse() = false;
+fn bool not(bool b) = if (b) false else true;
+fn bool equals(i32 a, i32 b) = { 
+	var bool val = if (a=b) makeTrue() else makeFalse();
+	if (val) not(val) else val;
+};
 
 fn void x() = { foo(); {}; };
 fn i32 foo() = { main(5); main(1); main(2); 8; };
