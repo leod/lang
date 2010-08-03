@@ -12,7 +12,7 @@ void Scope::addDecl(DeclPtr decl) {
 	assert(decl);
 
 	if (decls.find(decl->name) != decls.end())
-		throw std::runtime_error("decl already declared: " + decl->name);
+		throw std::runtime_error("symbol already declared: " + decl->name);
 
 	decls.insert(DeclMap::value_type(decl->name, decl));
 }

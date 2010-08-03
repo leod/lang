@@ -201,8 +201,11 @@ protected:
 			assert(bodyValue);
 
 			builder.CreateRet(bodyValue);
-			llvm::verifyFunction(*f);
 		}
+		else
+			builder.CreateRetVoid();
+
+		llvm::verifyFunction(*f);
 	}
 
 	virtual void visit(VariableDeclPtr variable, ScopeState state) {
