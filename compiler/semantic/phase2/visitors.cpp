@@ -30,12 +30,8 @@ protected:
 #undef ID_VISIT
 
 	virtual TypePtr visit(FunctionTypePtr type, ScopeState state) {
-		for (auto it = type->parameterTypes.begin();
-		     it != type->parameterTypes.end();
-			 ++it) {
-			acceptOn(*it, state);	
-		}
-
+		acceptOn(type->parameterTypes.begin(), type->parameterTypes.end(),
+		         state);
 		acceptOn(type->returnType, state);
 
 		return type;
@@ -157,11 +153,7 @@ protected:
 		acceptScope(block->scope.get(), state);
 		state.scope = block->scope.get();
 
-		for (auto it = block->exprs.begin();
-             it != block->exprs.end();
-             ++it) {
-			acceptOn(*it, state);		
-		}
+		acceptOn(block->exprs.begin(), block->exprs.end(), state);
 
 		block->type = block->exprs.size() ?
 			block->exprs.back()->type :

@@ -72,7 +72,7 @@ public:
 	             const identifier_t& name,
 	             TypePtr type,
 	             ExprPtr initializer,
-				 Node::Tag tag = Node::VARIABLE_DECL)
+	             Node::Tag tag = Node::VARIABLE_DECL)
 		: Decl(tag, location, name),
 		  type(type),
 		  initializer(initializer) {
@@ -88,7 +88,7 @@ class ParameterDecl : public VariableDecl {
 public:
 	ParameterDecl(const Location& location,
 	              const identifier_t& name,
-				  TypePtr type)
+	              TypePtr type)
 		: VariableDecl(location, name, type, ExprPtr(), Node::PARAMETER_DECL) {
 	}
 };
@@ -100,7 +100,7 @@ public:
 	typedef std::list<ParameterDeclPtr> ParameterList;
 
 	FunctionDecl(const Location& location,
-				 const identifier_t& name,
+	             const identifier_t& name,
 	             TypePtr returnType,
 	             ParameterList& parameters,
 	             ExprPtr body)
