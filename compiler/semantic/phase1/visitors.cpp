@@ -79,7 +79,7 @@ protected:
 		}
 
 		acceptOn(function->returnType, state);
-		acceptOn(function->body, state);
+		if (function->body) acceptOn(function->body, state);
 
 		function->type = TypePtr(new FunctionType(function->location(),
 		                                          function->returnType,

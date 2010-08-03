@@ -189,6 +189,11 @@ protected:
 		ScopeState::Function functionState;
 		functionState.llvmFunction = f;
 
+		if (!function->body) {
+			assert(function->isExtern);
+			return;
+		}
+
 		{
 			assert(f->arg_size() == function->parameters.size()); // TODO
 

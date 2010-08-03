@@ -112,7 +112,8 @@ public:
 		: ScopedDecl(Node::FUNCTION_DECL, location, name),
 		  returnType(returnType),
 		  parameters(parameters),
-		  body(body) {
+		  body(body),
+		  isExtern(false) {
 	}
 
 	std::string mangle() {
@@ -126,10 +127,11 @@ public:
 	ExprPtr body;	
 	
 	TypePtr type;
+
+	bool isExtern;
 };
 
 typedef shared_ptr<FunctionDecl> FunctionDeclPtr;
-
 
 } // namespace ast
 } // namespace llang

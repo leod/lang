@@ -31,6 +31,22 @@ DeclPtr Parser::parseDecl() {
 	case Token::KEYWORD_VAR:
 		return parseVariableDecl();
 
+	case Token::KEYWORD_EXTERN: {
+		ts.next();
+		// TODO: wrong location
+
+		FunctionDeclPtr function = assumeIsA<FunctionDecl>(parseFunctionDecl());	
+		function->isExtern = true;
+		
+		if (function->body) {
+			diag.error(function->location(),
+				"extern function '%s' cannot have body",
+				function->name.c_str());
+		}
+
+		return function;
+	}
+		
 	default:
 		expectedError("decl");		
 	}
@@ -90,46 +106,20 @@ ExprPtr Parser::parseExpr() {
 DeclPtr Parser::parseFunctionDecl() {
 	const Location location = ts.get().location;
 
-	assumeNext(Token::KEYWORD_FN);
-	
-	TypePtr returnType = parseType();	
-	identifier_t identifier = parseIdentifier();
-
-	assumeNext(Token::LPAREN);
-
+	TypePtr returnType;
+	identifier_t name;
 	FunctionDecl::ParameterList parameters;
+	parseFunctionPrototype(returnType, name, parameters);
 
-	if (ts.get().type != Token::RPAREN) {
-		bool doLoop = true;
+	ExprPtr body;
 
-		do {
-			TypePtr type = parseType();
-
-			bool hasName = false;	
-			identifier_t name;
-
-			if (ts.get().type == Token::IDENTIFIER) {
-				hasName = true;
-				name = parseIdentifier();
-			}
-
-			parameters.push_back(ParameterDeclPtr(
-				new ParameterDecl(location, name, hasName, type)));	
-
-			if (ts.get().type != Token::COMMA)
-				doLoop = false;
-			else
-				ts.next();
-		} while(doLoop);
+	if (ts.get().type == Token::EQUALS) {
+		ts.next();
+		body = parseExpr();
 	}
 
-	assumeNext(Token::RPAREN);
-	assumeNext(Token::EQUALS);
-
-	ExprPtr body = parseExpr();
-
-	return DeclPtr(new FunctionDecl(location, identifier, returnType, 
-	                                parameters, body));
+	return DeclPtr(new FunctionDecl(location, name, returnType, parameters,
+	                                body));
 }
 
 DeclPtr Parser::parseVariableDecl() {
@@ -363,6 +353,52 @@ ExprPtr Parser::parsePostExpr(ExprPtr expr) {
 	}
 }
 
+identifier_t Parser::parseIdentifier() {
+	assume(Token::IDENTIFIER);
+	const identifier_t identifier = ts.get().identifier;
+	ts.next();
+
+	return identifier;
+}
+
+void Parser::parseFunctionPrototype(TypePtr& returnType, identifier_t& name,
+                                    FunctionDecl::ParameterList& parameters) {
+	assumeNext(Token::KEYWORD_FN);
+	
+	returnType = parseType();	
+	name = parseIdentifier();
+
+	assumeNext(Token::LPAREN);
+
+	if (ts.get().type != Token::RPAREN) {
+		bool doLoop = true;
+
+		do {
+			const Location location = ts.get().location;
+
+			TypePtr type = parseType();
+
+			bool hasName = false;	
+			identifier_t name;
+
+			if (ts.get().type == Token::IDENTIFIER) {
+				hasName = true;
+				name = parseIdentifier();
+			}
+
+			parameters.push_back(ParameterDeclPtr(
+				new ParameterDecl(location, name, hasName, type)));	
+
+			if (ts.get().type != Token::COMMA)
+				doLoop = false;
+			else
+				ts.next();
+		} while(doLoop);
+	}
+
+	assumeNext(Token::RPAREN);
+}
+
 void Parser::assume(lexer::Token::Type type) {
 	const Token& token = ts.get();
 	if (token.type != type) {
@@ -381,14 +417,6 @@ const Token& Parser::expectNext(lexer::Token::Type type) {
 	assumeNext(type);
 
 	return token;
-}
-
-identifier_t Parser::parseIdentifier() {
-	assume(Token::IDENTIFIER);
-	const identifier_t identifier = ts.get().identifier;
-	ts.next();
-
-	return identifier;
 }
 
 void Parser::error(const char* format, ...) {
