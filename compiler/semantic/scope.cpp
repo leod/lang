@@ -10,6 +10,7 @@ using namespace ast;
 
 void Scope::addDecl(DeclPtr decl) {
 	assert(decl);
+	assert(decl->name != "");
 
 	if (decls.find(decl->name) != decls.end())
 		throw std::runtime_error("symbol already declared: " + decl->name);
