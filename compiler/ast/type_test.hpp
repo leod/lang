@@ -1,17 +1,17 @@
-#ifndef LLANG_SEMANTIC_TYPE_TEST_HPP_INCLUDED
-#define LLANG_SEMANTIC_TYPE_TEST_HPP_INCLUDED
+#ifndef LLANG_AST_TYPE_TEST_HPP_INCLUDED
+#define LLANG_AST_TYPE_TEST_HPP_INCLUDED
 
-#include "semantic/type.hpp"
+#include "ast/type.hpp"
 
 namespace llang {
-namespace semantic {
+namespace ast {
 
 bool isBool(TypePtr type) {
 	IntegralTypePtr	integral = isA<IntegralType>(type);
 	return integral && integral->type == ast::IntegralType::BOOL;
 }
 
-} // namespace semantic
+} // namespace ast
 } // namespace llang
 
 #endif
