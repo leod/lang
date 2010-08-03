@@ -1,28 +1,29 @@
 #include <stdexcept>
 
-#include "semantic/symbol.hpp"
 #include "semantic/scope.hpp"
 
 namespace llang {
 namespace semantic {
 
-void Scope::addSymbol(SymbolPtr symbol) {
-	assert(symbol);
+using namespace ast;
 
-	if (symbols.find(symbol->name) != symbols.end())
-		throw std::runtime_error("symbol already declared: " + symbol->name);
+void Scope::addDecl(DeclPtr decl) {
+	assert(decl);
 
-	symbols.insert(symbol_map_t::value_type(symbol->name, symbol));
+	if (decls.find(decl->name) != decls.end())
+		throw std::runtime_error("decl already declared: " + decl->name);
+
+	decls.insert(DeclMap::value_type(decl->name, decl));
 }
 
-SymbolPtr Scope::lookup(const identifier_t& name) {
-	symbol_map_t::iterator it = symbols.find(name);
+DeclPtr Scope::lookup(const identifier_t& name) {
+	DeclMap::iterator it = decls.find(name);
 	
-	if (it == symbols.end()) {
+	if (it == decls.end()) {
 		if (parent_)
 			return parent_->lookup(name);
 		else
-			return SymbolPtr();
+			return DeclPtr();
 	}
 
 	return it->second;

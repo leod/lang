@@ -2,8 +2,8 @@
 #include <cstdio>
 
 #include "ast/type.hpp"
-#include "ast/declaration.hpp"
-#include "ast/expression.hpp"
+#include "ast/decl.hpp"
+#include "ast/expr.hpp"
 #include "parser/parser.hpp"
 
 namespace llang {
@@ -12,55 +12,52 @@ namespace parser {
 using namespace ast;
 using namespace lexer;
 
-Module* Parser::parseModule() {
-	Module::declaration_list_t declarations;
+ModulePtr Parser::parseModule() {
+	Module::DeclList decls;
 
 	while (ts.get().type != Token::END_OF_FILE) {
-		declarations.push_back(DeclarationPtr(parseDeclaration()));
+		decls.push_back(parseDecl());
 		assumeNext(Token::SEMICOLON);
 	}
 
-	return new Module(Location(moduleName, 1, 1), moduleName, declarations);
+	return ModulePtr(new Module(Location(moduleName, 1, 1), moduleName, decls));
 }
 
-Declaration* Parser::parseDeclaration() {
+DeclPtr Parser::parseDecl() {
 	switch (ts.get().type) {
 	case Token::KEYWORD_FN:
-		return parseFunctionDeclaration();
+		return parseFunctionDecl();
 
 	case Token::KEYWORD_VAR:
-		return parseVariableDeclaration();
+		return parseVariableDecl();
 
 	default:
-		expectedError("declaration");		
+		expectedError("decl");		
 	}
 
 	assert(false);
 }
 
-Type* Parser::parseType() {
+TypePtr Parser::parseType() {
 	Location location = ts.get().location;
 
 	switch (ts.get().type) {
-	case Token::KEYWORD_I32:
-		ts.next();
-		return new IntegralType(location, IntegralType::I32);
+	case Token::KEYWORD_I32: {
+		IntegralType::Kind type;
 
+		type = IntegralType::I32;
 	case Token::KEYWORD_CHAR:
-		ts.next();
-		return new IntegralType(location, IntegralType::CHAR);
-
+		type = IntegralType::CHAR;
 	case Token::KEYWORD_VOID:
-		ts.next();
-		return new IntegralType(location, IntegralType::VOID);
-
+		type = IntegralType::VOID;
 	case Token::KEYWORD_STRING:
-		ts.next();
-		return new IntegralType(location, IntegralType::STRING);
-
+		type = IntegralType::STRING;
 	case Token::KEYWORD_BOOL:
+		type = IntegralType::BOOL;
+
 		ts.next();
-		return new IntegralType(location, IntegralType::BOOL);
+		return TypePtr(new IntegralType(location, type));
+	}
 
 	default:
 		expectedError("type");
@@ -68,35 +65,35 @@ Type* Parser::parseType() {
 	}
 }
 
-Expression* Parser::parseExpression() {
+ExprPtr Parser::parseExpr() {
 	switch (ts.get().type) {
 	default:
-		return parseAssignExpression();
+		return parseAssignExpr();
 
 	case Token::KEYWORD_FN:
 	case Token::KEYWORD_VAR:
 		const Location location = ts.get().location;
-		return new DeclarationExpression(location, parseDeclaration());
+		return ExprPtr(new DeclExpr(location, parseDecl()));
 	}
 }
 
-Declaration* Parser::parseFunctionDeclaration() {
+DeclPtr Parser::parseFunctionDecl() {
 	const Location location = ts.get().location;
 
 	assumeNext(Token::KEYWORD_FN);
 	
-	Type* returnType = parseType();	
+	TypePtr returnType = parseType();	
 	identifier_t identifier = parseIdentifier();
 
 	assumeNext(Token::LPAREN);
 
-	FunctionDeclaration::parameter_list_t parameters;
+	FunctionDecl::ParameterList parameters;
 
 	if (ts.get().type != Token::RPAREN) {
 		bool doLoop = true;
 
 		do {
-			Type* type = parseType();
+			TypePtr type = parseType();
 
 			bool hasName = false;	
 			identifier_t name;
@@ -106,8 +103,8 @@ Declaration* Parser::parseFunctionDeclaration() {
 				name = parseIdentifier();
 			}
 
-			parameters.push_back(FunctionDeclaration::Parameter(
-				type, hasName, name));	
+			parameters.push_back(ParameterDeclPtr(
+				new ParameterDecl(location, name, type)));	
 
 			if (ts.get().type != Token::COMMA)
 				doLoop = false;
@@ -119,19 +116,19 @@ Declaration* Parser::parseFunctionDeclaration() {
 	assumeNext(Token::RPAREN);
 	assumeNext(Token::EQUALS);
 
-	Expression* body = parseExpression();
+	ExprPtr body = parseExpr();
 
-	return new FunctionDeclaration(location, returnType, identifier, parameters,
-	                               body);
+	return DeclPtr(new FunctionDecl(location, identifier, returnType, 
+	                                parameters, body));
 }
 
-Declaration* Parser::parseVariableDeclaration() {
+DeclPtr Parser::parseVariableDecl() {
 	const Location location = ts.get().location;
 
 	assumeNext(Token::KEYWORD_VAR);
 	
-	// TODO: parse inferred declarations
-	Type* type = parseType();
+	// TODO: parse inferred decls
+	TypePtr type = parseType();
 
 	identifier_t identifier = parseIdentifier();
 
@@ -140,85 +137,86 @@ Declaration* Parser::parseVariableDeclaration() {
 	} else {
 		assumeNext(Token::EQUALS);
 
-		Expression* initializer = parseExpression();
+		ExprPtr initializer = parseExpr();
 
-		return new VariableDeclaration(location, type, identifier, initializer);
+		return DeclPtr(new VariableDecl(location, identifier, type,
+		                                initializer));
 	}
 }
 
-Expression* Parser::parseBlockExpression() {
+ExprPtr Parser::parseBlockExpr() {
 	const Location location = ts.get().location;
 
 	assumeNext(Token::LBRACE);
 
-	BlockExpression::expression_list_t expressions;
+	BlockExpr::expr_list_t exprs;
 
 	while (ts.get().type != Token::RBRACE) {
-		expressions.push_back(ExpressionPtr(parseExpression()));
+		exprs.push_back(ExprPtr(parseExpr()));
 		assumeNext(Token::SEMICOLON);
 	}
 
 	assumeNext(Token::RBRACE);
 
-	return new BlockExpression(location, expressions);
+	return ExprPtr(new BlockExpr(location, exprs));
 }
 
-Expression* Parser::parseIfElseExpression() {
+ExprPtr Parser::parseIfElseExpr() {
 	const Location location = ts.get().location;
 
 	assumeNext(Token::KEYWORD_IF);
 
 	assumeNext(Token::LPAREN);
-	Expression* condition = parseExpression();
+	ExprPtr condition = parseExpr();
 	assumeNext(Token::RPAREN);
 
-	Expression* ifBody = parseExpression();
+	ExprPtr ifBody = parseExpr();
 
 	assumeNext(Token::KEYWORD_ELSE);
-	Expression* elseBody = parseExpression();
+	ExprPtr elseBody = parseExpr();
 
-	return new IfElseExpression(location, condition, ifBody, elseBody);
+	return ExprPtr(new IfElseExpr(location, condition, ifBody, elseBody));
 }
 
-Expression* Parser::parseAssignExpression() {
+ExprPtr Parser::parseAssignExpr() {
 	Location location = ts.get().location;
 
-	Expression* expression = parseEqualsExpression();
+	ExprPtr expr = parseEqualsExpr();
 	
 	// TODO
 
-	return expression;
+	return expr;
 }
 
-Expression* Parser::parseEqualsExpression() {
+ExprPtr Parser::parseEqualsExpr() {
 	Location location = ts.get().location;
 
-	Expression* expression = parseAddExpression();
+	ExprPtr expr = parseAddExpr();
 	
 	while (ts.get().type == Token::EQUALS) {
 		ts.next();
 
-		expression = new BinaryExpression(location, BinaryExpression::EQUALS,
-		                                  expression, parseAddExpression());
+		expr = ExprPtr(new BinaryExpr(location, BinaryExpr::EQUALS, expr,
+		                              parseAddExpr()));
 	}
 
-	return expression;
+	return expr;
 }
 
-Expression* Parser::parseAddExpression() {
+ExprPtr Parser::parseAddExpr() {
 	Location location = ts.get().location;
 
-	Expression* expression = parseMulExpression();
+	ExprPtr expr = parseMulExpr();
 	
 	while (ts.get().type == Token::PLUS || ts.get().type == Token::MINUS) {
-		BinaryExpression::Operation operation;
+		BinaryExpr::Operation operation;
 
 		switch (ts.get().type) {
 		case Token::PLUS:
-			operation = BinaryExpression::ADD;
+			operation = BinaryExpr::ADD;
 			break;
 		case Token::MINUS:
-			operation = BinaryExpression::SUB;
+			operation = BinaryExpr::SUB;
 			break;
 		default:
 			assert(false);
@@ -226,28 +224,28 @@ Expression* Parser::parseAddExpression() {
 
 		ts.next();
 
-		expression = new BinaryExpression(location, operation,
-		                                  expression, parseMulExpression());
+		expr = ExprPtr(new BinaryExpr(location, operation, expr,
+		                              parseMulExpr()));
 		//location = ts.get().location;
 	}
 
-	return expression;
+	return expr;
 }
 
-Expression* Parser::parseMulExpression() {
+ExprPtr Parser::parseMulExpr() {
 	Location location = ts.get().location;
 
-	Expression* expression = parsePrimaryExpression();
+	ExprPtr expr = parsePrimaryExpr();
 	
 	while (ts.get().type == Token::STAR || ts.get().type == Token::SLASH) {
-		BinaryExpression::Operation operation;
+		BinaryExpr::Operation operation;
 
 		switch (ts.get().type) {
 		case Token::STAR:
-			operation = BinaryExpression::MUL;
+			operation = BinaryExpr::MUL;
 			break;
 		case Token::SLASH:
-			operation = BinaryExpression::DIV;
+			operation = BinaryExpr::DIV;
 			break;
 		default:
 			assert(false);
@@ -255,35 +253,35 @@ Expression* Parser::parseMulExpression() {
 
 		ts.next();
 
-		expression = new BinaryExpression(location, operation,
-		                                  expression, parsePrimaryExpression());
+		expr = ExprPtr(new BinaryExpr(location, operation, expr,
+		                              parsePrimaryExpr()));
 		//location = ts.get().location;
 	}
 
-	return expression;
+	return expr;
 }
 
-Expression* Parser::parsePrimaryExpression() {
+ExprPtr Parser::parsePrimaryExpr() {
 	const Location location = ts.get().location;
 
-	Expression* expression = 0;
+	ExprPtr expr;
 	
 	switch (ts.get().type) {
 	case Token::IDENTIFIER:
-		expression = new IdentifierExpression(location, parseIdentifier());
+		expr = ExprPtr(new IdentifierExpr(location, parseIdentifier()));
 		break;
 
 	case Token::NUMBER: {
 		const int_t number = ts.get().number;
 		ts.next();
-		expression = new LiteralNumberExpression(location, number);
+		expr = ExprPtr(new LiteralNumberExpr(location, number));
 		break;
 	}
 
 	case Token::STRING: {
 		const std::string string = ts.get().identifier;
 		ts.next();
-		expression = new LiteralStringExpression(location, string);
+		expr = ExprPtr(new LiteralStringExpr(location, string));
 		break;
 	}
 
@@ -291,52 +289,51 @@ Expression* Parser::parsePrimaryExpression() {
 	case Token::KEYWORD_FALSE: {
 		const Token::Type type = ts.get().type;
 		ts.next();
-		expression =
-			new LiteralBoolExpression(location,
-			                          type == Token::KEYWORD_TRUE);
+		expr = ExprPtr(
+			new LiteralBoolExpr(location, type == Token::KEYWORD_TRUE));
 		break;
 	}
 
 	case Token::KEYWORD_VOID:
 		ts.next(); 
-		expression = new VoidExpression(location);
+		expr = ExprPtr(new VoidExpr(location));
 		break;
 
 	case Token::LPAREN:
 		ts.next();
-		expression = parseExpression();
+		expr = parseExpr();
 		assumeNext(Token::RPAREN);
 		break;
 
 	case Token::LBRACE:
-		expression = parseBlockExpression();
+		expr = parseBlockExpr();
 		break;
 
 	case Token::KEYWORD_IF:
-		expression = parseIfElseExpression();
+		expr = parseIfElseExpr();
 		break;
 
 	default:
-		expectedError("primary expression");
+		expectedError("primary expr");
 		assert(false);
 	}
 
-	expression = parsePostExpression(expression);
+	expr = parsePostExpr(expr);
 
-	return expression;
+	return expr;
 }
 
-Expression* Parser::parsePostExpression(Expression* expression) {
+ExprPtr Parser::parsePostExpr(ExprPtr expr) {
 	const Location location = ts.get().location;
 
 	switch (ts.get().type) {
 	case Token::LPAREN: {
 		ts.next();
 
-		CallExpression::argument_list_t arguments;
+		CallExpr::argument_list_t arguments;
 		
 		while (ts.get().type != Token::RPAREN) {
-			arguments.push_back(ExpressionPtr(parseExpression()));	
+			arguments.push_back(ExprPtr(parseExpr()));	
 
 			if (ts.get().type == Token::COMMA) {
 				ts.next();
@@ -348,11 +345,11 @@ Expression* Parser::parsePostExpression(Expression* expression) {
 
 		assumeNext(Token::RPAREN);
 
-		return new CallExpression(location, expression, arguments);
+		return ExprPtr(new CallExpr(location, expr, arguments));
 	}
 
 	default:
-		return expression;
+		return expr;
 	}
 }
 

@@ -3,8 +3,8 @@
 
 #include "lexer/token.hpp"
 #include "semantic/semantic_visitor.hpp"
-#include "semantic/symbol.hpp"
-#include "semantic/expression.hpp"
+#include "semantic/decl.hpp"
+#include "semantic/expr.hpp"
 #include "semantic/type.hpp"
 #include "semantic/type_test.hpp"
 
@@ -27,16 +27,16 @@ protected:
 		return visitors->typeVisitor->accept(n, p);
 	}
 
-	SymbolPtr accept(SymbolPtr n, const ScopeState& p) {
+	DeclPtr accept(DeclPtr n, const ScopeState& p) {
 		assert(n);
-		assert(visitors && visitors->symbolVisitor);
-		return visitors->symbolVisitor->accept(n, p);
+		assert(visitors && visitors->declVisitor);
+		return visitors->declVisitor->accept(n, p);
 	}
 
-	ExpressionPtr accept(ExpressionPtr n, const ScopeState& p) {
+	ExprPtr accept(ExprPtr n, const ScopeState& p) {
 		assert(n);
-		assert(visitors && visitors->expressionVisitor);
-		return visitors->expressionVisitor->accept(n, p);
+		assert(visitors && visitors->exprVisitor);
+		return visitors->exprVisitor->accept(n, p);
 	}
 
 	template<typename T> void acceptOn(shared_ptr<T>& n, const ScopeState& p) {
@@ -46,8 +46,8 @@ protected:
 	void acceptScope(Scope* scope, ScopeState state) {
 		state.scope = scope;
 
-		for (auto it = scope->symbols.begin();
-		     it != scope->symbols.end();
+		for (auto it = scope->decls.begin();
+		     it != scope->decls.end();
 		     ++it) {
 			acceptOn(it->second, state);
 		}
@@ -88,19 +88,19 @@ protected:
 	}
 };
 
-class SymbolVisitor : public VisitorBase<SymbolPtr> {
+class DeclVisitor : public VisitorBase<DeclPtr> {
 private:
-	SymbolVisitor(Context& context)
-		: VisitorBase<SymbolPtr>(context) {}
+	DeclVisitor(Context& context)
+		: VisitorBase<DeclPtr>(context) {}
 	friend SemanticVisitors* semantic::makeSemanticVisitors(Context&);
 
 protected:
-	virtual SymbolPtr visit(ModulePtr module, ScopeState state) {
+	virtual DeclPtr visit(ModulePtr module, ScopeState state) {
 		acceptScope(module->scope.get(), state);
 		return module;
 	}
 
-	virtual SymbolPtr visit(VariableSymbolPtr variable, ScopeState state) {
+	virtual DeclPtr visit(VariableDeclPtr variable, ScopeState state) {
 		acceptOn(variable->type, state);
 		acceptOn(variable->initializer, state);
 
@@ -116,20 +116,20 @@ protected:
 		return variable;
 	}
 
-	virtual SymbolPtr visit(ParameterSymbolPtr parameter, ScopeState state) {
+	virtual DeclPtr visit(ParameterDeclPtr parameter, ScopeState state) {
 		acceptOn(parameter->type, state);
 		return parameter;
 	}
 
-	virtual SymbolPtr visit(FunctionSymbolPtr function, ScopeState state) {
+	virtual DeclPtr visit(FunctionDeclPtr function, ScopeState state) {
 		for (auto it = function->parameters.begin();
 		     it != function->parameters.end();
 		     ++it) {
 			acceptOn(it->type, state);
 
-			if (it->symbol)
-				it->symbol = assumeIsA<ParameterSymbol>(
-					accept(it->symbol, state));
+			if (it->decl)
+				it->decl = assumeIsA<ParameterDecl>(
+					accept(it->decl, state));
 		}
 
 		acceptOn(function->returnType, state);
@@ -138,7 +138,7 @@ protected:
 		// TODO
 		if (!function->body->type->equals(function->returnType)) {
 			context.diag.error(function->body->astNode.location(),
-				"wrong type in function body expression of '%s': "
+				"wrong type in function body expr of '%s': "
 				"expected '%s', got '%s'",
 				function->name.c_str(),
 				function->returnType->name().c_str(),
@@ -148,75 +148,75 @@ protected:
 		return function;
 	}
 
-	virtual SymbolPtr visit(DelayedSymbolPtr delayed, ScopeState state) {
-		SymbolPtr symbol = state.scope->lookup(delayed->name);
+	virtual DeclPtr visit(DelayedDeclPtr delayed, ScopeState state) {
+		DeclPtr decl = state.scope->lookup(delayed->name);
 		
-		if (!symbol) {
+		if (!decl) {
 			context.diag.error(delayed->astNode.location(),
-				"symbol not found: %s",
+				"decl not found: %s",
 				delayed->name.c_str());
 		}
 
-		return symbol;
+		return decl;
 	}
 };
 
-class ExpressionVisitor : public VisitorBase<ExpressionPtr> {
+class ExprVisitor : public VisitorBase<ExprPtr> {
 private:
-	ExpressionVisitor(Context& context)
-		: VisitorBase<ExpressionPtr>(context) {}
+	ExprVisitor(Context& context)
+		: VisitorBase<ExprPtr>(context) {}
 	friend SemanticVisitors* semantic::makeSemanticVisitors(Context&);
 
 protected:
 #define ID_VISIT(type) \
-	virtual ExpressionPtr visit(type##Ptr ptr, ScopeState) \
+	virtual ExprPtr visit(type##Ptr ptr, ScopeState) \
 	{ return ptr; }
 
-	ID_VISIT(VoidExpression)
-	ID_VISIT(LiteralNumberExpression)
-	ID_VISIT(LiteralStringExpression)
-	ID_VISIT(LiteralBoolExpression)
-	ID_VISIT(DeclarationExpression)
+	ID_VISIT(VoidExpr)
+	ID_VISIT(LiteralNumberExpr)
+	ID_VISIT(LiteralStringExpr)
+	ID_VISIT(LiteralBoolExpr)
+	ID_VISIT(DeclExpr)
 
 #undef ID_VISIT
 
-	virtual ExpressionPtr visit(DelayedExpressionPtr delayed,
+	virtual ExprPtr visit(DelayedExprPtr delayed,
 	                            ScopeState state) {
-		SymbolPtr symbol = accept(delayed->delayedSymbol, state);
+		DeclPtr decl = accept(delayed->delayedDecl, state);
 		
 		TypePtr type;
-		if (FunctionSymbolPtr function = isA<FunctionSymbol>(symbol))
+		if (FunctionDeclPtr function = isA<FunctionDecl>(decl))
 			type = function->type;
-		else if (VariableSymbolPtr variable = isA<VariableSymbol>(symbol)) {
+		else if (VariableDeclPtr variable = isA<VariableDecl>(decl)) {
 			type = variable->type;
 		}
-		else if (ParameterSymbolPtr parameter = isA<ParameterSymbol>(symbol))
+		else if (ParameterDeclPtr parameter = isA<ParameterDecl>(decl))
 			type = parameter->type;
 
-		return ExpressionPtr(new SymbolExpression(delayed->astNode, type,
-		                                          symbol));
+		return ExprPtr(new DeclExpr(delayed->astNode, type,
+		                                          decl));
 	}	
 
-	virtual ExpressionPtr visit(BlockExpressionPtr block, ScopeState state) {
+	virtual ExprPtr visit(BlockExprPtr block, ScopeState state) {
 		acceptScope(block->scope.get(), state);
 		state.scope = block->scope.get();
 
-		for (auto it = block->expressions.begin();
-             it != block->expressions.end();
+		for (auto it = block->exprs.begin();
+             it != block->exprs.end();
              ++it) {
 			acceptOn(*it, state);		
 		}
 
-		block->type = block->expressions.size() ?
-			block->expressions.back()->type :
+		block->type = block->exprs.size() ?
+			block->exprs.back()->type :
 			TypePtr(new IntegralType(block->astNode,
 			                         ast::IntegralType::VOID));
 
 		return block;
 	}
 
-	virtual ExpressionPtr visit(CallExpressionPtr call, ScopeState state) {
-		ExpressionPtr callee = call->callee = accept(call->callee, state);
+	virtual ExprPtr visit(CallExprPtr call, ScopeState state) {
+		ExprPtr callee = call->callee = accept(call->callee, state);
 
 		FunctionTypePtr type = isA<FunctionType>(callee->type);
 
@@ -238,7 +238,7 @@ protected:
 			auto it2 = type->parameterTypes.begin();
 
 			for (; it1 != call->arguments.end(); ++it1, ++it2, ++i) {
-				ExpressionPtr argument = *it1 = accept(*it1, state); 
+				ExprPtr argument = *it1 = accept(*it1, state); 
 
 				if (!argument->type->equals(*it2)) {
 					std::string expectedType = (*it2)->name();
@@ -256,18 +256,18 @@ protected:
 		return call;
 	}
 
-	virtual ExpressionPtr visit(BinaryExpressionPtr binary, ScopeState state) {
+	virtual ExprPtr visit(BinaryExprPtr binary, ScopeState state) {
 		acceptOn(binary->left, state);
 		acceptOn(binary->right, state);
 
 		// TODO
 		if (!binary->left->type->equals(binary->right->type))
 			context.diag.error(binary->astNode.location(),
-				"'%s' and '%s' are not the same type in binary expression",
+				"'%s' and '%s' are not the same type in binary expr",
 				binary->left->type->name().c_str(),
 				binary->right->type->name().c_str());
 
-		if (binary->operation == ast::BinaryExpression::EQUALS) {
+		if (binary->operation == ast::BinaryExpr::EQUALS) {
 			binary->type = TypePtr(new IntegralType(binary->astNode,
 			                                        ast::IntegralType::BOOL));	
 		}
@@ -277,10 +277,10 @@ protected:
 		return binary;
 	}
 
-	virtual ExpressionPtr visit(IfElseExpressionPtr ifElse, ScopeState state) {
+	virtual ExprPtr visit(IfElseExprPtr ifElse, ScopeState state) {
 		acceptOn(ifElse->condition, state);
-		acceptOn(ifElse->ifExpression, state);
-		acceptOn(ifElse->elseExpression, state);
+		acceptOn(ifElse->ifExpr, state);
+		acceptOn(ifElse->elseExpr, state);
 
 		if (!isBool(ifElse->condition->type))
 			context.diag.error(ifElse->astNode.location(),
@@ -288,14 +288,14 @@ protected:
 				ifElse->condition->type->name().c_str());
 
 		// TODO
-		if (!ifElse->ifExpression->type->equals(ifElse->elseExpression->type))
+		if (!ifElse->ifExpr->type->equals(ifElse->elseExpr->type))
 			context.diag.error(ifElse->astNode.location(),
-				"type of if and else expression need to be equivalent: "
+				"type of if and else expr need to be equivalent: "
 				"'%s' vs '%s'",
-				ifElse->ifExpression->type->name().c_str(),
-				ifElse->elseExpression->type->name().c_str());
+				ifElse->ifExpr->type->name().c_str(),
+				ifElse->elseExpr->type->name().c_str());
 
-		ifElse->type = ifElse->ifExpression->type;
+		ifElse->type = ifElse->ifExpr->type;
 
 		return ifElse;
 	}
@@ -305,16 +305,16 @@ protected:
 
 SemanticVisitors* makeSemanticVisitors(Context& context) {
 	TypeVisitor* typeVisitor = new TypeVisitor(context);
-	SymbolVisitor* symbolVisitor = new SymbolVisitor(context);
-	ExpressionVisitor* expressionVisitor = new ExpressionVisitor(context);
+	DeclVisitor* declVisitor = new DeclVisitor(context);
+	ExprVisitor* exprVisitor = new ExprVisitor(context);
 
 	SemanticVisitors* visitors = new SemanticVisitors(typeVisitor,
-	                                                  symbolVisitor,
-	                                                  expressionVisitor);
+	                                                  declVisitor,
+	                                                  exprVisitor);
 	
 	typeVisitor->visitors = visitors;
-	symbolVisitor->visitors = visitors;
-	expressionVisitor->visitors = visitors;
+	declVisitor->visitors = visitors;
+	exprVisitor->visitors = visitors;
 
 	return visitors;
 }

@@ -3,7 +3,7 @@
 
 #include "util/smart_ptr.hpp"
 #include "common/context.hpp"
-#include "semantic/symbol.hpp"
+#include "semantic/decl.hpp"
 #include "semantic/visitor.hpp"
 
 namespace llang {

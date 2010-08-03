@@ -20,7 +20,7 @@ using namespace llvm;
 struct ScopeState {
 	struct Function {
 		llvm::Function* llvmFunction;
-		std::map<SymbolPtr, Value*> variables;
+		std::map<DeclPtr, Value*> variables;
 	};
 
 	// Null outside of functions
@@ -44,10 +44,10 @@ struct Codegen::Impl {
 	llvm::IRBuilder<> builder;
 
 	scoped_ptr<Visitor<ScopeState, const llvm::Type*> > typeVisitor;
-	scoped_ptr<Visitor<ScopeState, void> > symbolVisitor;
-	scoped_ptr<Visitor<ScopeState, Value*> > expressionVisitor;
+	scoped_ptr<Visitor<ScopeState, void> > declVisitor;
+	scoped_ptr<Visitor<ScopeState, Value*> > exprVisitor;
 
-	ModulePtr moduleSymbol;
+	ModulePtr moduleDecl;
 	
 	Impl(Context&, ModulePtr module);
 	void run();
@@ -75,12 +75,12 @@ public:
 		return visitors.typeVisitor->accept(n, p);
 	}
 
-	void accept(SymbolPtr n, const ScopeState& p) {
-		visitors.symbolVisitor->accept(n, p);
+	void accept(DeclPtr n, const ScopeState& p) {
+		visitors.declVisitor->accept(n, p);
 	}
 
-	Value* accept(ExpressionPtr n, const ScopeState& p) {
-		return visitors.expressionVisitor->accept(n, p);
+	Value* accept(ExprPtr n, const ScopeState& p) {
+		return visitors.exprVisitor->accept(n, p);
 	}
 };
 
@@ -122,17 +122,17 @@ protected:
 	}
 };
 
-class SymbolVisitor : public VisitorBase<void> {
+class DeclVisitor : public VisitorBase<void> {
 public:
-	SymbolVisitor(Codegen::Impl& visitors, Context& context,
+	DeclVisitor(Codegen::Impl& visitors, Context& context,
 	              llvm::Module* module, IRBuilder<>& builder)
 		: VisitorBase<void>(visitors, context, module, builder) {
 	}
 
 protected:
 	virtual void visit(ModulePtr module, ScopeState state) {
-		for (auto it = module->scope->symbols.begin();
-		     it != module->scope->symbols.end();
+		for (auto it = module->scope->decls.begin();
+		     it != module->scope->decls.end();
 		     ++it) {
 			accept(it->second, state);
 		}
@@ -154,7 +154,7 @@ protected:
 		BasicBlock::iterator point;
 	};
 
-	virtual void visit(FunctionSymbolPtr function, ScopeState state) {
+	virtual void visit(FunctionDeclPtr function, ScopeState state) {
 		// Need to save insert point as we might already be generating
 		// a function right now!
 		SaveInsertPoint saveInsertPoint(builder);
@@ -180,10 +180,10 @@ protected:
 			auto it1 = f->arg_begin();
 			auto it2 = function->parameters.begin();
 			for (; it1 != f->arg_end(); ++it1, ++it2) {
-				if (!it2->symbol) continue; // unnamed parameter
+				if (!it2->decl) continue; // unnamed parameter
 
-				it1->setName(it2->symbol->name);
-				functionState.variables[it2->symbol] = it1;
+				it1->setName(it2->decl->name);
+				functionState.variables[it2->decl] = it1;
 			}
 		}
 
@@ -201,7 +201,7 @@ protected:
 		}
 	}
 
-	virtual void visit(VariableSymbolPtr variable, ScopeState state) {
+	virtual void visit(VariableDeclPtr variable, ScopeState state) {
 		assert(state.function); // TODO
 
 		llvm::Function* llvmFunction = state.function->llvmFunction;
@@ -219,15 +219,15 @@ protected:
 	}
 };
 
-class ExpressionVisitor : public VisitorBase<Value*> {
+class ExprVisitor : public VisitorBase<Value*> {
 public:
-	ExpressionVisitor(Codegen::Impl& visitors, Context& context,
+	ExprVisitor(Codegen::Impl& visitors, Context& context,
 	                  llvm::Module* module, IRBuilder<>& builder)
 		: VisitorBase<Value*>(visitors, context, module, builder) {
 	}
 
 private:
-	Function* getFunction(FunctionSymbolPtr function, ScopeState state) {
+	Function* getFunction(FunctionDeclPtr function, ScopeState state) {
 		if (Function* llvmFunction = module->getFunction(function->mangle())) {
 			return llvmFunction;
 		}
@@ -241,30 +241,30 @@ private:
 	}
 
 protected:
-	virtual Value* visit(SymbolExpressionPtr expression, ScopeState state) {
-		if (VariableSymbolPtr symbol =
-				isA<VariableSymbol>(SymbolPtr(expression->symbol))) {
-			return builder.CreateLoad(state.function->variables[symbol],
-			                          symbol->name);
+	virtual Value* visit(DeclExprPtr expr, ScopeState state) {
+		if (VariableDeclPtr decl =
+				isA<VariableDecl>(DeclPtr(expr->decl))) {
+			return builder.CreateLoad(state.function->variables[decl],
+			                          decl->name);
 		}
-		if (ParameterSymbolPtr symbol =
-				isA<ParameterSymbol>(SymbolPtr(expression->symbol))) {
-			return state.function->variables[symbol];
+		if (ParameterDeclPtr decl =
+				isA<ParameterDecl>(DeclPtr(expr->decl))) {
+			return state.function->variables[decl];
 		}
 		else assert(false); // TODO
 	}
 
-	virtual Value* visit(CallExpressionPtr expression, ScopeState state) {
-		if (SymbolExpressionPtr callee =
-				isA<SymbolExpression>(expression->callee)) {
-			if (FunctionSymbolPtr function =
-					isA<FunctionSymbol>(SymbolPtr(callee->symbol))) {
+	virtual Value* visit(CallExprPtr expr, ScopeState state) {
+		if (DeclExprPtr callee =
+				isA<DeclExpr>(expr->callee)) {
+			if (FunctionDeclPtr function =
+					isA<FunctionDecl>(DeclPtr(callee->decl))) {
 				Function* llvmFunction = getFunction(function, state);
 				assert(llvmFunction);
 
 				std::vector<Value*> arguments;
-				for (auto it = expression->arguments.begin();
-				     it != expression->arguments.end();
+				for (auto it = expr->arguments.begin();
+				     it != expr->arguments.end();
 				     ++it) {
 					arguments.push_back(accept(*it, state));
 				}
@@ -277,14 +277,14 @@ protected:
 		else assert(false); // TODO
 	}
 
-	virtual Value* visit(VoidExpressionPtr, ScopeState) {
+	virtual Value* visit(VoidExprPtr, ScopeState) {
 		return 0;
 	}
 
-	virtual Value* visit(BlockExpressionPtr block, ScopeState state) {
+	virtual Value* visit(BlockExprPtr block, ScopeState state) {
 		Value* value = 0;
-		for (auto it = block->expressions.begin();
-		     it != block->expressions.end();
+		for (auto it = block->exprs.begin();
+		     it != block->exprs.end();
 		     ++it) {
 			value = accept(*it, state);	
 		}
@@ -292,37 +292,37 @@ protected:
 		return value;
 	}		
 		
-	virtual Value* visit(LiteralNumberExpressionPtr expression, ScopeState) {
+	virtual Value* visit(LiteralNumberExprPtr expr, ScopeState) {
 		return ConstantInt::get(llvmContext,
-			APInt(sizeof(int_t) * 8, expression->number, true));
+			APInt(sizeof(int_t) * 8, expr->number, true));
 	}
 
-	virtual Value* visit(LiteralBoolExpressionPtr expression, ScopeState) {
-		return expression->value ? ConstantInt::getTrue(llvmContext)
+	virtual Value* visit(LiteralBoolExprPtr expr, ScopeState) {
+		return expr->value ? ConstantInt::getTrue(llvmContext)
 		                         : ConstantInt::getFalse(llvmContext);
 	}
 	
-	virtual Value* visit(BinaryExpressionPtr expression, ScopeState state) {
-		Value* left  = accept(expression->left, state);
-		Value* right = accept(expression->right, state);
+	virtual Value* visit(BinaryExprPtr expr, ScopeState state) {
+		Value* left  = accept(expr->left, state);
+		Value* right = accept(expr->right, state);
 
 		assert(left);
 		assert(right);
 
-		switch (expression->operation) {
-		case ast::BinaryExpression::ADD:
+		switch (expr->operation) {
+		case ast::BinaryExpr::ADD:
 			return builder.CreateAdd(left, right, "addtmp");
 
-		case ast::BinaryExpression::SUB:
+		case ast::BinaryExpr::SUB:
 			return builder.CreateSub(left, right, "subtmp");
 
-		case ast::BinaryExpression::MUL:
+		case ast::BinaryExpr::MUL:
 			return builder.CreateMul(left, right, "multmp");
 
-		//case ast::BinaryExpression::DIV:
+		//case ast::BinaryExpr::DIV:
 			//return builder.CreateSDiv(left, right, "divtmp");
 
-		case ast::BinaryExpression::EQUALS:
+		case ast::BinaryExpr::EQUALS:
 			return builder.CreateICmpEQ(left, right, "eqtmp");
 
 		default:
@@ -330,15 +330,15 @@ protected:
 		}
 	}
 
-	virtual Value* visit(DeclarationExpressionPtr expression,
+	virtual Value* visit(DeclExprPtr expr,
 	                     ScopeState state) {
 		
-		accept(expression->symbol, state);
+		accept(expr->decl, state);
 		return 0; // TODO?
 	}
 
-	virtual Value* visit(IfElseExpressionPtr expression, ScopeState state) {
-		Value* condition = accept(expression->condition, state);
+	virtual Value* visit(IfElseExprPtr expr, ScopeState state) {
+		Value* condition = accept(expr->condition, state);
 
 		assert(state.function);
 		Function* llvmFunction = state.function->llvmFunction;
@@ -352,19 +352,19 @@ protected:
 		builder.CreateCondBr(condition, ifBlock, elseBlock);
 
 		builder.SetInsertPoint(ifBlock);
-		Value* ifValue = accept(expression->ifExpression, state);
+		Value* ifValue = accept(expr->ifExpr, state);
 		builder.CreateBr(mergeBlock);
 		ifBlock = builder.GetInsertBlock();
 
 		llvmFunction->getBasicBlockList().push_back(elseBlock);
 		builder.SetInsertPoint(elseBlock);
-		Value* elseValue = accept(expression->elseExpression, state);
+		Value* elseValue = accept(expr->elseExpr, state);
 		builder.CreateBr(mergeBlock);
 		elseBlock = builder.GetInsertBlock();
 
 		llvmFunction->getBasicBlockList().push_back(mergeBlock);
 		builder.SetInsertPoint(mergeBlock);
-		PHINode* phi = builder.CreatePHI(accept(expression->type, state),
+		PHINode* phi = builder.CreatePHI(accept(expr->type, state),
 		                                 "iftmp");
 		phi->addIncoming(ifValue, ifBlock);
 		phi->addIncoming(elseValue, elseBlock);
@@ -375,24 +375,24 @@ protected:
 
 } // namespace
 
-Codegen::Impl::Impl(Context& context, ModulePtr moduleSymbol)
+Codegen::Impl::Impl(Context& context, ModulePtr moduleDecl)
 	: llvmContext(),
 	  module(new llvm::Module("test", llvmContext)),
 	  builder(llvmContext),
 	  typeVisitor(new TypeVisitor(*this, context, module.get(), builder)),
-	  symbolVisitor(new SymbolVisitor(*this, context, module.get(), builder)),
-	  expressionVisitor(new ExpressionVisitor(*this, context, module.get(),
+	  declVisitor(new DeclVisitor(*this, context, module.get(), builder)),
+	  exprVisitor(new ExprVisitor(*this, context, module.get(),
 	                    builder)),
-	  moduleSymbol(moduleSymbol) {
+	  moduleDecl(moduleDecl) {
 }
 
 void Codegen::Impl::run() {
 	ScopeState state;
-	symbolVisitor->accept(moduleSymbol, state);
+	declVisitor->accept(moduleDecl, state);
 }
 
-Codegen::Codegen(Context& context, ModulePtr moduleSymbol)
-	: impl(new Impl(context, moduleSymbol)) {
+Codegen::Codegen(Context& context, ModulePtr moduleDecl)
+	: impl(new Impl(context, moduleDecl)) {
 }
 
 Codegen::~Codegen() {

@@ -1,8 +1,7 @@
 #ifndef LLANG_AST_NODE_HPP_INCLUDED
 #define LLANG_AST_NODE_HPP_INCLUDED
 
-#include <cassert>
-
+#include "util/smart_ptr.hpp"
 #include "common/location.hpp"
 #include "ast/node_table.hpp"
 
@@ -11,7 +10,6 @@ namespace ast {
 
 class Node {
 public:
-	// Create an enum of Node types
 #define GENERATE_ENUM_ENTRY(name, nameInCaps) nameInCaps,
 	enum Tag {
 		LLANG_AST_NODE_TABLE(GENERATE_ENUM_ENTRY)
@@ -19,35 +17,44 @@ public:
 	};
 #undef GENERATE_ENUM_ENTRY
 
-	Node(const Tag tag, const Location& location)
+	Node(Tag tag, const Location& location)
 		: tag(tag), location_(location) {
 	}
 
 	virtual ~Node() {}
-	
-	virtual Location location() const {
-		return location_;
+
+	template <typename T> T* isA() {
+		return dynamic_cast<T*>(this);
+	}
+
+	template <typename T> const T* isA() const {
+		return dynamic_cast<const T*>(this);
 	}
 
 	const Tag tag;
+
+	Location location() const {
+		return location_;
+	}
 
 private:
 	const Location location_;
 };
 
-class DummyNode : public Node {
-public:	
-	DummyNode()
-		: Node(Node::DUMMY_NODE, Location("", 0, 0)) {
-	}
+typedef shared_ptr<Node> NodePtr;
 
-	virtual Location location() const {
-		assert(false);
-		return Node::location();
-	}
-};
+template <typename T, typename U> shared_ptr<T> isA(shared_ptr<U> p) {
+	return dynamic_pointer_cast<T>(p);
+}
 
-} // namespace ast
+template <typename T, typename U> shared_ptr<T> assumeIsA(shared_ptr<U> p) {
+	shared_ptr<T> t = isA<T>(p);
+	assert(t.get());
+
+	return t;
+}
+
+} // namespace semantic
 } // namespace llang
 
 #endif

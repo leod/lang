@@ -7,20 +7,28 @@
 	X(DummyNode, DUMMY_NODE) \
 	\
 	X(Module, MODULE) \
-	X(FunctionDeclaration, FUNCTION_DECLARATION) \
-	X(VariableDeclaration, VARIABLE_DECLARATION) \
+	X(FunctionDecl, FUNCTION_DECL) \
+	X(VariableDecl, VARIABLE_DECL) \
+	X(ParameterDecl, PARAMETER_DECL) \
+	X(DelayedDecl, DELAYED_DECL) \
 	\
 	X(IntegralType, INTEGRAL_TYPE) \
+	X(UndefinedType, UNDEFINED_TYPE) \
+	X(DelayedType, DELAYED_TYPE) \
+	X(FunctionType, FUNCTION_TYPE) \
+	X(ArrayType, ARRAY_TYPE) \
 	\
-	X(BinaryExpression, BINARY_EXPRESSION) \
-	X(LiteralNumberExpression, LITERAL_NUMBER_EXPRESSION) \
-	X(LiteralStringExpression, LITERAL_STRING_EXPRESSION) \
-	X(LiteralBoolExpression, LITERAL_BOOL_EXPRESSION) \
-	X(BlockExpression, BLOCK_EXPRESSION) \
-	X(IfElseExpression, IF_ELSE_EXPRESSION) \
-	X(VoidExpression, VOID_EXPRESSION) \
-	X(IdentifierExpression, IDENTIFIER_EXPRESSION) \
-	X(CallExpression, CALL_EXPRESSION) \
-	X(DeclarationExpression, DECLARATION_EXPRESSION)
+	X(BinaryExpr, BINARY_EXPR) \
+	X(LiteralNumberExpr, LITERAL_NUMBER_EXPR) \
+	X(LiteralStringExpr, LITERAL_STRING_EXPR) \
+	X(LiteralBoolExpr, LITERAL_BOOL_EXPR) \
+	X(BlockExpr, BLOCK_EXPR) \
+	X(IfElseExpr, IF_ELSE_EXPR) \
+	X(VoidExpr, VOID_EXPR) \
+	X(IdentifierExpr, IDENTIFIER_EXPR) \
+	X(CallExpr, CALL_EXPR) \
+	X(DeclRefExpr, DECL_REF_EXPR) \
+	X(DeclExpr, DECL_EXPR) \
+	X(DelayedExpr, DELAYED_EXPR)
 
 #endif
