@@ -100,6 +100,9 @@ protected:
 		case ast::IntegralType::VOID:
 			return llvm::Type::getVoidTy(llvmContext);
 
+		case ast::IntegralType::BOOL:
+			return llvm::Type::getInt1Ty(llvmContext);
+
 		default:
 			assert(false);
 		}
@@ -293,6 +296,11 @@ protected:
 		return ConstantInt::get(llvmContext,
 			APInt(sizeof(int_t) * 8, expression->number, true));
 	}
+
+	virtual Value* visit(LiteralBoolExpressionPtr expression, ScopeState) {
+		return expression->value ? ConstantInt::getTrue(llvmContext)
+		                         : ConstantInt::getFalse(llvmContext);
+	}
 	
 	virtual Value* visit(BinaryExpressionPtr expression, ScopeState state) {
 		Value* left  = accept(expression->left, state);
@@ -313,6 +321,9 @@ protected:
 
 		//case ast::BinaryExpression::DIV:
 			//return builder.CreateSDiv(left, right, "divtmp");
+
+		case ast::BinaryExpression::EQUALS:
+			return builder.CreateICmpEQ(left, right, "eqtmp");
 
 		default:
 			assert(false);
