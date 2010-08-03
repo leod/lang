@@ -141,12 +141,12 @@ typedef shared_ptr<VoidExpr> VoidExprPtr;
 
 class IdentifierExpr : public Expr {
 public:
-	IdentifierExpr(const Location& location, const std::string& name)
+	IdentifierExpr(const Location& location, const identifier_t& name)
 		: Expr(Node::IDENTIFIER_EXPR, location),
 		  name(name) {
 	}
 
-	const std::string& name;
+	const identifier_t name;
 };
 
 typedef shared_ptr<IdentifierExpr> IdentifierExprPtr;
@@ -187,7 +187,7 @@ public:
 		  decl(decl) {
 	}
 
-	weak_ptr<Decl> decl;
+	shared_ptr<Decl> decl;
 };
 
 typedef shared_ptr<DeclExpr> DeclExprPtr;

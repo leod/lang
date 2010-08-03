@@ -110,7 +110,7 @@ protected:
 		
 		if (!decl) {
 			context.diag.error(delayed->location(),
-				"decl not found: %s",
+				"symbol not found: %s",
 				delayed->name.c_str());
 		}
 
@@ -143,14 +143,14 @@ protected:
 		TypePtr type;
 		if (FunctionDeclPtr function = isA<FunctionDecl>(decl))
 			type = function->type;
-		else if (VariableDeclPtr variable = isA<VariableDecl>(decl)) {
+		else if (VariableDeclPtr variable = isA<VariableDecl>(decl))
 			type = variable->type;
-		}
 		else if (ParameterDeclPtr parameter = isA<ParameterDecl>(decl))
 			type = parameter->type;
 
-		return ExprPtr(new DeclRefExpr(delayed->location(), delayed->type,
-		                               decl));
+		assert(type);
+
+		return ExprPtr(new DeclRefExpr(delayed->location(), type, decl));
 	}	
 
 	virtual ExprPtr visit(BlockExprPtr block, ScopeState state) {
@@ -172,7 +172,8 @@ protected:
 	}
 
 	virtual ExprPtr visit(CallExprPtr call, ScopeState state) {
-		ExprPtr callee = call->callee = accept(call->callee, state);
+		acceptOn(call->callee, state);
+		ExprPtr callee = call->callee;
 
 		FunctionTypePtr type = isA<FunctionType>(callee->type);
 

@@ -46,15 +46,25 @@ TypePtr Parser::parseType() {
 		IntegralType::Kind type;
 
 		type = IntegralType::I32;
+		goto Cintegral;
+
 	case Token::KEYWORD_CHAR:
 		type = IntegralType::CHAR;
+		goto Cintegral;
+
 	case Token::KEYWORD_VOID:
 		type = IntegralType::VOID;
+		goto Cintegral;
+
 	case Token::KEYWORD_STRING:
 		type = IntegralType::STRING;
+		goto Cintegral;
+
 	case Token::KEYWORD_BOOL:
 		type = IntegralType::BOOL;
-
+		goto Cintegral;
+	
+	Cintegral:
 		ts.next();
 		return TypePtr(new IntegralType(location, type));
 	}

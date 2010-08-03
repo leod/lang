@@ -46,8 +46,7 @@ public:
 protected:
 	ScopedDecl(Node::Tag tag, const Location& location,
 	           const identifier_t& name)
-		: Decl(tag, location, name),
-		  scope(scope) {
+		: Decl(tag, location, name) {
 	}
 };
 
@@ -108,8 +107,7 @@ public:
 		: ScopedDecl(Node::FUNCTION_DECL, location, name),
 		  returnType(returnType),
 		  parameters(parameters),
-		  body(body),
-		  type(type) {
+		  body(body) {
 	}
 
 	std::string mangle() {
