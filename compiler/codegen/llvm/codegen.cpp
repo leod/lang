@@ -309,6 +309,20 @@ protected:
 			APInt(sizeof(int_t) * 8, expr->number, true));
 	}
 
+	virtual Value* visit(LiteralStringExprPtr expr, ScopeState) {
+		size_t length = expr->string.size();
+
+		const llvm::Type* elementType = IntegerType::get(llvmContext, 8);
+		const llvm::Type* type = llvm::ArrayType::get(elementType, length);
+		llvm::StringRef string = StringRef(expr->string);
+		llvm::Constant* init = ConstantArray::get(llvmContext, string, false);
+
+		GlobalVariable* global =
+			new GlobalVariable(*module, type, true, GlobalValue::InternalLinkage,
+			                   init, "string");
+		return global;
+	}
+
 	virtual Value* visit(LiteralBoolExprPtr expr, ScopeState) {
 		return expr->value ? ConstantInt::getTrue(llvmContext)
 		                   : ConstantInt::getFalse(llvmContext);
