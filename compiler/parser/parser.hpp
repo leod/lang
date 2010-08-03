@@ -45,6 +45,8 @@ private:
 	ast::ExprPtr parsePrimaryExpr();
 	ast::ExprPtr parsePostExpr(ast::ExprPtr expr);
 
+	void parseFunctionPrototype(ast::TypePtr& returnType, identifier_t& name,
+	                            ast::FunctionDecl::ParameterList& parameters);
 	identifier_t parseIdentifier();
 
 	// Checks if current token is a 'type'

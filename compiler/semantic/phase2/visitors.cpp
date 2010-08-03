@@ -86,16 +86,19 @@ protected:
 		}
 
 		acceptOn(function->returnType, state);
-		acceptOn(function->body, state.withScope(function->scope.get()));
 
-		// TODO
-		if (!function->body->type->equals(function->returnType)) {
-			context.diag.error(function->body->location(),
-				"wrong type in function body expr of '%s': "
-				"expected '%s', got '%s'",
-				function->name.c_str(),
-				function->returnType->name().c_str(),
-				function->body->type->name().c_str());
+		if (function->body) {
+			acceptOn(function->body, state.withScope(function->scope.get()));
+
+			// TODO: implicit cast to void
+			if (!function->body->type->equals(function->returnType)) {
+				context.diag.error(function->body->location(),
+					"wrong type in function body expr of '%s': "
+					"expected '%s', got '%s'",
+					function->name.c_str(),
+					function->returnType->name().c_str(),
+					function->body->type->name().c_str());
+			}
 		}
 
 		return function;

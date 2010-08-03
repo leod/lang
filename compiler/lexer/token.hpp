@@ -41,6 +41,7 @@ struct Token {
 		KEYWORD_BOOL,
 		KEYWORD_TRUE,
 		KEYWORD_FALSE,
+		KEYWORD_EXTERN,
 
 		ENUM_MAX
 	} type;
