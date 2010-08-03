@@ -198,6 +198,8 @@ protected:
 		                          state.withFunction(&functionState));
 
 		if (!returnType || returnType->type != ast::IntegralType::VOID) {
+			assert(bodyValue);
+
 			builder.CreateRet(bodyValue);
 			llvm::verifyFunction(*f);
 		}
@@ -244,21 +246,26 @@ private:
 
 protected:
 	virtual Value* visit(DeclRefExprPtr expr, ScopeState state) {
-		if (VariableDeclPtr decl =
-				isA<VariableDecl>(DeclPtr(expr->decl))) {
-			return builder.CreateLoad(state.function->variables[decl],
-			                          decl->name);
-		}
+		Value* value = 0;
+
 		if (ParameterDeclPtr decl =
-				isA<ParameterDecl>(DeclPtr(expr->decl))) {
-			return state.function->variables[decl];
+			isA<ParameterDecl>(DeclPtr(expr->decl))) {
+			value = state.function->variables[decl];
+		}
+		else if (VariableDeclPtr decl =
+			isA<VariableDecl>(DeclPtr(expr->decl))) {
+			value = builder.CreateLoad(state.function->variables[decl],
+			                           decl->name);
 		}
 		else assert(false); // TODO
+
+		assert(value);
+		return value;
 	}
 
 	virtual Value* visit(CallExprPtr expr, ScopeState state) {
-		if (DeclExprPtr callee =
-				isA<DeclExpr>(expr->callee)) {
+		if (DeclRefExprPtr callee =
+				isA<DeclRefExpr>(expr->callee)) {
 			if (FunctionDeclPtr function =
 					isA<FunctionDecl>(DeclPtr(callee->decl))) {
 				Function* llvmFunction = getFunction(function, state);
