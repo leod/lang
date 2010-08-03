@@ -2,11 +2,11 @@
 
 #include "ast/print_visitor.hpp"
 #include "ast/type.hpp"
-#include "ast/declaration.hpp"
-#include "ast/expression.hpp"
+#include "ast/decl.hpp"
+#include "ast/expr.hpp"
 #include "semantic/ast_visitor.hpp"
-#include "semantic/symbol.hpp"
-#include "semantic/expression.hpp"
+#include "semantic/decl.hpp"
+#include "semantic/expr.hpp"
 #include "semantic/type.hpp"
 
 namespace llang {
@@ -26,12 +26,12 @@ protected:
 		return visitors->typeVisitor->accept(n, p);
 	}
 
-	SymbolPtr accept(ast::Declaration& n, const ScopeState& p) {
-		return visitors->declarationVisitor->accept(n, p);
+	DeclPtr accept(ast::Decl& n, const ScopeState& p) {
+		return visitors->declVisitor->accept(n, p);
 	}
 
-	ExpressionPtr accept(ast::Expression& n, const ScopeState& p) {
-		return visitors->expressionVisitor->accept(n, p);
+	ExprPtr accept(ast::Expr& n, const ScopeState& p) {
+		return visitors->exprVisitor->accept(n, p);
 	}
 };
 
@@ -51,195 +51,195 @@ protected:
 	}
 };
 
-class DeclarationVisitor : public VisitorBase<SymbolPtr> {
+class DeclVisitor : public VisitorBase<DeclPtr> {
 private:
-	DeclarationVisitor(Context& context)
-		: VisitorBase<SymbolPtr>(context) {}
+	DeclVisitor(Context& context)
+		: VisitorBase<DeclPtr>(context) {}
 	friend AstVisitors* semantic::makeAstVisitors(Context&);
 
 protected:
-	virtual SymbolPtr visit(ast::Module& module, ScopeState state) {
+	virtual DeclPtr visit(ast::Module& module, ScopeState state) {
 		Scope* scope = new Scope(0); // TODO
 		state.scope = scope;
 
-		shared_ptr<Module> symbol(new Module(module, scope));
+		shared_ptr<Module> decl(new Module(module, scope));
 
-		for (auto it = module.declarations.begin();
-		     it != module.declarations.end();
+		for (auto it = module.decls.begin();
+		     it != module.decls.end();
 		     ++it) {
-			symbol->scope->addSymbol(accept(**it, state));
+			decl->scope->addDecl(accept(**it, state));
 		}
 
-		return symbol;
+		return decl;
 	}
 
-	virtual SymbolPtr visit(ast::VariableDeclaration& variable,
+	virtual DeclPtr visit(ast::VariableDecl& variable,
 	                        ScopeState state) {
 		TypePtr type = accept(*variable.type, state);
-		ExpressionPtr initializer = accept(*variable.initializer, state);
+		ExprPtr initializer = accept(*variable.initializer, state);
 
-		SymbolPtr symbol(new VariableSymbol(variable, state.scope, type,
+		DeclPtr decl(new VariableDecl(variable, state.scope, type,
 		                                    initializer));
 
-		return symbol;
+		return decl;
 	}
 
-	virtual SymbolPtr visit(ast::FunctionDeclaration& function,
+	virtual DeclPtr visit(ast::FunctionDecl& function,
 	                        ScopeState state) {
 		Scope* scope = new Scope(state.scope);
 		state.scope = scope;
 
 		FunctionType::parameter_type_list_t parameterTypes;
-		FunctionSymbol::parameter_list_t parameters;
+		FunctionDecl::parameter_list_t parameters;
 
 		for (auto it = function.parameters.begin();
 		     it != function.parameters.end();
 		     ++it) {
 			TypePtr type(accept(*it->type, state));
 
-			ParameterSymbolPtr symbol;
+			ParameterDeclPtr decl;
 			if (it->hasName) {
-				symbol.reset(new ParameterSymbol(function, // TMP
+				decl.reset(new ParameterDecl(function, // TMP
 				                                 it->name, // TMP
 				                                 scope,
 				                                 type)); 
-				state.scope->addSymbol(symbol);
+				state.scope->addDecl(decl);
 			}
 
 			parameterTypes.push_back(type);
-			parameters.push_back(FunctionSymbol::Parameter(type, symbol));
+			parameters.push_back(FunctionDecl::Parameter(type, decl));
 		}
 
 		TypePtr returnType(accept(*function.returnType, state));
-		ExpressionPtr body = accept(*function.body, state);
+		ExprPtr body = accept(*function.body, state);
 
 		TypePtr type(new FunctionType(function, returnType, parameterTypes));
 
-		SymbolPtr symbol(new FunctionSymbol(function, scope, returnType,
+		DeclPtr decl(new FunctionDecl(function, scope, returnType,
 		                                    parameters, body, type));
 
-		return symbol;
+		return decl;
 	}
 };
 
 // Does nothing more than translate the ast into the semantic tree.
 // Typechecking is done in the second semantic phase.
 // This should allow us to easily deal with forward references.
-class ExpressionVisitor : public VisitorBase<ExpressionPtr> {
+class ExprVisitor : public VisitorBase<ExprPtr> {
 private:
-	ExpressionVisitor(Context& context)
-		: VisitorBase<ExpressionPtr>(context) {}
+	ExprVisitor(Context& context)
+		: VisitorBase<ExprPtr>(context) {}
 	friend AstVisitors* semantic::makeAstVisitors(Context&);
 
 protected:
-	virtual ExpressionPtr visit(ast::BinaryExpression& expression,
+	virtual ExprPtr visit(ast::BinaryExpr& expr,
 	                            ScopeState state) {
-		ExpressionPtr left = accept(*expression.left, state);
-		ExpressionPtr right = accept(*expression.right, state);
+		ExprPtr left = accept(*expr.left, state);
+		ExprPtr right = accept(*expr.right, state);
 
-		return ExpressionPtr(new BinaryExpression(expression,
+		return ExprPtr(new BinaryExpr(expr,
 		                                          UndefinedType::singleton(),
 		                                          left, right));
 	}
 
-	virtual ExpressionPtr visit(ast::IdentifierExpression& identifier,
+	virtual ExprPtr visit(ast::IdentifierExpr& identifier,
 	                            ScopeState) {
-		// Delay looking up the symbol to the next semantic phase
+		// Delay looking up the decl to the next semantic phase
 
-		SymbolPtr symbol(new DelayedSymbol(identifier, identifier.name, 0));
-		TypePtr type(new DelayedType(identifier, symbol));
-		ExpressionPtr expression(
-			new DelayedExpression(identifier, type, symbol));
+		DeclPtr decl(new DelayedDecl(identifier, identifier.name, 0));
+		TypePtr type(new DelayedType(identifier, decl));
+		ExprPtr expr(
+			new DelayedExpr(identifier, type, decl));
      
-		return expression;
+		return expr;
 	}
 
-	virtual ExpressionPtr visit(ast::CallExpression& call,
+	virtual ExprPtr visit(ast::CallExpr& call,
 	                            ScopeState state) {
-		ExpressionPtr callee = accept(*call.callee, state);
+		ExprPtr callee = accept(*call.callee, state);
 
-		CallExpression::argument_list_t arguments;
+		CallExpr::argument_list_t arguments;
 
 		for (auto it = call.arguments.begin();
 			 it != call.arguments.end();
 			 ++it) {
-			ExpressionPtr argument(accept(**it, state));
+			ExprPtr argument(accept(**it, state));
 			arguments.push_back(argument);		
 		}
 
-		return ExpressionPtr(
-			new CallExpression(call, UndefinedType::singleton(), callee,
+		return ExprPtr(
+			new CallExpr(call, UndefinedType::singleton(), callee,
 			                   arguments));
 	}
 
-	virtual ExpressionPtr visit(ast::BlockExpression& block,
+	virtual ExprPtr visit(ast::BlockExpr& block,
 	                            ScopeState state) {
 		Scope* scope = new Scope(state.scope); // TODO
 		state.scope = scope;
 
-		BlockExpression::expression_list_t expressions;
-		for (auto it = block.expressions.begin();
-		     it != block.expressions.end();
+		BlockExpr::expr_list_t exprs;
+		for (auto it = block.exprs.begin();
+		     it != block.exprs.end();
 		     ++it) {
-			expressions.push_back(accept(**it, state));
+			exprs.push_back(accept(**it, state));
 		}
 
-		return ExpressionPtr(new BlockExpression(block,
+		return ExprPtr(new BlockExpr(block,
 		                                         UndefinedType::singleton(),
 		                                         scope,
-		                                         expressions));
+		                                         exprs));
 	}
 
-	virtual ExpressionPtr visit(ast::LiteralNumberExpression& literal,
+	virtual ExprPtr visit(ast::LiteralNumberExpr& literal,
 	                            ScopeState) {
 		// TODO: This type is not right. Literal numbers have an unspecified
 		//       int type and are implicitly casteable to i32.
 		
 		TypePtr type(new IntegralType(literal, ast::IntegralType::I32));
 
-		return ExpressionPtr(new LiteralNumberExpression(literal, type));
+		return ExprPtr(new LiteralNumberExpr(literal, type));
 	}
 
-	virtual ExpressionPtr visit(ast::LiteralStringExpression& literal,
+	virtual ExprPtr visit(ast::LiteralStringExpr& literal,
 	                            ScopeState) {
 		TypePtr type(new ArrayType(literal,
 				TypePtr(new IntegralType(literal, ast::IntegralType::CHAR))));
 
-		return ExpressionPtr(new LiteralStringExpression(literal, type));
+		return ExprPtr(new LiteralStringExpr(literal, type));
 	}
 
-	virtual ExpressionPtr visit(ast::LiteralBoolExpression& literal,
+	virtual ExprPtr visit(ast::LiteralBoolExpr& literal,
 	                            ScopeState) {
 		TypePtr type(new IntegralType(literal, ast::IntegralType::BOOL));
 
-		return ExpressionPtr(new LiteralBoolExpression(literal, type));
+		return ExprPtr(new LiteralBoolExpr(literal, type));
 	}
 
-	virtual ExpressionPtr visit(ast::VoidExpression& voidExpression,
+	virtual ExprPtr visit(ast::VoidExpr& voidExpr,
 	                            ScopeState) {
-		TypePtr type(new IntegralType(voidExpression,
+		TypePtr type(new IntegralType(voidExpr,
 		                              ast::IntegralType::VOID));
-		return ExpressionPtr(new VoidExpression(voidExpression, type));
+		return ExprPtr(new VoidExpr(voidExpr, type));
 	}
 
-	virtual ExpressionPtr visit(ast::DeclarationExpression& declaration,
+	virtual ExprPtr visit(ast::DeclExpr& decl,
                                 ScopeState state) {
-		SymbolPtr symbol(accept(*declaration.declaration, state));
-		state.scope->addSymbol(symbol);
+		DeclPtr decl(accept(*decl.decl, state));
+		state.scope->addDecl(decl);
 
-		TypePtr type(new IntegralType(declaration, ast::IntegralType::VOID));
-		return ExpressionPtr(
-			new DeclarationExpression(declaration, type, symbol));
+		TypePtr type(new IntegralType(decl, ast::IntegralType::VOID));
+		return ExprPtr(
+			new DeclExpr(decl, type, decl));
 	}	
 
-	virtual ExpressionPtr visit(ast::IfElseExpression& ifElse,
+	virtual ExprPtr visit(ast::IfElseExpr& ifElse,
 	                            ScopeState state) {
-		return ExpressionPtr(
-			new IfElseExpression(ifElse,
+		return ExprPtr(
+			new IfElseExpr(ifElse,
 			                     UndefinedType::singleton(),
 			                     accept(*ifElse.condition, state),
-			                     accept(*ifElse.ifExpression, state),
-			                     accept(*ifElse.elseExpression, state)));
+			                     accept(*ifElse.ifExpr, state),
+			                     accept(*ifElse.elseExpr, state)));
 	}
 };
 
@@ -247,16 +247,16 @@ protected:
 
 AstVisitors* makeAstVisitors(Context& context) {
 	TypeVisitor* typeVisitor = new TypeVisitor(context);
-	DeclarationVisitor* declarationVisitor =
-		new DeclarationVisitor(context);
-	ExpressionVisitor* expressionVisitor = new ExpressionVisitor(context);
+	DeclVisitor* declVisitor =
+		new DeclVisitor(context);
+	ExprVisitor* exprVisitor = new ExprVisitor(context);
 
-	AstVisitors* visitors = new AstVisitors(typeVisitor, declarationVisitor,
-	                                        expressionVisitor);
+	AstVisitors* visitors = new AstVisitors(typeVisitor, declVisitor,
+	                                        exprVisitor);
 	
 	typeVisitor->visitors = visitors;
-	declarationVisitor->visitors = visitors;
-	expressionVisitor->visitors = visitors;
+	declVisitor->visitors = visitors;
+	exprVisitor->visitors = visitors;
 
 	return visitors;
 }

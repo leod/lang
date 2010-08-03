@@ -5,8 +5,8 @@
 #include "semantic/node_table.hpp"
 #include "semantic/node.hpp"
 #include "semantic/type.hpp"
-#include "semantic/symbol.hpp"
-#include "semantic/expression.hpp"
+#include "semantic/decl.hpp"
+#include "semantic/expr.hpp"
 
 namespace llang {
 namespace semantic {

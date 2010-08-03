@@ -1,90 +1,90 @@
-#ifndef LLANG_SEMANTIC_SYMBOL_HPP_INCLUDED
-#define LLANG_SEMANTIC_SYMBOL_HPP_INCLUDED
+#ifndef LLANG_SEMANTIC_DECL_HPP_INCLUDED
+#define LLANG_SEMANTIC_DECL_HPP_INCLUDED
 
 #include "util/smart_ptr.hpp"
 
-#include "ast/declaration.hpp"
+#include "ast/decl.hpp"
 #include "semantic/node.hpp"
 #include "semantic/scope.hpp"
 #include "semantic/type_ptr.hpp"
-#include "semantic/symbol_ptr.hpp"
-#include "semantic/expression_ptr.hpp"
+#include "semantic/decl_ptr.hpp"
+#include "semantic/expr_ptr.hpp"
 
 namespace llang {
 namespace semantic {
 
-class Expression;
+class Expr;
 
-class Symbol : public Node {
+class Decl : public Node {
 public:
 	const identifier_t name;
-	Scope* const declarationScope;
+	Scope* const declScope;
 
 protected:
-	Symbol(Node::Tag tag, const ast::Node& astNode,
-	       const identifier_t& name, Scope* declarationScope)
+	Decl(Node::Tag tag, const ast::Node& astNode,
+	       const identifier_t& name, Scope* declScope)
 		: Node(tag, astNode), name(name),
-		  declarationScope(declarationScope) {
+		  declScope(declScope) {
 	}
 };
 
 // Used only internally
-class DelayedSymbol : public Symbol {
+class DelayedDecl : public Decl {
 public:
-	DelayedSymbol(const ast::Node& astNode, const identifier_t& name,
-	              Scope* declarationScope)
-		: Symbol(Node::DELAYED_SYMBOL, astNode, name, declarationScope) {
+	DelayedDecl(const ast::Node& astNode, const identifier_t& name,
+	              Scope* declScope)
+		: Decl(Node::DELAYED_DECL, astNode, name, declScope) {
 	}
 };
 
-typedef shared_ptr<DelayedSymbol> DelayedSymbolPtr;
+typedef shared_ptr<DelayedDecl> DelayedDeclPtr;
 
-class ScopedSymbol : public Symbol {
+class ScopedDecl : public Decl {
 public:
 	scoped_ptr<Scope> scope;
 
 protected:
-	ScopedSymbol(Node::Tag tag, const ast::Node& astNode,
+	ScopedDecl(Node::Tag tag, const ast::Node& astNode,
 	             const identifier_t& name, Scope* scope)
-		: Symbol(tag, astNode, name, scope->parent()),
+		: Decl(tag, astNode, name, scope->parent()),
 		  scope(scope) {
 	}
 };
 
-typedef shared_ptr<ScopedSymbol> ScopedSymbolPtr;
+typedef shared_ptr<ScopedDecl> ScopedDeclPtr;
 
-class Module : public ScopedSymbol {
+class Module : public ScopedDecl {
 public:
 	Module(const ast::Module& astNode, Scope* scope)
-		: ScopedSymbol(Node::MODULE, astNode, astNode.name, scope) {
+		: ScopedDecl(Node::MODULE, astNode, astNode.name, scope) {
 	}
 };
 
 typedef shared_ptr<Module> ModulePtr;
 
-class ParameterSymbol;
-typedef shared_ptr<ParameterSymbol> ParameterSymbolPtr;
+class ParameterDecl;
+typedef shared_ptr<ParameterDecl> ParameterDeclPtr;
 
-class FunctionSymbol : public ScopedSymbol {
+class FunctionDecl : public ScopedDecl {
 public:
 	struct Parameter {
 		TypePtr type;
-		ParameterSymbolPtr symbol;
+		ParameterDeclPtr decl;
 
-		Parameter(TypePtr type, ParameterSymbolPtr symbol)
-			: type(type), symbol(symbol) {
+		Parameter(TypePtr type, ParameterDeclPtr decl)
+			: type(type), decl(decl) {
 		}
 	};
 
 	typedef std::list<Parameter> parameter_list_t;
 
-	FunctionSymbol(const ast::FunctionDeclaration& astNode,
+	FunctionDecl(const ast::FunctionDecl& astNode,
 	               Scope* scope,
 	               TypePtr returnType,
 	               parameter_list_t& parameters,
-	               ExpressionPtr body,
+	               ExprPtr body,
 	               TypePtr type)
-		: ScopedSymbol(Node::FUNCTION_SYMBOL, astNode,
+		: ScopedDecl(Node::FUNCTION_DECL, astNode,
 		               astNode.name, scope),
 		  returnType(returnType),
 		  parameters(parameters),
@@ -100,39 +100,39 @@ public:
 
 	TypePtr returnType;
 	parameter_list_t parameters;	
-	ExpressionPtr body;	
+	ExprPtr body;	
 	
 	TypePtr type;
 };
 
-typedef shared_ptr<FunctionSymbol> FunctionSymbolPtr;
+typedef shared_ptr<FunctionDecl> FunctionDeclPtr;
 
-class VariableSymbol : public Symbol {
+class VariableDecl : public Decl {
 public:
-	VariableSymbol(const ast::VariableDeclaration& astNode,
-	               Scope* declarationScope,
+	VariableDecl(const ast::VariableDecl& astNode,
+	               Scope* declScope,
 	               TypePtr type,
-	               ExpressionPtr initializer)
-		: Symbol(Node::VARIABLE_SYMBOL, astNode,
-		         astNode.name, declarationScope),
+	               ExprPtr initializer)
+		: Decl(Node::VARIABLE_DECL, astNode,
+		         astNode.name, declScope),
 		  type(type),
 		  initializer(initializer) {
 	}
 
 	TypePtr type;
-	ExpressionPtr initializer;
+	ExprPtr initializer;
 };
 
-typedef shared_ptr<VariableSymbol> VariableSymbolPtr;
+typedef shared_ptr<VariableDecl> VariableDeclPtr;
 
-class ParameterSymbol : public Symbol {
+class ParameterDecl : public Decl {
 public:
-	ParameterSymbol(const ast::Node& astNode,
+	ParameterDecl(const ast::Node& astNode,
 	                const identifier_t& name, // TMP until I add ast::Param
-	                Scope* declarationScope,
+	                Scope* declScope,
 	                TypePtr type)
-		: Symbol(Node::PARAMETER_SYMBOL, astNode, name,
-		         declarationScope),
+		: Decl(Node::PARAMETER_DECL, astNode, name,
+		         declScope),
 		  type(type) {
 	}
 

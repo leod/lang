@@ -6,9 +6,9 @@
 #include "util/smart_ptr.hpp"
 #include "common/context.hpp"
 #include "semantic/visitor.hpp"
-#include "semantic/expression_ptr.hpp"
+#include "semantic/expr_ptr.hpp"
 #include "semantic/type_ptr.hpp"
-#include "semantic/symbol_ptr.hpp"
+#include "semantic/decl_ptr.hpp"
 #include "semantic/scope_state.hpp"
 
 namespace llang {
@@ -17,19 +17,19 @@ namespace semantic {
 class SemanticVisitors {
 public:
 	typedef Visitor<ScopeState, TypePtr> TypeVisitor;
-	typedef Visitor<ScopeState, SymbolPtr> SymbolVisitor;
-	typedef Visitor<ScopeState, ExpressionPtr> ExpressionVisitor;
+	typedef Visitor<ScopeState, DeclPtr> DeclVisitor;
+	typedef Visitor<ScopeState, ExprPtr> ExprVisitor;
 
 	scoped_ptr<TypeVisitor> typeVisitor;
-	scoped_ptr<SymbolVisitor> symbolVisitor;
-	scoped_ptr<ExpressionVisitor> expressionVisitor;
+	scoped_ptr<DeclVisitor> declVisitor;
+	scoped_ptr<ExprVisitor> exprVisitor;
 
 	SemanticVisitors(TypeVisitor* typeVisitor,
-	                 SymbolVisitor* symbolVisitor,
-	                 ExpressionVisitor* expressionVisitor)
+	                 DeclVisitor* declVisitor,
+	                 ExprVisitor* exprVisitor)
 		: typeVisitor(typeVisitor),
-		  symbolVisitor(symbolVisitor),
-		  expressionVisitor(expressionVisitor) {
+		  declVisitor(declVisitor),
+		  exprVisitor(exprVisitor) {
 	}
 };
 

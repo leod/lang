@@ -9,9 +9,9 @@ namespace llang {
 namespace ast {
 
 class Type;
-class Declaration;
+class Decl;
 class Module;
-class Expression;
+class Expr;
 
 } // namespace ast
 
@@ -25,25 +25,25 @@ public:
 		: diag(context.diag), moduleName(moduleName), ts(ts) {
 	}
 
-	ast::Module* parseModule();
+	ast::ModulePtr parseModule();
 
 private:
-	ast::Declaration* parseDeclaration();
-	ast::Type* parseType();
-	ast::Expression* parseExpression();
+	ast::DeclPtr parseDecl();
+	ast::TypePtr parseType();
+	ast::ExprPtr parseExpr();
 
-	ast::Declaration* parseFunctionDeclaration();
-	ast::Declaration* parseVariableDeclaration();
+	ast::DeclPtr parseFunctionDecl();
+	ast::DeclPtr parseVariableDecl();
 
-	ast::Expression* parseBlockExpression();
-	ast::Expression* parseIfElseExpression();
+	ast::ExprPtr parseBlockExpr();
+	ast::ExprPtr parseIfElseExpr();
 
-	ast::Expression* parseAssignExpression();
-	ast::Expression* parseEqualsExpression();
-	ast::Expression* parseAddExpression();
-	ast::Expression* parseMulExpression();
-	ast::Expression* parsePrimaryExpression();
-	ast::Expression* parsePostExpression(ast::Expression* expression);
+	ast::ExprPtr parseAssignExpr();
+	ast::ExprPtr parseEqualsExpr();
+	ast::ExprPtr parseAddExpr();
+	ast::ExprPtr parseMulExpr();
+	ast::ExprPtr parsePrimaryExpr();
+	ast::ExprPtr parsePostExpr(ast::ExprPtr expr);
 
 	identifier_t parseIdentifier();
 
