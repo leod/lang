@@ -149,7 +149,7 @@ ExprPtr Parser::parseBlockExpr() {
 
 	assumeNext(Token::LBRACE);
 
-	BlockExpr::expr_list_t exprs;
+	BlockExpr::ExprList exprs;
 
 	while (ts.get().type != Token::RBRACE) {
 		exprs.push_back(ExprPtr(parseExpr()));
@@ -330,7 +330,7 @@ ExprPtr Parser::parsePostExpr(ExprPtr expr) {
 	case Token::LPAREN: {
 		ts.next();
 
-		CallExpr::argument_list_t arguments;
+		CallExpr::ArgumentList arguments;
 		
 		while (ts.get().type != Token::RPAREN) {
 			arguments.push_back(ExprPtr(parseExpr()));	

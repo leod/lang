@@ -3,6 +3,7 @@
 
 #include <map>
 
+#include "util/smart_ptr.hpp"
 #include "common/identifier.hpp"
 #include "ast/decl_ptr.hpp"
 
@@ -25,6 +26,8 @@ public:
 private:
 	Scope* parent_;
 };
+
+typedef shared_ptr<Scope> ScopePtr;
 
 } // namespace semantic
 } // namespace llang

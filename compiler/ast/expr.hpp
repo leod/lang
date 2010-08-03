@@ -10,6 +10,7 @@
 #include "ast/type_ptr.hpp"
 #include "ast/decl_ptr.hpp"
 #include "ast/expr_ptr.hpp"
+#include "semantic/scope.hpp"
 
 namespace llang {
 namespace ast {
@@ -98,14 +99,14 @@ typedef shared_ptr<LiteralBoolExpr> LiteralBoolExprPtr;
 
 class BlockExpr : public Expr {
 public:
-	typedef std::list<ExprPtr> expr_list_t;
+	typedef std::list<ExprPtr> ExprList;
 
-	BlockExpr(const Location& location, expr_list_t& exprs)
+	BlockExpr(const Location& location, ExprList& exprs)
 		: Expr(Node::BLOCK_EXPR, location),
 	      exprs(exprs) {
 	}
 
-	expr_list_t exprs;
+	ExprList exprs;
 
 	shared_ptr<semantic::Scope> scope;
 };
@@ -148,11 +149,14 @@ public:
 	const std::string& name;
 };
 
+typedef shared_ptr<IdentifierExpr> IdentifierExprPtr;
+
 class DeclRefExpr : public Expr {
 public:
-	DeclRefExpr(const Location& location, DeclPtr decl)
+	DeclRefExpr(const Location& location, TypePtr type, DeclPtr decl)
 		: Expr(Node::DECL_REF_EXPR, location),
 		  decl(decl) {
+		Expr::type = type;
 	}
 
 	weak_ptr<Decl> decl;
@@ -162,16 +166,16 @@ typedef shared_ptr<DeclRefExpr> DeclRefExprPtr;
 
 class CallExpr : public Expr {
 public:
-	typedef std::list<ExprPtr> argument_list_t;
+	typedef std::list<ExprPtr> ArgumentList;
 
 	CallExpr(const Location& location, ExprPtr callee,
-	         argument_list_t arguments)
+	         ArgumentList arguments)
 		: Expr(Node::CALL_EXPR, location),
 		  callee(callee), arguments(arguments) {
 	}
 
 	ExprPtr callee;
-	argument_list_t arguments;
+	ArgumentList arguments;
 };
 
 typedef shared_ptr<CallExpr> CallExprPtr;
