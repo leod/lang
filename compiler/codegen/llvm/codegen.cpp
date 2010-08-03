@@ -127,7 +127,7 @@ protected:
 class DeclVisitor : public VisitorBase<void> {
 public:
 	DeclVisitor(Codegen::Impl& visitors, Context& context,
-	              llvm::Module* module, IRBuilder<>& builder)
+	            llvm::Module* module, IRBuilder<>& builder)
 		: VisitorBase<void>(visitors, context, module, builder) {
 	}
 
@@ -226,7 +226,7 @@ protected:
 class ExprVisitor : public VisitorBase<Value*> {
 public:
 	ExprVisitor(Codegen::Impl& visitors, Context& context,
-	                  llvm::Module* module, IRBuilder<>& builder)
+	            llvm::Module* module, IRBuilder<>& builder)
 		: VisitorBase<Value*>(visitors, context, module, builder) {
 	}
 
@@ -388,8 +388,7 @@ Codegen::Impl::Impl(Context& context, ModulePtr moduleDecl)
 	  builder(llvmContext),
 	  typeVisitor(new TypeVisitor(*this, context, module.get(), builder)),
 	  declVisitor(new DeclVisitor(*this, context, module.get(), builder)),
-	  exprVisitor(new ExprVisitor(*this, context, module.get(),
-	                    builder)),
+	  exprVisitor(new ExprVisitor(*this, context, module.get(), builder)),
 	  moduleDecl(moduleDecl) {
 }
 
