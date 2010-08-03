@@ -92,6 +92,12 @@ public:
 		  type(type) {
 	}
 
+	std::string mangle() {
+		// TODO
+
+		return name;	
+	}
+
 	TypePtr returnType;
 	parameter_list_t parameters;	
 	ExpressionPtr body;	
