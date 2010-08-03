@@ -66,6 +66,16 @@ public:
 	const std::string string;
 };
 
+class LiteralBoolExpression : public Expression {
+public:
+	LiteralBoolExpression(const Location& location, bool value)
+		: Expression(Node::LITERAL_BOOL_EXPRESSION, location),
+		  value(value) {
+	}
+	
+	const bool value;		
+};
+
 class BlockExpression : public Expression {
 public:
 	typedef std::list<ExpressionPtr> expression_list_t;

@@ -18,6 +18,7 @@ public:
 	enum Kind {
 		I32,
 		CHAR,
+		BOOL,
 		VOID,
 		STRING
 	};

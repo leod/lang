@@ -325,6 +325,10 @@ protected:
 		accept(expression->symbol, state);
 		return 0; // TODO?
 	}
+
+	virtual Value* visit(IfElseExpressionPtr expression, ScopeState state) {
+		Value* condition = accept(expression->condition, state);
+	}
 };
 
 } // namespace

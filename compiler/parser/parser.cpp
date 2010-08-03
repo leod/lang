@@ -58,6 +58,10 @@ Type* Parser::parseType() {
 		ts.next();
 		return new IntegralType(location, IntegralType::STRING);
 
+	case Token::KEYWORD_BOOL:
+		ts.next();
+		return new IntegralType(location, IntegralType::BOOL);
+
 	default:
 		expectedError("type");
 		assert(false);
@@ -282,6 +286,13 @@ Expression* Parser::parsePrimaryExpression() {
 		expression = new LiteralStringExpression(location, string);
 		break;
 	}
+
+	case Token::KEYWORD_TRUE:
+	case Token::KEYWORD_FALSE:
+		expression =
+			new LiteralBoolExpression(location,
+			                          ts.get().type == Token::KEYWORD_TRUE);
+		break;
 
 	case Token::KEYWORD_VOID:
 		ts.next(); 
