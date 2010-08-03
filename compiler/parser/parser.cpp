@@ -288,11 +288,14 @@ Expression* Parser::parsePrimaryExpression() {
 	}
 
 	case Token::KEYWORD_TRUE:
-	case Token::KEYWORD_FALSE:
+	case Token::KEYWORD_FALSE: {
+		const Token::Type type = ts.get().type;
+		ts.next();
 		expression =
 			new LiteralBoolExpression(location,
-			                          ts.get().type == Token::KEYWORD_TRUE);
+			                          type == Token::KEYWORD_TRUE);
 		break;
+	}
 
 	case Token::KEYWORD_VOID:
 		ts.next(); 

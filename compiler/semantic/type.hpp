@@ -95,6 +95,8 @@ public:
 			return "void";
 		case ast::IntegralType::CHAR:
 			return "char";
+		case ast::IntegralType::BOOL:
+			return "bool";
 		default:
 			assert(false);
 		}
