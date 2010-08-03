@@ -161,13 +161,13 @@ protected:
 		
 		// First check if we generated this function already
 		// (due to forward references)
-		if (module->getFunction(function->name)) return;
+		if (module->getFunction(function->mangle())) return;
 
 		const llvm::FunctionType* type =
 			llvm::cast<llvm::FunctionType>(accept(function->type, state));
 		llvm::Function* f = Function::Create(type,
 		                                     Function::ExternalLinkage,
-		                                     function->name,
+		                                     function->mangle(),
 		                                     module);
 		
 		
@@ -228,13 +228,13 @@ public:
 
 private:
 	Function* getFunction(FunctionSymbolPtr function, ScopeState state) {
-		if (Function* llvmFunction = module->getFunction(function->name)) {
+		if (Function* llvmFunction = module->getFunction(function->mangle())) {
 			return llvmFunction;
 		}
 
 		accept(function, state);
 
-		Function* llvmFunction = module->getFunction(function->name);
+		Function* llvmFunction = module->getFunction(function->mangle());
 		assert(llvmFunction);
 
 		return llvmFunction;
