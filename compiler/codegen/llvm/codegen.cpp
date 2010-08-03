@@ -8,13 +8,15 @@
 #include "llvm/Support/IRBuilder.h"
 #include "llvm/Analysis/Verifier.h"
 
-#include "semantic/visitor.hpp"
+#include "ast/type.hpp"
+#include "ast/expr.hpp"
+#include "ast/visitor.hpp"
 #include "codegen/llvm/codegen.hpp"
 
 namespace llang {
 namespace codegen {
 
-using namespace semantic;
+using namespace ast;
 using namespace llvm;
 
 struct ScopeState {
@@ -56,7 +58,7 @@ struct Codegen::Impl {
 namespace {
 
 template <typename Result> class VisitorBase
-	: public Visitor<ScopeState, Result> {
+	: public ast::Visitor<ScopeState, Result> {
 public:
 	Codegen::Impl& visitors;
 	Context& context;
@@ -180,10 +182,10 @@ protected:
 			auto it1 = f->arg_begin();
 			auto it2 = function->parameters.begin();
 			for (; it1 != f->arg_end(); ++it1, ++it2) {
-				if (!it2->decl) continue; // unnamed parameter
+				//if (!it2->decl) continue; // unnamed parameter
 
-				it1->setName(it2->decl->name);
-				functionState.variables[it2->decl] = it1;
+				it1->setName((*it2)->name);
+				functionState.variables[*it2] = it1;
 			}
 		}
 
@@ -241,7 +243,7 @@ private:
 	}
 
 protected:
-	virtual Value* visit(DeclExprPtr expr, ScopeState state) {
+	virtual Value* visit(DeclRefExprPtr expr, ScopeState state) {
 		if (VariableDeclPtr decl =
 				isA<VariableDecl>(DeclPtr(expr->decl))) {
 			return builder.CreateLoad(state.function->variables[decl],
@@ -299,7 +301,7 @@ protected:
 
 	virtual Value* visit(LiteralBoolExprPtr expr, ScopeState) {
 		return expr->value ? ConstantInt::getTrue(llvmContext)
-		                         : ConstantInt::getFalse(llvmContext);
+		                   : ConstantInt::getFalse(llvmContext);
 	}
 	
 	virtual Value* visit(BinaryExprPtr expr, ScopeState state) {
@@ -330,10 +332,8 @@ protected:
 		}
 	}
 
-	virtual Value* visit(DeclExprPtr expr,
-	                     ScopeState state) {
-		
-		accept(expr->decl, state);
+	virtual Value* visit(DeclExprPtr expr, ScopeState state) {
+		accept(DeclPtr(expr->decl), state);
 		return 0; // TODO?
 	}
 

@@ -1,5 +1,6 @@
 #include <stdexcept>
 
+#include "ast/decl.hpp"
 #include "semantic/scope.hpp"
 
 namespace llang {

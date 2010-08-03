@@ -11,15 +11,13 @@
 #include "lexer/lexer.hpp"
 #include "lexer/token_stream.hpp"
 
-//#include "ast/print_visitor.hpp"
 #include "ast/decl.hpp"
 #include "ast/type.hpp"
 #include "ast/expr.hpp"
 #include "parser/parser.hpp"
 
-//#include "semantic/decl.hpp"
-#include "semantic/ast_visitor.hpp"
-#include "semantic/semantic_visitor.hpp"
+#include "semantic/phase1/visitors.hpp"
+#include "semantic/phase2/visitors.hpp"
 
 #include "codegen/llvm/codegen.hpp"
 
@@ -55,21 +53,18 @@ int main(int argc, const char** argv) {
 	lexer::TokenStream ts(lexer);
 
 	parser::Parser parser(context, filename, ts);
-	scoped_ptr<ast::Module> module(parser.parseModule());
+	ast::DeclPtr module(parser.parseModule());
 	//print(*module);
 
-	scoped_ptr<semantic::AstVisitors> astVisitors(
-		semantic::makeAstVisitors(context));
+	scoped_ptr<semantic::Visitors>
+		phase1(semantic::makePhase1Visitors(context)),
+		phase2(semantic::makePhase2Visitors(context));
 	semantic::ScopeState state;
 
-	semantic::DeclPtr semModule(
-		astVisitors->declVisitor->accept(*module, state));
-
-	scoped_ptr<semantic::SemanticVisitors> semanticVisitors(
-		semantic::makeSemanticVisitors(context));
-	semModule = semanticVisitors->declVisitor->accept(semModule, state);
+	module = phase1->declVisitor->accept(module, state);
+	module = phase2->declVisitor->accept(module, state);
 
 	codegen::Codegen gen(context,
-		semantic::assumeIsA<semantic::Module>(semModule));
+		ast::assumeIsA<ast::Module>(module));
 	gen.run();
 }
