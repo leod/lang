@@ -53,6 +53,8 @@ struct Codegen::Impl {
 	void run();
 };
 
+namespace {
+
 template <typename Result> class VisitorBase
 	: public Visitor<ScopeState, Result> {
 public:
@@ -324,6 +326,8 @@ protected:
 		return 0; // TODO?
 	}
 };
+
+} // namespace
 
 Codegen::Impl::Impl(Context& context, ModulePtr moduleSymbol)
 	: llvmContext(),

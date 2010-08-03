@@ -10,14 +10,15 @@
 namespace llang {
 namespace semantic {
 
-template <typename Result> class SemanticVisitorBase
+namespace {
+
+template <typename Result> class VisitorBase
 	: public Visitor<ScopeState, Result> {
 protected:
 	SemanticVisitors* visitors;
 	Context& context;
 
-	SemanticVisitorBase(Context& context) : context(context) {}
-	friend SemanticVisitors* makeSemanticVisitors(Context&);
+	VisitorBase(Context& context) : context(context) {}
 
 	TypePtr accept(TypePtr n, const ScopeState& p) {
 		assert(n);
@@ -53,11 +54,11 @@ protected:
 };
 
 
-class SemanticTypeVisitor : public SemanticVisitorBase<TypePtr> {
+class TypeVisitor : public VisitorBase<TypePtr> {
 private:
-	SemanticTypeVisitor(Context& context)
-		: SemanticVisitorBase<TypePtr>(context) {}
-	friend SemanticVisitors* makeSemanticVisitors(Context&);
+	TypeVisitor(Context& context)
+		: VisitorBase<TypePtr>(context) {}
+	friend SemanticVisitors* semantic::makeSemanticVisitors(Context&);
 
 protected:
 #define ID_VISIT(type) \
@@ -86,11 +87,11 @@ protected:
 	}
 };
 
-class SemanticSymbolVisitor : public SemanticVisitorBase<SymbolPtr> {
+class SymbolVisitor : public VisitorBase<SymbolPtr> {
 private:
-	SemanticSymbolVisitor(Context& context)
-		: SemanticVisitorBase<SymbolPtr>(context) {}
-	friend SemanticVisitors* makeSemanticVisitors(Context&);
+	SymbolVisitor(Context& context)
+		: VisitorBase<SymbolPtr>(context) {}
+	friend SemanticVisitors* semantic::makeSemanticVisitors(Context&);
 
 protected:
 	virtual SymbolPtr visit(ModulePtr module, ScopeState state) {
@@ -159,11 +160,11 @@ protected:
 	}
 };
 
-class SemanticExpressionVisitor : public SemanticVisitorBase<ExpressionPtr> {
+class ExpressionVisitor : public VisitorBase<ExpressionPtr> {
 private:
-	SemanticExpressionVisitor(Context& context)
-		: SemanticVisitorBase<ExpressionPtr>(context) {}
-	friend SemanticVisitors* makeSemanticVisitors(Context&);
+	ExpressionVisitor(Context& context)
+		: VisitorBase<ExpressionPtr>(context) {}
+	friend SemanticVisitors* semantic::makeSemanticVisitors(Context&);
 
 protected:
 #define ID_VISIT(type) \
@@ -288,11 +289,12 @@ protected:
 	}
 };
 
+} // namespace
+
 SemanticVisitors* makeSemanticVisitors(Context& context) {
-	SemanticTypeVisitor* typeVisitor = new SemanticTypeVisitor(context);
-	SemanticSymbolVisitor* symbolVisitor = new SemanticSymbolVisitor(context);
-	SemanticExpressionVisitor* expressionVisitor =
-		new SemanticExpressionVisitor(context);
+	TypeVisitor* typeVisitor = new TypeVisitor(context);
+	SymbolVisitor* symbolVisitor = new SymbolVisitor(context);
+	ExpressionVisitor* expressionVisitor = new ExpressionVisitor(context);
 
 	SemanticVisitors* visitors = new SemanticVisitors(typeVisitor,
 	                                                  symbolVisitor,
