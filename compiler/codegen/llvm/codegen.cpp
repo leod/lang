@@ -105,6 +105,9 @@ protected:
 		case ast::IntegralType::BOOL:
 			return llvm::Type::getInt1Ty(llvmContext);
 
+		case ast::IntegralType::CHAR:
+			return llvm::Type::getInt8Ty(llvmContext);
+
 		default:
 			assert(false);
 		}
@@ -121,6 +124,16 @@ protected:
 
 		return llvm::FunctionType::get(accept(type->returnType, state),
 		                               params, false);
+	}
+
+	virtual const llvm::Type* visit(ArrayTypePtr type, ScopeState state) {
+		const llvm::Type* inner = accept(type->inner, state);
+
+		// TODO: should use largest int available
+		return llvm::StructType::get(llvmContext,
+		                             llvm::Type::getInt32Ty(llvmContext),
+		                             llvm::PointerType::getUnqual(inner),
+		                             NULL);
 	}
 };
 
@@ -309,18 +322,35 @@ protected:
 			APInt(sizeof(int_t) * 8, expr->number, true));
 	}
 
-	virtual Value* visit(LiteralStringExprPtr expr, ScopeState) {
+	virtual Value* visit(LiteralStringExprPtr expr, ScopeState state) {
 		size_t length = expr->string.size();
 
 		const llvm::Type* elementType = IntegerType::get(llvmContext, 8);
-		const llvm::Type* type = llvm::ArrayType::get(elementType, length);
 		llvm::StringRef string = StringRef(expr->string);
-		llvm::Constant* init = ConstantArray::get(llvmContext, string, false);
 
-		GlobalVariable* global =
-			new GlobalVariable(*module, type, true, GlobalValue::InternalLinkage,
-			                   init, "string");
-		return global;
+		GlobalVariable* globalCharArray =
+			new GlobalVariable(*module,
+			                   llvm::ArrayType::get(elementType, length),
+			                   true,
+			                   GlobalValue::InternalLinkage,
+			                   ConstantArray::get(llvmContext, string, false),
+			                   "staticstring");
+
+		std::vector<Constant*> structValues;
+
+		// TODO: hardcoded size
+		structValues.push_back(ConstantInt::get(llvmContext,
+		                                        APInt(32, length, true)));
+		structValues.push_back(
+			ConstantExpr::getPointerCast(globalCharArray,
+			                             PointerType::getUnqual(elementType)));
+
+		const llvm::StructType* structType = llvm::cast<const llvm::StructType>(
+			accept(expr->type, state));
+		Constant* structInit =
+			ConstantStruct::get(structType, structValues);
+
+		return structInit;
 	}
 
 	virtual Value* visit(LiteralBoolExprPtr expr, ScopeState) {
