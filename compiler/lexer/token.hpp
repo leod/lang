@@ -28,6 +28,8 @@ struct Token {
 		MINUS,
 		SLASH,
 		STRING,
+		LBRACKET,
+		RBRACKET,
 		END_OF_FILE,
 
 		KEYWORD_FN,

@@ -251,6 +251,26 @@ protected:
 
 		return ifElse;
 	}
+
+	virtual ExprPtr visit(ArrayElementExprPtr element, ScopeState state) {
+		acceptOn(element->array, state);
+		acceptOn(element->index, state);
+
+		if (!isArray(element->array->type))
+			context.diag.error(element->location(),
+				"expected array type for element expression, not '%s'",
+				element->array->type->name().c_str());
+
+		// TODO: hardcoded type
+		if (!isI32(element->index->type))
+			context.diag.error(element->location(),
+				"expected int type for index expression, not '%s'",
+				element->index->type->name().c_str());
+
+		element->type = assumeIsA<ArrayType>(element->array->type)->inner;
+
+		return element;
+	}
 };
 
 } // namespace

@@ -192,6 +192,19 @@ public:
 
 typedef shared_ptr<DeclExpr> DeclExprPtr;
 
+class ArrayElementExpr : public Expr {
+public:
+	ArrayElementExpr(const Location& location, ExprPtr array, ExprPtr index)
+		: Expr(Node::ARRAY_ELEMENT_EXPR, location),
+		  array(array), index(index) {
+	}
+
+	ExprPtr array;
+	ExprPtr index;
+};
+
+typedef shared_ptr<ArrayElementExpr> ArrayElementExprPtr;
+
 } // namespace ast
 } // namespace llang
 

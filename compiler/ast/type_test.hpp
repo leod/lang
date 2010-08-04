@@ -11,6 +11,15 @@ bool isBool(TypePtr type) {
 	return integral && integral->type == ast::IntegralType::BOOL;
 }
 
+bool isI32(TypePtr type) {
+	IntegralTypePtr	integral = isA<IntegralType>(type);
+	return integral && integral->type == ast::IntegralType::I32;
+}
+
+bool isArray(TypePtr type) {
+	return isA<ArrayType>(type);
+}
+
 } // namespace ast
 } // namespace llang
 

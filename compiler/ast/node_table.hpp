@@ -27,6 +27,7 @@
 	X(CallExpr, CALL_EXPR) \
 	X(DeclRefExpr, DECL_REF_EXPR) \
 	X(DeclExpr, DECL_EXPR) \
-	X(DelayedExpr, DELAYED_EXPR)
+	X(DelayedExpr, DELAYED_EXPR) \
+	X(ArrayElementExpr, ARRAY_ELEMENT_EXPR)
 
 #endif

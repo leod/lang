@@ -18,6 +18,8 @@ const char* typeToStringArray[] =
 	  "minus",
 	  "slash",
 	  "string literal",
+	  "lbracket",
+	  "rbracket",
 	  "end_of_file",
 	  "fn",
 	  "var",

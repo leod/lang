@@ -345,7 +345,17 @@ ExprPtr Parser::parsePostExpr(ExprPtr expr) {
 
 		assumeNext(Token::RPAREN);
 
-		return ExprPtr(new CallExpr(location, expr, arguments));
+		return parsePostExpr(ExprPtr(new CallExpr(location, expr, arguments)));
+	}
+
+	case Token::LBRACKET: {
+		ts.next();
+
+		ExprPtr index = parseExpr();
+		assumeNext(Token::RBRACKET);
+
+		return parsePostExpr(ExprPtr(
+			new ArrayElementExpr(location, expr, index)));
 	}
 
 	default:

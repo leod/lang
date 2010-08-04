@@ -188,6 +188,13 @@ protected:
 
 		return ifElse;
 	}
+
+	virtual ExprPtr visit(ArrayElementExprPtr element, ScopeState state) {
+		acceptOn(element->array, state);
+		acceptOn(element->index, state);
+
+		return element;
+	}
 };
 
 } // namespace
