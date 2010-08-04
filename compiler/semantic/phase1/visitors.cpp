@@ -133,7 +133,11 @@ protected:
 	}
 
 	virtual ExprPtr visit(LiteralNumberExprPtr literal, ScopeState) {
-		TypePtr type(new NumberType(literal->location()));
+		//TypePtr type(new NumberType(literal->location()));
+
+		// TODO: hardcoded type
+		TypePtr type(new IntegralType(literal->location(),
+		                              IntegralType::I32));
 
 		literal->type = type;
 

@@ -448,6 +448,10 @@ protected:
 
 		return element;
 	}
+
+	Value* visit(ImplicitCastExprPtr expr, ScopeState state) {
+			
+	}
 };
 
 } // namespace

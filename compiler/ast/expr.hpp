@@ -53,6 +53,8 @@ public:
 	ExprPtr expr;
 };
 
+typedef shared_ptr<ImplicitCastExpr> ImplicitCastExprPtr;
+
 class BinaryExpr : public Expr {
 public:
 	enum Operation {
