@@ -212,6 +212,12 @@ protected:
 		acceptOn(binary->left, state);
 		acceptOn(binary->right, state);
 
+		// HACK
+		if (LiteralNumberExprPtr lit = isA<LiteralNumberExpr>(binary->left))
+			lit->type = binary->right->type;
+		if (LiteralNumberExprPtr lit = isA<LiteralNumberExpr>(binary->right))
+			lit->type = binary->left->type;
+
 		// TODO
 		if (!binary->left->type->equals(binary->right->type))
 			context.diag.error(binary->location(),
