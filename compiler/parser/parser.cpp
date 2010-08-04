@@ -85,10 +85,41 @@ TypePtr Parser::parseType() {
 		return TypePtr(new IntegralType(location, type));
 	}
 
+	case Token::KEYWORD_FN:
+		return parseFunctionType();
+
 	default:
 		expectedError("type");
 		assert(false);
 	}
+}
+
+TypePtr Parser::parseFunctionType() {
+	const Location location = ts.get().location;
+
+	ts.next();
+
+	TypePtr returnType = parseType();	
+	FunctionType::ParameterTypeList parameters;
+
+	assumeNext(Token::LPAREN);
+
+	if (ts.get().type != Token::RPAREN) {
+		bool doLoop = true;
+
+		do {
+			parameters.push_back(parseType());	
+
+			if (ts.get().type != Token::COMMA)
+				doLoop = false;
+			else
+				ts.next();
+		} while(doLoop);
+	}
+
+	assumeNext(Token::RPAREN);
+
+	return TypePtr(new FunctionType(location, returnType, parameters));
 }
 
 ExprPtr Parser::parseExpr() {

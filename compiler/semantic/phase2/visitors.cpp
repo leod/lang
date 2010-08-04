@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cstdio>
+#include <iostream>
 
 #include "ast/decl.hpp"
 #include "ast/expr.hpp"
