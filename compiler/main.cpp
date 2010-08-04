@@ -26,7 +26,7 @@ using namespace llang;
 int main(int argc, const char** argv) {
 	std::string filename;
 	if (argc == 1)
-		filename = "test.ll";
+		filename = "test.llang";
 	else if (argc == 2)
 		filename = argv[1];
 	else

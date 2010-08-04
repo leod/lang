@@ -6,24 +6,29 @@
 namespace llang {
 namespace ast {
 
-inline bool isBool(TypePtr type) {
+inline bool isIntegral(TypePtr type, ast::IntegralType::Kind kind) {
 	IntegralTypePtr	integral = isA<IntegralType>(type);
-	return integral && integral->type == ast::IntegralType::BOOL;
+	return integral && integral->type == kind;
+}
+
+inline bool isIntegral(TypePtr type) {
+	return isA<IntegralType>(type);
+}
+
+inline bool isBool(TypePtr type) {
+	return isIntegral(type, ast::IntegralType::BOOL);
 }
 
 inline bool isI32(TypePtr type) {
-	IntegralTypePtr	integral = isA<IntegralType>(type);
-	return integral && integral->type == ast::IntegralType::I32;
+	return isIntegral(type, ast::IntegralType::I32);
 }
 
 inline bool isChar(TypePtr type) {
-	IntegralTypePtr	integral = isA<IntegralType>(type);
-	return integral && integral->type == ast::IntegralType::CHAR;
+	return isIntegral(type, ast::IntegralType::CHAR);
 }
 
 inline bool isVoid(TypePtr type) {
-	IntegralTypePtr	integral = isA<IntegralType>(type);
-	return integral && integral->type == ast::IntegralType::VOID;
+	return isIntegral(type, ast::IntegralType::VOID);
 }
 
 inline bool isArray(TypePtr type) {

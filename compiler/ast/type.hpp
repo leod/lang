@@ -25,6 +25,7 @@ public:
 	}
 
 	virtual std::string name() const = 0;
+	virtual bool canCastImplicitly(const TypePtr) const { return false; }
 
 protected:
 	Type(const Node::Tag tag, const Location& location)
@@ -32,7 +33,7 @@ protected:
 	}
 };
 
-// Used only internally
+// Used internally
 class DelayedType : public Type {
 public:
 	DelayedType(const Location& location, DeclPtr delayedDecl)
@@ -46,7 +47,7 @@ public:
 	DeclPtr delayedDecl;
 };
 
-// Used only internally
+// Used internally
 class UndefinedType : public Type {
 public:
 	UndefinedType(const Location& location)
@@ -107,6 +108,25 @@ public:
 };
 
 typedef shared_ptr<IntegralType> IntegralTypePtr;
+
+// Used internally
+class NumberType : public Type {
+public:
+	NumberType(const Location& location)
+		: Type(Node::NUMBER_TYPE, location) {
+	}
+
+	virtual bool equals(const Type* other) const {
+		const NumberType* type = other->isA<NumberType>();
+		return type;
+	}
+
+	virtual std::string name() const {
+		return "<number>";
+	}
+
+	virtual bool canCastImplicitly(const TypePtr) const;
+};
 
 class FunctionType : public Type {
 public:
