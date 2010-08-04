@@ -9,6 +9,7 @@
 #include "llvm/Analysis/Verifier.h"
 
 #include "ast/type.hpp"
+#include "ast/type_test.hpp"
 #include "ast/expr.hpp"
 #include "ast/visitor.hpp"
 #include "codegen/llvm/codegen.hpp"
@@ -185,7 +186,6 @@ protected:
 		                                     function->mangle(),
 		                                     module);
 		
-		
 		ScopeState::Function functionState;
 		functionState.llvmFunction = f;
 
@@ -299,8 +299,12 @@ protected:
 					arguments.push_back(accept(*it, state));
 				}
 
+				FunctionTypePtr type = assumeIsA<FunctionType>(function->type);
+				std::string tmpName = isVoid(type->returnType)
+					? "" : "calltmp";
+
 				return builder.CreateCall(llvmFunction, arguments.begin(),
-				                          arguments.end(), "calltmp");
+				                          arguments.end(), tmpName);
 			}
 			else assert(false); // TODO
 		}
@@ -323,12 +327,17 @@ protected:
 	}		
 		
 	virtual Value* visit(LiteralNumberExprPtr expr, ScopeState) {
-		return ConstantInt::get(llvmContext,
-			APInt(sizeof(int_t) * 8, expr->number, true));
+		// TODO: hardcoded types
+		size_t size;
+		if (isChar(expr->type)) size = 8;
+		else if (isI32(expr->type)) size = 32;
+		else assert(false);
+
+		return ConstantInt::get(llvmContext, APInt(size, expr->number, true));
 	}
 
 	virtual Value* visit(LiteralStringExprPtr expr, ScopeState state) {
-		size_t length = expr->string.size();
+		size_t length = expr->string.size() + 1;
 
 		const llvm::Type* elementType = IntegerType::get(llvmContext, 8);
 		llvm::StringRef string = StringRef(expr->string);
@@ -429,6 +438,15 @@ protected:
 		phi->addIncoming(elseValue, elseBlock);
 
 		return phi;
+	}
+
+	Value* visit(ArrayElementExprPtr expr, ScopeState state) {
+		Value* array = accept(expr->array, state);
+		Value* ptr = builder.CreateExtractValue(array, 1);
+		Value* index = accept(expr->index, state);
+		Value* element = builder.CreateLoad(builder.CreateGEP(ptr, index));
+
+		return element;
 	}
 };
 
