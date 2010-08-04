@@ -23,9 +23,13 @@ protected:
 	Expr(const Node::Tag tag, const Location& location)
 		: Node(tag, location) {
 	}
+
+	Expr(const Node::Tag tag, const Location& location, TypePtr type)
+		: Node(tag, location), type(type) {
+	}
 };
 
-// Used only internally
+// Used internally
 class DelayedExpr : public Expr {
 public:
 	DelayedExpr(const Location& location, DeclPtr delayedDecl)
@@ -37,6 +41,17 @@ public:
 };
 
 typedef shared_ptr<DelayedExpr> DelayedExprPtr;
+
+// Used internally
+class ImplicitCastExpr : public Expr {
+public:
+	ImplicitCastExpr(const Location& location, TypePtr type, ExprPtr expr)
+		: Expr(Node::IMPLICIT_CAST_EXPR, location, type),
+		  expr(expr) {
+	}
+
+	ExprPtr expr;
+};
 
 class BinaryExpr : public Expr {
 public:

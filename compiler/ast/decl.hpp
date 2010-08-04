@@ -29,7 +29,7 @@ protected:
 	}
 };
 
-// Used only internally
+// Used internally
 class DelayedDecl : public Decl {
 public:
 	DelayedDecl(const Location& location, const identifier_t& name)

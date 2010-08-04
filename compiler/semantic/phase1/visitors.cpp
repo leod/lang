@@ -133,9 +133,7 @@ protected:
 	}
 
 	virtual ExprPtr visit(LiteralNumberExprPtr literal, ScopeState) {
-		// TODO: This type is not right. Literal numbers have an unspecified
-		//       int type and are implicitly casteable to i32.
-		TypePtr type(new IntegralType(literal->location(), IntegralType::I32));
+		TypePtr type(new NumberType(literal->location()));
 
 		literal->type = type;
 

@@ -11,6 +11,7 @@
 	X(DelayedDecl, DELAYED_DECL) \
 	\
 	X(IntegralType, INTEGRAL_TYPE) \
+	X(NumberType, NUMBER_TYPE) \
 	X(UndefinedType, UNDEFINED_TYPE) \
 	X(DelayedType, DELAYED_TYPE) \
 	X(FunctionType, FUNCTION_TYPE) \
@@ -28,6 +29,7 @@
 	X(DeclRefExpr, DECL_REF_EXPR) \
 	X(DeclExpr, DECL_EXPR) \
 	X(DelayedExpr, DELAYED_EXPR) \
-	X(ArrayElementExpr, ARRAY_ELEMENT_EXPR)
+	X(ArrayElementExpr, ARRAY_ELEMENT_EXPR) \
+	X(ImplicitCastExpr, IMPLICIT_CAST_EXPR)
 
 #endif

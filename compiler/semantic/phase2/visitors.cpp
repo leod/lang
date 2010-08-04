@@ -59,6 +59,11 @@ protected:
 		acceptOn(variable->type, state);
 		acceptOn(variable->initializer, state);
 
+		if (isVoid(variable->type))
+			context.diag.error(variable->location(),
+				"cannot declare variable '%s' of type void",
+				variable->name.c_str());
+
 		if (!variable->type->equals(variable->initializer->type)) {
 			context.diag.error(variable->location(),
 				"initializer of %s has wrong type: "
@@ -73,6 +78,11 @@ protected:
 
 	virtual DeclPtr visit(ParameterDeclPtr parameter, ScopeState state) {
 		acceptOn(parameter->type, state);
+		
+		if (isVoid(parameter->type))
+			context.diag.error(parameter->location(),
+				"cannot have parameter of type void");
+
 		return parameter;
 	}
 
@@ -122,6 +132,17 @@ private:
 	ExprVisitor(Context& context)
 		: VisitorBase<ExprPtr>(context) {}
 	friend Visitors* semantic::makePhase2Visitors(Context&);
+
+	bool allowImplicitCast(ExprPtr& expr, TypePtr to) {
+		if (expr->type->equals(to)) return false;
+
+		if (expr->type->canCastImplicitly(to)) {
+			expr = ExprPtr(new ImplicitCastExpr(expr->location(), to, expr));
+			return true;
+		}
+		
+		return false;
+	}
 
 protected:
 #define ID_VISIT(type) \
@@ -190,7 +211,9 @@ protected:
 			auto it2 = type->parameterTypes.begin();
 
 			for (; it1 != call->arguments.end(); ++it1, ++it2, ++i) {
-				ExprPtr argument = *it1 = accept(*it1, state); 
+				ExprPtr& argument = *it1 = accept(*it1, state); 
+
+				allowImplicitCast(*it1, *it2);
 
 				if (!argument->type->equals(*it2)) {
 					std::string expectedType = (*it2)->name();
@@ -219,11 +242,16 @@ protected:
 			lit->type = binary->left->type;
 
 		// TODO
-		if (!binary->left->type->equals(binary->right->type))
+		if (!binary->left->type->equals(binary->right->type)) {
+			// Try implicit casting
+			if (!allowImplicitCast(binary->left, binary->right->type))
+				allowImplicitCast(binary->right, binary->left->type);
+
 			context.diag.error(binary->location(),
-				"'%s' and '%s' are not the same type in binary expr",
+				"'%s' and '%s' are not compatible types in binary expression",
 				binary->left->type->name().c_str(),
 				binary->right->type->name().c_str());
+		}
 
 		if (binary->operation == ast::BinaryExpr::EQUALS) {
 			binary->type = TypePtr(new IntegralType(binary->location(),
