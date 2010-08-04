@@ -454,6 +454,8 @@ protected:
 	}
 
 	Value* visit(ImplicitCastExprPtr expr, ScopeState state) {
+		if (isVoid(expr->type)) return accept(expr->expr, state);
+
 		// TODO			
 		const llvm::Type* to = accept(expr->type, state);
 		Value* value = accept(expr->expr, state);
