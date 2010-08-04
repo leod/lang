@@ -431,6 +431,11 @@ protected:
 
 		llvmFunction->getBasicBlockList().push_back(mergeBlock);
 		builder.SetInsertPoint(mergeBlock);
+
+		if (isVoid(expr->type))
+			return 0;
+
+		// PHI is only needed if the if expression is used in an expression
 		PHINode* phi = builder.CreatePHI(accept(expr->type, state),
 		                                 "iftmp");
 		phi->addIncoming(ifValue, ifBlock);
