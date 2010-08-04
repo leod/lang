@@ -104,6 +104,8 @@ public:
 		}
 	}
 
+	virtual bool canCastImplicitly(const TypePtr) const;
+
 	const IntegralType::Kind type;
 };
 
