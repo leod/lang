@@ -450,7 +450,10 @@ protected:
 	}
 
 	Value* visit(ImplicitCastExprPtr expr, ScopeState state) {
-			
+		// TODO			
+		const llvm::Type* to = accept(expr->type, state);
+		Value* value = accept(expr->expr, state);
+		return builder.CreateIntCast(value, to, true);
 	}
 };
 
