@@ -85,6 +85,20 @@ public:
 	Value* accept(ExprPtr n, const ScopeState& p) {
 		return visitors.exprVisitor->accept(n, p);
 	}
+
+	// HACK
+	const llvm::FunctionType* getFunctionType(FunctionTypePtr type, ScopeState state) {
+		std::vector<const llvm::Type*> params;
+
+		for (auto it = type->parameterTypes.begin();
+		     it != type->parameterTypes.end();
+		     ++it) {
+			params.push_back(accept(*it, state));
+		}
+
+		return llvm::FunctionType::get(accept(type->returnType, state),
+		                               params, false);
+	}
 };
 
 class TypeVisitor : public VisitorBase<const llvm::Type*> {
@@ -115,16 +129,7 @@ protected:
 	}
 
 	virtual const llvm::Type* visit(FunctionTypePtr type, ScopeState state) {
-		std::vector<const llvm::Type*> params;
-
-		for (auto it = type->parameterTypes.begin();
-		     it != type->parameterTypes.end();
-		     ++it) {
-			params.push_back(accept(*it, state));
-		}
-
-		return llvm::FunctionType::get(accept(type->returnType, state),
-		                               params, false);
+		return llvm::PointerType::getUnqual(getFunctionType(type, state));
 	}
 
 	virtual const llvm::Type* visit(ArrayTypePtr type, ScopeState state) {
@@ -179,8 +184,7 @@ protected:
 		// (due to forward references)
 		if (module->getFunction(function->mangle())) return;
 
-		const llvm::FunctionType* type =
-			llvm::cast<llvm::FunctionType>(accept(function->type, state));
+		const llvm::FunctionType* type = getFunctionType(assumeIsA<FunctionType>(function->type), state);
 		llvm::Function* f = Function::Create(type,
 		                                     Function::ExternalLinkage,
 		                                     function->mangle(),
@@ -269,14 +273,17 @@ protected:
 	virtual Value* visit(DeclRefExprPtr expr, ScopeState state) {
 		Value* value = 0;
 
-		if (ParameterDeclPtr decl =
-			isA<ParameterDecl>(DeclPtr(expr->decl))) {
+		if (ParameterDeclPtr decl = isA<ParameterDecl>(DeclPtr(expr->decl))) {
 			value = state.function->variables[decl];
 		}
 		else if (VariableDeclPtr decl =
-			isA<VariableDecl>(DeclPtr(expr->decl))) {
+				isA<VariableDecl>(DeclPtr(expr->decl))) {
 			value = builder.CreateLoad(state.function->variables[decl],
 			                           decl->name);
+		}
+		else if (FunctionDeclPtr decl =
+				isA<FunctionDecl>(DeclPtr(expr->decl))) {
+			return getFunction(decl, state);	
 		}
 		else assert(false); // TODO
 
@@ -285,30 +292,22 @@ protected:
 	}
 
 	virtual Value* visit(CallExprPtr expr, ScopeState state) {
-		if (DeclRefExprPtr callee =
-				isA<DeclRefExpr>(expr->callee)) {
-			if (FunctionDeclPtr function =
-					isA<FunctionDecl>(DeclPtr(callee->decl))) {
-				Function* llvmFunction = getFunction(function, state);
-				assert(llvmFunction);
+		Value* callee = accept(expr->callee, state);
+		assert(callee);
 
-				std::vector<Value*> arguments;
-				for (auto it = expr->arguments.begin();
-				     it != expr->arguments.end();
-				     ++it) {
-					arguments.push_back(accept(*it, state));
-				}
-
-				FunctionTypePtr type = assumeIsA<FunctionType>(function->type);
-				std::string tmpName = isVoid(type->returnType)
-					? "" : "calltmp";
-
-				return builder.CreateCall(llvmFunction, arguments.begin(),
-				                          arguments.end(), tmpName);
-			}
-			else assert(false); // TODO
+		std::vector<Value*> arguments;
+		for (auto it = expr->arguments.begin();
+			 it != expr->arguments.end();
+			 ++it) {
+			arguments.push_back(accept(*it, state));
 		}
-		else assert(false); // TODO
+
+		FunctionTypePtr type = assumeIsA<FunctionType>(expr->callee->type);
+		std::string tmpName = isVoid(type->returnType)
+			? "" : "calltmp";
+
+		return builder.CreateCall(callee, arguments.begin(),
+								  arguments.end(), tmpName);
 	}
 
 	virtual Value* visit(VoidExprPtr, ScopeState) {

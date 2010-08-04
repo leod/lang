@@ -28,9 +28,11 @@ public:
 	ast::ModulePtr parseModule();
 
 private:
-	ast::DeclPtr parseDecl();
 	ast::TypePtr parseType();
+	ast::DeclPtr parseDecl();
 	ast::ExprPtr parseExpr();
+
+	ast::TypePtr parseFunctionType();
 
 	ast::DeclPtr parseFunctionDecl();
 	ast::DeclPtr parseVariableDecl();

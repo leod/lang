@@ -20,6 +20,13 @@ private:
 	friend Visitors* semantic::makePhase1Visitors(Context&);
 
 protected:
+	virtual TypePtr visit(FunctionTypePtr type, ScopeState state) {
+		acceptOn(type->returnType, state);
+		acceptOn(type->parameterTypes.begin(), type->parameterTypes.end(),
+		         state);
+		return type;
+	}
+
 	virtual TypePtr visit(IntegralTypePtr type, ScopeState) {
 		if (type->type == IntegralType::STRING) {
 			TypePtr inner(new IntegralType(type->location(),
