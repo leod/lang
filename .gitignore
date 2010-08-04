@@ -6,3 +6,4 @@ llc
 .deps
 fabricate.py
 fabricate.pyc
+out.ll
