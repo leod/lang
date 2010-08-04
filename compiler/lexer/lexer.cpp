@@ -52,6 +52,7 @@ Token Lexer::lexToken() {
 	Location location(filename, line, static_cast<size_t>(c - lineStart) + 1);
 	
 	switch (*c) {
+		// TODO: this repetiton kind of sucks
 		case '(':
 			++c;
 			return Token(location, Token::LPAREN);	
@@ -85,6 +86,12 @@ Token Lexer::lexToken() {
 		case '/':
 			++c;
 			return Token(location, Token::SLASH);
+		case '[':
+			++c;
+			return Token(location, Token::LBRACKET);
+		case ']':
+			++c;
+			return Token(location, Token::RBRACKET);
 		case '"':
 			return lexStringLiteral(location);
 		case '\0':

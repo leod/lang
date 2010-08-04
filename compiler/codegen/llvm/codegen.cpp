@@ -338,7 +338,7 @@ protected:
 			                   llvm::ArrayType::get(elementType, length),
 			                   true,
 			                   GlobalValue::InternalLinkage,
-			                   ConstantArray::get(llvmContext, string, false),
+			                   ConstantArray::get(llvmContext, string, true),
 			                   "staticstring");
 
 		std::vector<Constant*> structValues;
