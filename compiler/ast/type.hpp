@@ -25,7 +25,7 @@ public:
 	}
 
 	virtual std::string name() const = 0;
-	virtual bool canCastImplicitly(const TypePtr) const { return false; }
+	virtual bool canCastImplicitly(const TypePtr) const;
 
 protected:
 	Type(const Node::Tag tag, const Location& location)

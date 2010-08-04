@@ -14,6 +14,18 @@ using namespace ast;
 
 namespace {
 
+bool allowImplicitCast(ExprPtr& expr, TypePtr to) {
+	if (expr->type->equals(to)) return false;
+
+	if (expr->type->canCastImplicitly(to)) {
+		expr = ExprPtr(new ImplicitCastExpr(expr->location(), to, expr));
+		return true;
+	}
+	
+	return false;
+}
+
+
 class TypeVisitor : public VisitorBase<TypePtr> {
 private:
 	TypeVisitor(Context& context)
@@ -64,6 +76,8 @@ protected:
 				"cannot declare variable '%s' of type void",
 				variable->name.c_str());
 
+		allowImplicitCast(variable->initializer, variable->type);
+
 		if (!variable->type->equals(variable->initializer->type)) {
 			context.diag.error(variable->location(),
 				"initializer of %s has wrong type: "
@@ -100,6 +114,8 @@ protected:
 		if (function->body) {
 			acceptOn(function->body, state.withScope(function->scope.get()));
 
+			allowImplicitCast(function->body, function->returnType);
+
 			// TODO: implicit cast to void
 			if (!function->body->type->equals(function->returnType)) {
 				context.diag.error(function->body->location(),
@@ -132,17 +148,6 @@ private:
 	ExprVisitor(Context& context)
 		: VisitorBase<ExprPtr>(context) {}
 	friend Visitors* semantic::makePhase2Visitors(Context&);
-
-	bool allowImplicitCast(ExprPtr& expr, TypePtr to) {
-		if (expr->type->equals(to)) return false;
-
-		if (expr->type->canCastImplicitly(to)) {
-			expr = ExprPtr(new ImplicitCastExpr(expr->location(), to, expr));
-			return true;
-		}
-		
-		return false;
-	}
 
 protected:
 #define ID_VISIT(type) \
@@ -235,18 +240,10 @@ protected:
 		acceptOn(binary->left, state);
 		acceptOn(binary->right, state);
 
-		// HACK
-		if (LiteralNumberExprPtr lit = isA<LiteralNumberExpr>(binary->left))
-			lit->type = binary->right->type;
-		if (LiteralNumberExprPtr lit = isA<LiteralNumberExpr>(binary->right))
-			lit->type = binary->left->type;
+		if (!allowImplicitCast(binary->left, binary->right->type))
+			allowImplicitCast(binary->right, binary->left->type);
 
-		// TODO
 		if (!binary->left->type->equals(binary->right->type)) {
-			// Try implicit casting
-			if (!allowImplicitCast(binary->left, binary->right->type))
-				allowImplicitCast(binary->right, binary->left->type);
-
 			context.diag.error(binary->location(),
 				"'%s' and '%s' are not compatible types in binary expression",
 				binary->left->type->name().c_str(),
@@ -273,7 +270,10 @@ protected:
 				"if condition needs to be boolean (got '%s')",
 				ifElse->condition->type->name().c_str());
 
-		// TODO
+		if (!allowImplicitCast(ifElse->ifExpr, ifElse->elseExpr->type))
+			allowImplicitCast(ifElse->elseExpr, ifElse->ifExpr->type);
+
+		// TODO: this is not optimal
 		if (!ifElse->ifExpr->type->equals(ifElse->elseExpr->type))
 			context.diag.error(ifElse->location(),
 				"type of if and else expr need to be equivalent: "
@@ -296,7 +296,11 @@ protected:
 				element->array->type->name().c_str());
 
 		// TODO: hardcoded type
-		if (!isI32(element->index->type))
+		TypePtr indexType(new IntegralType(element->location(),
+		                                   IntegralType::I32));
+		allowImplicitCast(element->index, indexType);
+
+		if (!element->index->type->equals(indexType))
 			context.diag.error(element->location(),
 				"expected int type for index expression, not '%s'",
 				element->index->type->name().c_str());
