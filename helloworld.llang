@@ -10,6 +10,6 @@ fn void generic_puts(string x, fn i32(char) sink) = puts_impl(x, sink, 0);
 fn void puts(string x) = generic_puts(x, putchar);
 
 fn i32 main() = {
-	puts("Hello, world!");
+	puts("Hello, world!\n");
 	0;
 };

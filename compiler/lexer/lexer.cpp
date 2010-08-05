@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cctype>
 #include <map>
+#include <sstream>
 
 #include "lexer/lexer.hpp"
 
@@ -149,13 +150,31 @@ Token Lexer::lexStringLiteral(const Location& location) {
 	assert(*c == '"');
 	++c;
 
-	const char* start = c;
-	size_t length = 0;
+	std::stringstream ss;
 
 	// TODO: escape sequences
-	while (*c++ != '"') ++length;
+	while (*c != '"') {
+		if (*c == '\0') {
+			diag.error(location, "unterminated string literal");
+		} else if (*c != '\\') {
+			ss << *c++;
+		} else  {
+			++c;
+			
+			switch (*c) {
+			case '\\': ss << '\\'; break;
+			case 'n': ss << '\n'; break;
+			case '"': ss << '"'; break;
+			default: diag.error(location, "unrecognized escape sequence");
+			}
 
-	std::string string(start, length);
+			++c;
+		}
+	} 
+
+	++c;
+
+	std::string string(ss.str());
 
 	return Token(location, string, Token::STRING);
 }
