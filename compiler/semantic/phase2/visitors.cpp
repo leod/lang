@@ -112,8 +112,12 @@ protected:
 
 		acceptOn(function->returnType, state);
 
+		state.inNestedFunction = state.function;
+		state.function = function;
+		state.scope = function->scope.get();
+
 		if (function->body) {
-			acceptOn(function->body, state.withScope(function->scope.get()));
+			acceptOn(function->body, state);
 
 			allowImplicitCast(function->body, function->returnType);
 
@@ -150,6 +154,16 @@ private:
 		: VisitorBase<ExprPtr>(context) {}
 	friend Visitors* semantic::makePhase2Visitors(Context&);
 
+	void trackOuterVariables(VariableDeclPtr variable, ScopeState state) {
+		if (state.inNestedFunction) {
+			// Check if this variable was declared in an outer function
+			if (variable->function && variable->function != state.function) {
+				// Add to the current function's list of used outer variables
+				state.function->outerVariables.push_back(variable);
+			}
+		}
+	}
+
 protected:
 #define ID_VISIT(type) \
 	virtual ExprPtr visit(type##Ptr ptr, ScopeState) \
@@ -159,20 +173,31 @@ protected:
 	ID_VISIT(LiteralNumberExpr)
 	ID_VISIT(LiteralStringExpr)
 	ID_VISIT(LiteralBoolExpr)
-	ID_VISIT(DeclExpr)
 
 #undef ID_VISIT
+
+	virtual ExprPtr visit(DeclExprPtr decl, ScopeState state) {
+		acceptOn(decl->decl, state);
+		return decl;
+	}
 
 	virtual ExprPtr visit(DelayedExprPtr delayed, ScopeState state) {
 		DeclPtr decl = accept(delayed->delayedDecl, state);
 		
 		TypePtr type;
-		if (FunctionDeclPtr function = isA<FunctionDecl>(decl))
+		if (FunctionDeclPtr function = isA<FunctionDecl>(decl)) {
 			type = function->type;
-		else if (VariableDeclPtr variable = isA<VariableDecl>(decl))
-			type = variable->type;
-		else if (ParameterDeclPtr parameter = isA<ParameterDecl>(decl))
+		}
+		else if (ParameterDeclPtr parameter = isA<ParameterDecl>(decl)) {
 			type = parameter->type;
+
+			trackOuterVariables(parameter, state);
+		}
+		else if (VariableDeclPtr variable = isA<VariableDecl>(decl)) {
+			type = variable->type;
+
+			trackOuterVariables(parameter, state);
+		}
 
 		assert(type);
 
