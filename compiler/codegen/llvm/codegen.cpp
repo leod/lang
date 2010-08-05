@@ -86,7 +86,7 @@ public:
 		return visitors.exprVisitor->accept(n, p);
 	}
 
-	// HACK
+	// TODO: Those functions should be somewhere else...
 	const llvm::FunctionType* getFunctionType(FunctionTypePtr type,
 	                                          ScopeState state,
 	                                          const llvm::Type* context = 0) {
@@ -104,7 +104,33 @@ public:
 		return llvm::FunctionType::get(accept(type->returnType, state),
 		                               params, false);
 	}
+
+	// Generate a struct containing pointers to all the referenced outer
+	// variables of a nested function
+	const llvm::Type*
+	getNestedFunctionContextType(FunctionDeclPtr function,
+	                             ScopeState state,
+	                             bool addPointer = true) {
+		std::vector<const llvm::Type*> params;
+
+		for (auto it = function->outerVariables.begin();
+			 it != function->outerVariables.end();
+			 ++it) {
+			params.push_back(PointerType::getUnqual(
+				accept((*it)->type, state)));
+		}
+
+		const llvm::Type* result = StructType::get(llvmContext, params);
+
+		if (addPointer)
+			return PointerType::getUnqual(result);
+		else return result;	
+	}
 };
+
+namespace util {
+
+}
 
 class TypeVisitor : public VisitorBase<const llvm::Type*> {
 public:
@@ -140,7 +166,7 @@ protected:
 	virtual const llvm::Type* visit(ArrayTypePtr type, ScopeState state) {
 		const llvm::Type* inner = accept(type->inner, state);
 
-		// TODO: should use largest int available
+		// TODO: should use largest int available (hardcoded type)
 		return llvm::StructType::get(llvmContext,
 		                             llvm::Type::getInt32Ty(llvmContext),
 		                             llvm::PointerType::getUnqual(inner),
@@ -192,22 +218,9 @@ protected:
 		// Check if we need to take a hidden context pointer
 		const llvm::Type* contextType = 0;
 
-		if (function->isNested) {
-			// Generate a struct containing pointers to all the referenced outer
-			// variables
-			std::vector<const llvm::Type*> params;
-
-			for (auto it = function->outerVariables.begin();
-			     it != function->outerVariables.end();
-			     ++it) {
-				params.push_back(PointerType::getUnqual(
-					accept((*it)->type, state)));
-			}
-
-			if (function->outerVariables.size())
-				contextType = PointerType::getUnqual(
-					StructType::get(llvmContext, params));
-		}
+		if (function->isNested && function->outerVariables.size())
+			contextType = PointerType::getUnqual(
+				llvm::Type::getInt8Ty(llvmContext));
 
 		const llvm::FunctionType* type =
 			getFunctionType(assumeIsA<FunctionType>(function->type), state,
@@ -244,14 +257,23 @@ protected:
 		if (function->isNested && function->outerVariables.size()) {
 			// Context pointer is the last argument
 			Value* context = &f->getArgumentList().back();
+			
+			// First cast from i8* to our context struct type
+			const llvm::Type* contextType =
+				getNestedFunctionContextType(function, state);
+			context = builder.CreateBitCast(context, contextType, "contextptr");
+
 			Value* contextDeref = builder.CreateLoad(context, "context");
 
 			size_t i = 0;
 			for (auto it = function->outerVariables.begin();
 			     it != function->outerVariables.end();
 			     ++it, ++i) {
-				Value* value = builder.CreateExtractValue(contextDeref, i, "outervar");
+				Value* value = builder.CreateExtractValue(contextDeref, i,
+				                                          "outervar");
 				functionState.variables[*it] = value;
+
+				++i;
 			}
 		}
 
@@ -272,7 +294,7 @@ protected:
 	}
 
 	virtual void visit(VariableDeclPtr variable, ScopeState state) {
-		assert(state.function); // TODO
+		assert(state.function); // TODO: globals?
 
 		llvm::Function* llvmFunction = state.function->llvmFunction;
 
@@ -344,6 +366,37 @@ protected:
 		}
 
 		FunctionTypePtr type = assumeIsA<FunctionType>(expr->callee->type);
+
+		// If the callee is a nested function, create a structure with its
+		// referenced outer variables
+		FunctionDeclPtr func =
+			isA<FunctionDecl>(DeclPtr(isA<DeclRefExpr>(expr->callee)->decl));
+		if (func && func->isNested && func->outerVariables.size()) {
+			const llvm::Type* contextType =
+				getNestedFunctionContextType(func, state, false);
+
+			// TODO: figure it if this can be done without the alloca
+			Value* context = builder.CreateAlloca(contextType, 0, "context");
+			
+			size_t i = 0;
+			for (auto it = func->outerVariables.begin();
+			     it != func->outerVariables.end();
+			     ++it) {
+				Value* fieldPtr = builder.CreateStructGEP(context, i);
+
+				builder.CreateStore(state.function->variables[*it], fieldPtr);
+				
+				++i;	
+			}
+
+			// Cast the context struct to i8*
+			const llvm::Type* targetType = PointerType::getUnqual(
+				llvm::Type::getInt8Ty(llvmContext));
+			context = builder.CreateBitCast(context, targetType, "contextptr");
+
+			arguments.push_back(context);
+		}
+
 		std::string tmpName = isVoid(type->returnType)
 			? "" : "calltmp";
 

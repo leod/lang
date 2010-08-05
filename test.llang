@@ -1,7 +1,9 @@
-fn void outer() = {
+fn i32 main() = {
 	var i32 i = 42;
 
 	fn i32 inner() = {
 		i;
 	};
+
+	inner();
 };
