@@ -92,20 +92,28 @@ TypePtr Parser::parseType() {
 		type = parseFunctionType();
 		break;
 
+	case Token::KEYWORD_ARRAY:
+		ts.next();
+		assumeNext(Token::LBRACKET);
+		type = TypePtr(new ArrayType(location, parseType()));
+		assumeNext(Token::RBRACKET);
+
+		break;
+
 	default:
 		expectedError("type");
 		assert(false);
 	}
 
 	// Parse array type
-	assert(type);
+	//assert(type);
 
-	while (ts.get().type == Token::LBRACKET) {
-		ts.next();
-		assumeNext(Token::RBRACKET);
+	//while (ts.get().type == Token::LBRACKET) {
+		//ts.next();
+		//assumeNext(Token::RBRACKET);
 
-		type = TypePtr(new ArrayType(location, type));
-	}
+		//type = TypePtr(new ArrayType(location, type));
+	//}
 
 	return type;
 }

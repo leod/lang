@@ -27,6 +27,7 @@ keyword_map_t makeKeywordMap()
 	map["true"] = Token::KEYWORD_TRUE;
 	map["false"] = Token::KEYWORD_FALSE;
 	map["extern"] = Token::KEYWORD_EXTERN;
+	map["arr"] = Token::KEYWORD_ARRAY;
 
 	return map;
 }

@@ -87,7 +87,9 @@ public:
 	}
 
 	// HACK
-	const llvm::FunctionType* getFunctionType(FunctionTypePtr type, ScopeState state) {
+	const llvm::FunctionType* getFunctionType(FunctionTypePtr type,
+	                                          ScopeState state,
+	                                          const llvm::Type* context = 0) {
 		std::vector<const llvm::Type*> params;
 
 		for (auto it = type->parameterTypes.begin();
@@ -95,6 +97,9 @@ public:
 		     ++it) {
 			params.push_back(accept(*it, state));
 		}
+
+		if (context)
+			params.push_back(context);
 
 		return llvm::FunctionType::get(accept(type->returnType, state),
 		                               params, false);
@@ -176,7 +181,7 @@ protected:
 	};
 
 	virtual void visit(FunctionDeclPtr function, ScopeState state) {
-		// Need to save insert point as we might already be generating
+		// Need to save the insert point as we might already be generating
 		// a function right now!
 		SaveInsertPoint saveInsertPoint(builder);
 		
@@ -184,8 +189,29 @@ protected:
 		// (due to forward references)
 		if (module->getFunction(function->mangle())) return;
 
+		// Check if we need to take a hidden context pointer
+		const llvm::Type* contextType = 0;
+
+		if (function->isNested) {
+			// Generate a struct containing pointers to all the referenced outer
+			// variables
+			std::vector<const llvm::Type*> params;
+
+			for (auto it = function->outerVariables.begin();
+			     it != function->outerVariables.end();
+			     ++it) {
+				params.push_back(PointerType::getUnqual(
+					accept((*it)->type, state)));
+			}
+
+			if (function->outerVariables.size())
+				contextType = PointerType::getUnqual(
+					StructType::get(llvmContext, params));
+		}
+
 		const llvm::FunctionType* type =
-			getFunctionType(assumeIsA<FunctionType>(function->type), state);
+			getFunctionType(assumeIsA<FunctionType>(function->type), state,
+			                contextType);
 		llvm::Function* f = Function::Create(type,
 		                                     Function::ExternalLinkage,
 		                                     function->mangle(),
@@ -199,13 +225,12 @@ protected:
 			return;
 		}
 
+		// Put the function's parameters into the local variable map
 		{
-			assert(f->arg_size() == function->parameters.size()); // TODO
-
 			auto it1 = f->arg_begin();
 			auto it2 = function->parameters.begin();
-			for (; it1 != f->arg_end(); ++it1, ++it2) {
-				//if (!it2->decl) continue; // unnamed parameter
+			for (; it2 != function->parameters.end(); ++it1, ++it2) {
+				// TODO: unnamed parameters?
 
 				it1->setName((*it2)->name);
 				functionState.variables[*it2] = it1;
@@ -214,6 +239,21 @@ protected:
 
 		BasicBlock* block = BasicBlock::Create(llvmContext, "entry", f);
 		builder.SetInsertPoint(block);
+
+		// If in a nested function, add references to outer variables
+		if (function->isNested && function->outerVariables.size()) {
+			// Context pointer is the last argument
+			Value* context = &f->getArgumentList().back();
+			Value* contextDeref = builder.CreateLoad(context, "context");
+
+			size_t i = 0;
+			for (auto it = function->outerVariables.begin();
+			     it != function->outerVariables.end();
+			     ++it, ++i) {
+				Value* value = builder.CreateExtractValue(contextDeref, i, "outervar");
+				functionState.variables[*it] = value;
+			}
+		}
 
 		IntegralTypePtr returnType = isA<IntegralType>(function->returnType);
 
