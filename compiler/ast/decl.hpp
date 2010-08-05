@@ -66,6 +66,7 @@ public:
 
 typedef shared_ptr<Module> ModulePtr;
 
+class FunctionDecl;
 class VariableDecl : public Decl {
 public:
 	VariableDecl(const Location& location,
@@ -80,22 +81,24 @@ public:
 
 	TypePtr type;
 	ExprPtr initializer;
+
+	// Null if not declared in a function
+	shared_ptr<FunctionDecl> function;
 };
 
 typedef shared_ptr<VariableDecl> VariableDeclPtr;
 
-class ParameterDecl : public Decl {
+class ParameterDecl : public VariableDecl {
 public:
 	ParameterDecl(const Location& location,
 	              const identifier_t& name,
 				  bool hasName,
 	              TypePtr type)
-		: Decl(Node::PARAMETER_DECL, location, name),
-		  hasName(hasName), type(type) {
+		: VariableDecl(location, name, type, ExprPtr(), Node::PARAMETER_DECL),
+		  hasName(hasName) {
 	}
 
 	bool hasName;
-	TypePtr type;
 };
 
 typedef shared_ptr<ParameterDecl> ParameterDeclPtr;
@@ -129,6 +132,10 @@ public:
 	TypePtr type;
 
 	bool isExtern;
+
+	// A list of variables declared in outer functions used in this function.
+	// This is used for nested functions.
+	std::list<VariableDeclPtr> outerVariables;
 };
 
 typedef shared_ptr<FunctionDecl> FunctionDeclPtr;

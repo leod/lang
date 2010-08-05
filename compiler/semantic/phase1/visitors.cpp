@@ -66,6 +66,7 @@ protected:
 		acceptOn(variable->type, state);
 		acceptOn(variable->initializer, state);
 		variable->declScope = state.scope;
+		variable->function = state.function;
 		return variable;
 	}
 
@@ -78,7 +79,9 @@ protected:
 	virtual DeclPtr visit(FunctionDeclPtr function, ScopeState state) {
 		function->scope = ScopePtr(new Scope(state.scope));
 		function->declScope = state.scope;
+
 		state.scope = function->scope.get();
+		state.function = function;
 
 		FunctionType::ParameterTypeList parameterTypes;
 

@@ -10,8 +10,14 @@ namespace semantic {
 struct ScopeState {
 	Scope* scope;
 	ast::TypePtr expectedType;
+	
+	// Null if we're not in a function
+	ast::FunctionDeclPtr function;
+	bool inNestedFunction;
 
-	ScopeState() : scope(0) {}
+	ScopeState()
+		: scope(0), inNestedFunction(false) {
+	}
 
 	ScopeState withScope(Scope* scope) const {
 		ScopeState result = *this;
