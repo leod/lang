@@ -1,22 +1,7 @@
-fn void filter_impl(char[] array, fn bool(char) test, fn void(char) sink, i32 i) = {
-	var char c = array[i];
+fn void outer() = {
+	var i32 i = 42;
 
-	if (c = "\0"[0]) {
-	} else {
-		if (test(c)) sink(c) else {};
-		filter_impl(array, test, sink, i + 1);
+	fn i32 inner() = {
+		i;
 	};
 };
-
-fn void filter(char[] array, fn bool(char) test, fn void(char) sink) = {
-	filter_impl(array, test, sink, 0);
-};
-
-fn bool test(char c) = true;
-fn void sink(char c) = putchar(c);
-
-fn void main() = {
-	filter("abcdefghi", test, sink);
-};
-
-extern fn i32 putchar(char);

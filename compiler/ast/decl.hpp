@@ -1,4 +1,4 @@
-#ifndef LLANG_AST_DECL_HPP_INCLUDED
+	#ifndef LLANG_AST_DECL_HPP_INCLUDED
 #define LLANG_AST_DECL_HPP_INCLUDED
 
 #include <list>
@@ -116,11 +116,14 @@ public:
 		  returnType(returnType),
 		  parameters(parameters),
 		  body(body),
-		  isExtern(false) {
+		  isExtern(false),
+		  isNested(false) {
 	}
 
 	std::string mangle() {
 		// TODO
+		if (isNested)
+			return parentFunction->mangle() + '_' + name;
 
 		return name;	
 	}
@@ -136,6 +139,9 @@ public:
 	// A list of variables declared in outer functions used in this function.
 	// This is used for nested functions.
 	std::list<VariableDeclPtr> outerVariables;
+
+	bool isNested;
+	shared_ptr<FunctionDecl> parentFunction;
 };
 
 typedef shared_ptr<FunctionDecl> FunctionDeclPtr;

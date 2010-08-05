@@ -32,7 +32,8 @@ const char* typeToStringArray[] =
 	  "bool",
 	  "true",
 	  "false",
-	  "extern"
+	  "extern",
+	  "arr"
 	};
 
 const char* Token::typeToString(Token::Type type) {

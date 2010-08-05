@@ -112,7 +112,9 @@ protected:
 
 		acceptOn(function->returnType, state);
 
+		function->isNested = function->parentFunction = state.function;
 		state.inNestedFunction = state.function;
+
 		state.function = function;
 		state.scope = function->scope.get();
 
@@ -160,6 +162,10 @@ private:
 			if (variable->function && variable->function != state.function) {
 				// Add to the current function's list of used outer variables
 				state.function->outerVariables.push_back(variable);
+
+				std::cout << "function '" << state.function->name << "'"
+				          << " uses outer variable '" << variable->name << "'"
+				          << std::endl;
 			}
 		}
 	}
@@ -196,7 +202,7 @@ protected:
 		else if (VariableDeclPtr variable = isA<VariableDecl>(decl)) {
 			type = variable->type;
 
-			trackOuterVariables(parameter, state);
+			trackOuterVariables(variable, state);
 		}
 
 		assert(type);
@@ -205,7 +211,7 @@ protected:
 	}	
 
 	virtual ExprPtr visit(BlockExprPtr block, ScopeState state) {
-		acceptScope(block->scope.get(), state);
+		//acceptScope(block->scope.get(), state);
 		state.scope = block->scope.get();
 
 		acceptOn(block->exprs.begin(), block->exprs.end(), state);

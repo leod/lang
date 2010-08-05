@@ -205,8 +205,7 @@ public:
 	virtual std::string name() const {
 		std::stringstream ss;
 
-		ss << inner->name()
-		   << "[]";
+		ss << "arr[" << inner->name() << "]";
 
 		return ss.str();
 	}
