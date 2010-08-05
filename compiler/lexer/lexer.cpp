@@ -165,6 +165,7 @@ Token Lexer::lexStringLiteral(const Location& location) {
 			case '\\': ss << '\\'; break;
 			case 'n': ss << '\n'; break;
 			case '"': ss << '"'; break;
+			case '0': ss << '\0'; break;
 			default: diag.error(location, "unrecognized escape sequence");
 			}
 

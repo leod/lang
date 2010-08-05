@@ -57,41 +57,57 @@ DeclPtr Parser::parseDecl() {
 TypePtr Parser::parseType() {
 	Location location = ts.get().location;
 
+	TypePtr type;
+
 	switch (ts.get().type) {
 	case Token::KEYWORD_I32: {
-		IntegralType::Kind type;
+		IntegralType::Kind kind;
 
-		type = IntegralType::I32;
+		kind = IntegralType::I32;
 		goto Cintegral;
 
 	case Token::KEYWORD_CHAR:
-		type = IntegralType::CHAR;
+		kind = IntegralType::CHAR;
 		goto Cintegral;
 
 	case Token::KEYWORD_VOID:
-		type = IntegralType::VOID;
+		kind = IntegralType::VOID;
 		goto Cintegral;
 
 	case Token::KEYWORD_STRING:
-		type = IntegralType::STRING;
+		kind = IntegralType::STRING;
 		goto Cintegral;
 
 	case Token::KEYWORD_BOOL:
-		type = IntegralType::BOOL;
+		kind = IntegralType::BOOL;
 		goto Cintegral;
 	
 	Cintegral:
 		ts.next();
-		return TypePtr(new IntegralType(location, type));
+		type = TypePtr(new IntegralType(location, kind));
+		break;
 	}
 
 	case Token::KEYWORD_FN:
-		return parseFunctionType();
+		type = parseFunctionType();
+		break;
 
 	default:
 		expectedError("type");
 		assert(false);
 	}
+
+	// Parse array type
+	assert(type);
+
+	while (ts.get().type == Token::LBRACKET) {
+		ts.next();
+		assumeNext(Token::RBRACKET);
+
+		type = TypePtr(new ArrayType(location, type));
+	}
+
+	return type;
 }
 
 TypePtr Parser::parseFunctionType() {
