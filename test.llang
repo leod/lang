@@ -1,3 +1,22 @@
-fn void main() = {
-	var string s = "z\\a";
+fn void filter_impl(char[] array, fn bool(char) test, fn void(char) sink, i32 i) = {
+	var char c = array[i];
+
+	if (c = "\0"[0]) {
+	} else {
+		if (test(c)) putchar(c) else {};
+		filter_impl(array, test, sink, i + 1);
+	};
 };
+
+fn void filter(char[] array, fn bool(char) test, fn void(char) sink) = {
+	filter_impl(array, test, sink, 0);
+};
+
+fn bool test(char c) = true;
+fn void sink(char c) = putchar;
+
+fn void main() = {
+	filter("abcdefghi", test, sink);
+};
+
+extern fn i32 putchar(char);

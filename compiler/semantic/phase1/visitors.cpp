@@ -20,6 +20,11 @@ private:
 	friend Visitors* semantic::makePhase1Visitors(Context&);
 
 protected:
+	virtual TypePtr visit(ArrayTypePtr type, ScopeState state) {
+		acceptOn(type->inner, state);
+		return type;
+	}
+
 	virtual TypePtr visit(FunctionTypePtr type, ScopeState state) {
 		acceptOn(type->returnType, state);
 		acceptOn(type->parameterTypes.begin(), type->parameterTypes.end(),
