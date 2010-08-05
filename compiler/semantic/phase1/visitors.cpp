@@ -65,16 +65,19 @@ protected:
 	virtual DeclPtr visit(VariableDeclPtr variable, ScopeState state) {
 		acceptOn(variable->type, state);
 		acceptOn(variable->initializer, state);
+		variable->declScope = state.scope;
 		return variable;
 	}
 
 	virtual DeclPtr visit(ParameterDeclPtr variable, ScopeState state) {
 		acceptOn(variable->type, state);
+		variable->declScope = state.scope;
 		return variable;
 	}
 
 	virtual DeclPtr visit(FunctionDeclPtr function, ScopeState state) {
 		function->scope = ScopePtr(new Scope(state.scope));
+		function->declScope = state.scope;
 		state.scope = function->scope.get();
 
 		FunctionType::ParameterTypeList parameterTypes;
