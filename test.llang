@@ -3,7 +3,7 @@ fn void filter_impl(char[] array, fn bool(char) test, fn void(char) sink, i32 i)
 
 	if (c = "\0"[0]) {
 	} else {
-		if (test(c)) putchar(c) else {};
+		if (test(c)) sink(c) else {};
 		filter_impl(array, test, sink, i + 1);
 	};
 };
@@ -13,7 +13,7 @@ fn void filter(char[] array, fn bool(char) test, fn void(char) sink) = {
 };
 
 fn bool test(char c) = true;
-fn void sink(char c) = putchar;
+fn void sink(char c) = putchar(c);
 
 fn void main() = {
 	filter("abcdefghi", test, sink);

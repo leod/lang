@@ -184,7 +184,8 @@ protected:
 		// (due to forward references)
 		if (module->getFunction(function->mangle())) return;
 
-		const llvm::FunctionType* type = getFunctionType(assumeIsA<FunctionType>(function->type), state);
+		const llvm::FunctionType* type =
+			getFunctionType(assumeIsA<FunctionType>(function->type), state);
 		llvm::Function* f = Function::Create(type,
 		                                     Function::ExternalLinkage,
 		                                     function->mangle(),
