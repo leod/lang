@@ -400,8 +400,8 @@ protected:
 		std::string tmpName = isVoid(type->returnType)
 			? "" : "calltmp";
 
-		return builder.CreateCall(callee, arguments.begin(),
-								  arguments.end(), tmpName);
+		return builder.CreateCall(callee, arguments.begin(), arguments.end(),
+		                          tmpName);
 	}
 
 	virtual Value* visit(VoidExprPtr, ScopeState) {

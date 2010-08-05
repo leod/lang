@@ -1,13 +1,20 @@
 // Parameter type is a hack for now, but it works :P
 extern fn i32 putchar(char);
 
-fn void puts_impl(string x, fn i32(char) sink, i32 pos) = 
-	if (x[pos] = 0) {}
-	else { sink(x[pos]); puts_impl(x, sink, pos + 1); };
+fn void generic_puts(string s, fn i32(char) sink) = {
+	fn void impl(string s, fn i32(char) sink, i32 pos) = {
+		var char c = s[pos];
+		if (c = 0) {}
+		else {
+			sink(c);
+			impl(s, sink, pos+1);
+		};
+	};
 
-fn void generic_puts(string x, fn i32(char) sink) = puts_impl(x, sink, 0);
+	impl(s, sink, 0);
+}; 
 
-fn void puts(string x) = generic_puts(x, putchar);
+fn void puts(string s) = generic_puts(s, putchar);
 
 fn i32 main() = {
 	puts("Hello, world!\n");
