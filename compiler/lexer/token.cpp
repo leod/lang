@@ -26,6 +26,7 @@ const char* typeToStringArray[] =
 	  "if",
 	  "else",
 	  "i32",
+	  "int",
 	  "char",
 	  "void",
 	  "string",
