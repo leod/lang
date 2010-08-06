@@ -20,6 +20,7 @@ keyword_map_t makeKeywordMap()
 	map["if"] = Token::KEYWORD_IF;
 	map["else"] = Token::KEYWORD_ELSE;
 	map["i32"] = Token::KEYWORD_I32;
+	map["int"] = Token::KEYWORD_INT;
 	map["void"] = Token::KEYWORD_VOID;
 	map["string"] = Token::KEYWORD_STRING;
 	map["char"] = Token::KEYWORD_CHAR;
