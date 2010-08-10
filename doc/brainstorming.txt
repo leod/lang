@@ -1,26 +1,32 @@
-type Poop = struct {
-	x: int;
-	y: ref[Poop];
-	zzz: arr[Poop];
-};
-// equals?
-struct Poop {
-	// ...
+iface Iterator[type T] {
+	fn next(): bool;
+	fn get(): T;		
 };
 
-interface A {
-	type X;
-	fn poop(: string): void;
+iface Container[type T] {
+	type Iterator: Iterator[T];
+
+	fn add(t: T);
+	fn iterator(): Iterator;
 };
 
-implement A: Poop {
-	type X = alias int;
-	fn poop(s : string): void = pooppopopo(s);
-}
+impl arr[type T]: Container[T] {
+	struct Iterator {
+		a : arr[T];
+		idx: int;
 
+		impl Iterator[T] {
+			fn next(self: &Iterator): bool = {
+				self.idx <- self.idx + 1;	
+				self.a.length = self.idx;
+			};
+			fn get(self: this): T = self.a[self.idx];
+		};
+	};
 
+	fn add(t: &arr[T]) = {
+		// ...
+	};
 
-fn generic[type T: A](t: T): int = {
-	var T.X x;
-	t.poop("unchi");
+	fn iterator(t: &arr[T]) = Iterator(t, 0);
 };
