@@ -3,6 +3,7 @@
 
 #include <list>
 #include <cassert>
+#include <iostream>
 
 #include "util/smart_ptr.hpp"
 #include "common/number.hpp"
@@ -121,6 +122,11 @@ public:
 	BlockExpr(const Location& location, ExprList& exprs)
 		: Expr(Node::BLOCK_EXPR, location),
 	      exprs(exprs) {
+		std::cout << "x" << std::endl;
+	}
+
+	~BlockExpr() {
+		std::cout << "y" << std::endl;
 	}
 
 	ExprList exprs;
@@ -202,9 +208,12 @@ public:
 	DeclExpr(const Location& location, DeclPtr decl)
 		: Expr(Node::DECL_EXPR, location),
 		  decl(decl) {
+		std::cout << "a" << std::endl;
 	}
 
-	shared_ptr<Decl> decl;
+	~DeclExpr() { std::cout << "b" << std::endl; }
+
+	DeclPtr decl;
 };
 
 typedef shared_ptr<DeclExpr> DeclExprPtr;

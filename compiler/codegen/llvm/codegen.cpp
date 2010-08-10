@@ -128,10 +128,6 @@ public:
 	}
 };
 
-namespace util {
-
-}
-
 class TypeVisitor : public VisitorBase<const llvm::Type*> {
 public:
 	TypeVisitor(Codegen::Impl& visitors, Context& context,
