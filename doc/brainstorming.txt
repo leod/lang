@@ -1,68 +1,26 @@
-== General
-* High-level, system programming language
-* Able to interface with C
-* Compiles to LLVM IR
-* Imperative, but support for functional idioms
-* Some rudimentary form of OOP, allowing for polymorphism
-* Templates
-* Succinct syntax
-* Takes mainly from D and Scala
-* It's just a toy project
-
-== Syntax & Language brainstorming
-
-= Declarations
-* Variable declaration
-var Type x = ...;
-var y = ...; // Type inferred
-
-* Function declaration
-fn RetType f(Type param, Type2 param2) = {
-	
-}
-// RetType can be omitted to indicate that the function does not return any value:
-fn main() = {
-
-}
-
-fn main(Args) = 42
-
-* Function pointers
-var fn RetType(Type, Type2) z = f;
-var fn() main' = main;
-var fn(Args) = main; 
-
-= Expressions
-* Block expression
-{ exp1; exp2; exp3; ... expn; }
-Type: type of expn
-
-* Literal expression
-42
-
-* Function call expression
-f(a, b, c);
-Type: return type of f
-
-* Function expression
-f
-Type: type of f
-
-* If expression
-if (exp) ifexp else elseexp 
-
-* Values of any type are implicitly convertible to void, if an expression is expected to be void
-{
-	if (exp) 4 else 5;
-	// equivalent to:
-	if (exp) { 4; () } else { 5; () };
+type Poop = struct {
+	x: int;
+	y: ref[Poop];
+	zzz: arr[Poop];
+};
+// equals?
+struct Poop {
 	// ...
+};
+
+interface A {
+	type X;
+	fn poop(: string): void;
+};
+
+implement A: Poop {
+	type X = alias int;
+	fn poop(s : string): void = pooppopopo(s);
 }
 
-= Types
-* void (instance: ())
-* int
-* (Function pointer)
 
-= Notes
-* I will start by writing Lexer & Parser for this and then think some more about the language
+
+fn generic[type T: A](t: T): int = {
+	var T.X x;
+	t.poop("unchi");
+};

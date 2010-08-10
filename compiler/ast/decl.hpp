@@ -1,4 +1,4 @@
-	#ifndef LLANG_AST_DECL_HPP_INCLUDED
+#ifndef LLANG_AST_DECL_HPP_INCLUDED
 #define LLANG_AST_DECL_HPP_INCLUDED
 
 #include <list>
